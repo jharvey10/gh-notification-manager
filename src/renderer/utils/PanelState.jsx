@@ -1,0 +1,5 @@
+export const PanelState = {
+  LOADING: 'LOADING',
+  TOKEN_PROMPT: 'TOKEN_PROMPT',
+  DASHBOARD: 'DASHBOARD'
+}
