@@ -47,7 +47,7 @@ export function TokenPrompt({ setPanelState }) {
           {saving ? 'Saving...' : 'Save Token'}
         </button>
       </form>
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-error">{error}</p>}
     </div>
   )
 }

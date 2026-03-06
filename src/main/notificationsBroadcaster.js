@@ -1,8 +1,8 @@
-const store = require('./store')
+import * as store from './store.js'
 
 function broadcastNotificationsUpdated(mainWindow) {
   if (!mainWindow || mainWindow.isDestroyed()) return
   mainWindow.webContents.send('notifications:updated', store.getAll())
 }
 
-module.exports = { broadcastNotificationsUpdated }
+export { broadcastNotificationsUpdated }

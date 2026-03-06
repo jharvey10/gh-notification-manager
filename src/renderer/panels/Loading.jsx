@@ -18,9 +18,10 @@ export const Loading = ({ setPanelState }) => {
   }, [setPanelState])
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center h-screen gap-4">
       <h2 className="text-3xl">GitHub Notification Manager</h2>
       <span className="loading loading-spinner loading-xl"></span>
+      <p>Loading notifications...</p>
     </div>
   )
 }

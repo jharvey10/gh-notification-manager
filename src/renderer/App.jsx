@@ -6,7 +6,6 @@ import { Loading } from './panels/Loading'
 
 export function App() {
   const [panelState, setPanelState] = useState(PanelState.LOADING)
-
   switch (panelState) {
     case PanelState.LOADING:
       return <Loading setPanelState={setPanelState} />

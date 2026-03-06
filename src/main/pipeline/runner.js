@@ -1,4 +1,4 @@
-const { notify } = require('./notifier')
+import { notify } from './notifier.js'
 
 const taggers = []
 
@@ -25,4 +25,4 @@ async function runPipeline(notification, { shouldNotify = false }) {
   return notification
 }
 
-module.exports = { registerTagger, runPipeline }
+export { registerTagger, runPipeline }

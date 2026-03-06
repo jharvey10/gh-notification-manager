@@ -1,6 +1,6 @@
-const { fetchNotifications } = require('./github/notifications')
-const { runPipeline } = require('./pipeline/runner')
-const store = require('./store')
+import { fetchNotifications } from './github/notifications.js'
+import { runPipeline } from './pipeline/runner.js'
+import * as store from './store.js'
 
 const POLL_INTERVAL_MS = 60_000
 let intervalId = null
@@ -35,4 +35,4 @@ function stop() {
   intervalId = null
 }
 
-module.exports = { start, stop, poll }
+export { start, stop, poll }

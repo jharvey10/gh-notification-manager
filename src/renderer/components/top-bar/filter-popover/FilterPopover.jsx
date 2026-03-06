@@ -1,0 +1,52 @@
+import React from 'react'
+import { PopoverCard } from '../PopoverCard'
+import { ActiveFilterList } from './ActiveFilterList'
+import { FilterOptionRow } from './FilterOptionRow'
+import { FilterPopoverHeader } from './FilterPopoverHeader'
+import { FilterPopoverTrigger } from './FilterPopoverTrigger'
+
+export function FilterPopover({
+  popoverId,
+  anchorName,
+  triggerLabel,
+  title,
+  description,
+  items,
+  includedItems,
+  excludedItems,
+  onToggle,
+  onClear
+}) {
+  const activeItemCount = includedItems.size + excludedItems.size
+
+  return (
+    <PopoverCard
+      popoverId={popoverId}
+      anchorName={anchorName}
+      trigger={
+        <FilterPopoverTrigger triggerLabel={triggerLabel} activeItemCount={activeItemCount} />
+      }
+    >
+      <div className="flex flex-col gap-3">
+        <FilterPopoverHeader title={title} description={description} />
+        <ActiveFilterList
+          includedItems={includedItems}
+          excludedItems={excludedItems}
+          onToggle={onToggle}
+          onClear={onClear}
+        />
+        <div className="flex max-h-80 flex-col gap-2 overflow-y-auto">
+          {items.map((item) => (
+            <FilterOptionRow
+              key={item}
+              item={item}
+              isIncluded={includedItems.has(item)}
+              isExcluded={excludedItems.has(item)}
+              onToggle={onToggle}
+            />
+          ))}
+        </div>
+      </div>
+    </PopoverCard>
+  )
+}

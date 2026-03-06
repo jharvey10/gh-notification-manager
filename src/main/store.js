@@ -2,41 +2,33 @@
 let notifications = null
 
 function getAll() {
-  return notifications ? Array.from(notifications.values()) : null;
+  return notifications ? Array.from(notifications.values()) : null
 }
 
 function initialize() {
-  notifications ??= new Map();
+  notifications ??= new Map()
 }
 
 function upsert(id, notification) {
-  notifications ??= new Map();
-  notifications.set(id, notification);
+  notifications ??= new Map()
+  notifications.set(id, notification)
 }
 
 function remove(id) {
-  notifications?.delete(id);
+  notifications?.delete(id)
 }
 
 function has(id) {
-  return notifications?.has(id);
+  return notifications?.has(id)
 }
 
 function clear() {
-  notifications?.clear();
+  notifications?.clear()
 }
 
 function markRead(id) {
-  const n = notifications?.get(id);
-  if (n) notifications.set(id, { ...n, isUnread: false });
+  const n = notifications?.get(id)
+  if (n) notifications.set(id, { ...n, isUnread: false })
 }
 
-module.exports = {
-  getAll,
-  initialize,
-  upsert,
-  remove,
-  has,
-  clear,
-  markRead,
-};
+export { getAll, initialize, upsert, remove, has, clear, markRead }

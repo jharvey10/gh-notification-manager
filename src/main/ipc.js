@@ -1,9 +1,9 @@
-const { ipcMain, shell, Notification } = require('electron')
-const store = require('./store')
-const auth = require('./auth')
-const { markThreadsAsDone, markThreadsAsRead } = require('./github/mutations')
-const { start, stop, poll } = require('./poller')
-const { resetClients } = require('./github/client')
+import { ipcMain, shell, Notification } from 'electron'
+import * as store from './store.js'
+import * as auth from './auth.js'
+import { markThreadsAsDone, markThreadsAsRead } from './github/mutations.js'
+import { start, stop, poll } from './poller.js'
+import { resetClients } from './github/client.js'
 
 function registerIpcHandlers({ onNotificationsChanged }) {
   ipcMain.handle('shell:openExternal', (_event, url) => {
@@ -63,4 +63,4 @@ function registerIpcHandlers({ onNotificationsChanged }) {
   })
 }
 
-module.exports = { registerIpcHandlers }
+export { registerIpcHandlers }

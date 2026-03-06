@@ -1,39 +1,49 @@
-const { app, BrowserWindow } = require('electron')
-const path = require('node:path')
-const { registerIpcHandlers } = require('./ipc')
-const { start, stop } = require('./poller')
-const { broadcastNotificationsUpdated } = require('./notificationsBroadcaster')
-const { registerTagger } = require('./pipeline/runner')
-const { reviewTypeTagger } = require('./pipeline/taggers/reviewType')
-const { mentionTypeTagger } = require('./pipeline/taggers/mentionType')
-const { junkTagger } = require('./pipeline/taggers/junkTagger')
-
-registerTagger(reviewTypeTagger)
-registerTagger(mentionTypeTagger)
-registerTagger(junkTagger)
+import { app, BrowserWindow } from 'electron'
+import path from 'node:path'
+import { registerIpcHandlers } from './ipc.js'
+import { start, stop } from './poller.js'
+import { broadcastNotificationsUpdated } from './notificationsBroadcaster.js'
+import { registerTagger } from './pipeline/runner.js'
+import { reviewTypeTagger } from './pipeline/taggers/reviewTypeTagger.js'
+import { reasonTagger } from './pipeline/taggers/reasonTagger.js'
+import { junkTagger } from './pipeline/taggers/junkTagger.js'
 
 const DEV_SERVER_URL = 'http://localhost:5173'
 let mainWindow = null
 
+function registerTaggers() {
+  registerTagger(reviewTypeTagger)
+  registerTagger(reasonTagger)
+  registerTagger(junkTagger)
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 700,
-    icon: path.join(__dirname, '../../assets/app-icon.png'),
+    width: 1280,
+    height: 800,
+    icon: path.join(import.meta.dirname, 'assets/app-icon.png'),
     webPreferences: {
-      preload: path.join(__dirname, '../preload/index.js')
+      preload: path.join(import.meta.dirname, '../preload/index.cjs')
     }
   })
 
-  if (!app.isPackaged) {
-    mainWindow.loadURL(DEV_SERVER_URL)
+  if (app.isPackaged) {
+    mainWindow.loadFile(path.join(import.meta.dirname, '../../dist/renderer/index.html'))
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../../dist/renderer/index.html'))
+    mainWindow.loadURL(DEV_SERVER_URL)
   }
 }
 
+function getMainWindow() {
+  return mainWindow
+}
+
 async function main() {
-  await app.whenReady()
+  if (!app.isReady()) {
+    await app.whenReady()
+  }
+
+  registerTaggers()
   createWindow()
   const onNotificationsChanged = () => broadcastNotificationsUpdated(mainWindow)
   registerIpcHandlers({ onNotificationsChanged })
@@ -52,6 +62,8 @@ async function main() {
   })
 }
 
-main().catch(console.error)
+main().catch((err) => {
+  console.error('Failed to start app:', err)
+})
 
-module.exports = { getMainWindow: () => mainWindow }
+export { getMainWindow }

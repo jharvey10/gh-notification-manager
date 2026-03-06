@@ -64,18 +64,18 @@ const NOTIFICATION_QUERY = `
       }
     }
   }
-`;
+`
 
 const MARK_DONE_MUTATION = `
   mutation MarkDone($input: MarkNotificationsAsDoneInput!) {
     markNotificationsAsDone(input: $input) { success }
   }
-`;
+`
 
 const MARK_READ_MUTATION = `
   mutation MarkRead($input: MarkNotificationsAsReadInput!) {
     markNotificationsAsRead(input: $input) { success }
   }
-`;
+`
 
-module.exports = { NOTIFICATION_QUERY, MARK_DONE_MUTATION, MARK_READ_MUTATION };
+export { NOTIFICATION_QUERY, MARK_DONE_MUTATION, MARK_READ_MUTATION }

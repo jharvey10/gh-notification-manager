@@ -1,19 +1,19 @@
-const { graphql } = require('@octokit/graphql');
-const { loadToken } = require('../auth');
+import { graphql } from '@octokit/graphql'
+import { loadToken } from '../auth.js'
 
-let graphqlClient = null;
+let graphqlClient = null
 
 function getGraphql() {
   if (!graphqlClient) {
-    const token = loadToken();
-    if (!token) throw new Error('No GitHub token configured');
-    graphqlClient = graphql.defaults({ headers: { authorization: `token ${token}` } });
+    const token = loadToken()
+    if (!token) throw new Error('No GitHub token configured')
+    graphqlClient = graphql.defaults({ headers: { authorization: `token ${token}` } })
   }
-  return graphqlClient;
+  return graphqlClient
 }
 
 function resetClients() {
-  graphqlClient = null;
+  graphqlClient = null
 }
 
-module.exports = { getGraphql, resetClients };
+export { getGraphql, resetClients }

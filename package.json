@@ -5,6 +5,7 @@
   "description": "My Electron application description",
   "main": "src/main/index.js",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
     "dev:renderer": "vite",
@@ -21,12 +22,6 @@
     "email": "51208233+jharvey10@users.noreply.github.com"
   },
   "license": "MIT",
-  "dependencies": {
-    "@octokit/graphql": "^9.0.3",
-    "clsx": "^2.1.1",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
-  },
   "build": {
     "appId": "com.jharvey10.gh-notification-manager",
     "productName": "GitHub Notification Manager",
@@ -59,6 +54,12 @@
         "AppImage"
       ]
     }
+  },
+  "dependencies": {
+    "@octokit/graphql": "^9.0.3",
+    "clsx": "^2.1.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.0",

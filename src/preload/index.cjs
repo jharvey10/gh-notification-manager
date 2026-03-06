@@ -1,3 +1,4 @@
+// This file is executed in a sanbox environment and therefore must be a CommonJS module
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('api', {

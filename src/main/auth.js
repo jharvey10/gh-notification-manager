@@ -1,35 +1,34 @@
-const { safeStorage } = require('electron');
-const fs = require('node:fs');
-const path = require('node:path');
-const { app } = require('electron');
+import { safeStorage, app } from 'electron'
+import fs from 'node:fs'
+import path from 'node:path'
 
 function tokenPath() {
-  return path.join(app.getPath('userData'), 'gh-token.enc');
+  return path.join(app.getPath('userData'), 'gh-token.enc')
 }
 
 function hasToken() {
-  return fs.existsSync(tokenPath());
+  return fs.existsSync(tokenPath())
 }
 
 function saveToken(token) {
   if (!safeStorage.isEncryptionAvailable()) {
-    throw new Error('Encryption not available on this system');
+    throw new Error('Encryption not available on this system')
   }
-  const encrypted = safeStorage.encryptString(token);
-  fs.writeFileSync(tokenPath(), encrypted);
+  const encrypted = safeStorage.encryptString(token)
+  fs.writeFileSync(tokenPath(), encrypted)
 }
 
 function loadToken() {
-  if (!hasToken()) return null;
-  if (!safeStorage.isEncryptionAvailable()) return null;
-  const encrypted = fs.readFileSync(tokenPath());
-  return safeStorage.decryptString(encrypted);
+  if (!hasToken()) return null
+  if (!safeStorage.isEncryptionAvailable()) return null
+  const encrypted = fs.readFileSync(tokenPath())
+  return safeStorage.decryptString(encrypted)
 }
 
 function clearToken() {
   if (fs.existsSync(tokenPath())) {
-    fs.unlinkSync(tokenPath());
+    fs.unlinkSync(tokenPath())
   }
 }
 
-module.exports = { hasToken, saveToken, loadToken, clearToken };
+export { hasToken, saveToken, loadToken, clearToken }

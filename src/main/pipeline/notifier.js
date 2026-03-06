@@ -1,5 +1,5 @@
-const { Notification } = require("electron");
-const formatMod = import("../../shared/formatNotificationType.mjs");
+import { Notification } from 'electron'
+import { formatNotificationType } from '../../shared/formatNotificationType.js'
 
 /**
  * Decides whether a processed notification should trigger a macOS push
@@ -10,22 +10,21 @@ const formatMod = import("../../shared/formatNotificationType.mjs");
  * @returns {boolean} true to fire a desktop notification
  */
 function shouldNotify(notification) {
-  const { tags } = notification;
+  const { tags } = notification
 
-  if (tags.includes('direct_review')) return true;
-  if (tags.includes('direct_mention')) return true;
+  if (tags.includes('direct_review')) return true
+  if (tags.includes('direct_mention')) return true
 
-  return false;
+  return false
 }
 
 async function notify(notification) {
-  if (!shouldNotify(notification)) return;
+  if (!shouldNotify(notification)) return
 
-  const { formatNotificationType } = await formatMod;
   new Notification({
     title: `${formatNotificationType(notification)} [${notification.optionalList?.nameWithOwner ?? 'unknown'}]`,
-    body: `${notification.title}`,
-  }).show();
+    body: `${notification.title}`
+  }).show()
 }
 
-module.exports = { notify };
+export { notify }
