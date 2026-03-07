@@ -5,7 +5,7 @@ export async function junkTagger(notification) {
   if (
     notification.title?.toLowerCase().match(/attempt #\d+ succeeded/) ||
     notification.title?.toLowerCase().includes('workflow run cancelled') ||
-    notification.optionalList?.nameWithOwner?.toLowerCase() === 'grafana/deployment_tools'
+    notification.optionalSubject?.state === 'MERGED'
   ) {
     return ['junk']
   }

@@ -1,11 +1,12 @@
 import React from 'react'
-import { ActionBar } from '../components/ActionBar'
-import { NotificationList } from '../components/NotificationList'
+import PropTypes from 'prop-types'
+import { BatchActionBar } from '../components/BatchActionBar'
 import { useFilters } from '../hooks/useFilters'
 import { useNotifications } from '../hooks/useNotifications'
 import { useSelection } from '../hooks/useSelection'
 import { PanelState } from '../utils/PanelState'
 import { TopBar } from '../components/top-bar/TopBar'
+import { NotificationListContainer } from '../components/notification-list/NotificationListContainer'
 
 export function Dashboard({ setPanelState }) {
   const { notifications, loading } = useNotifications()
@@ -70,7 +71,7 @@ export function Dashboard({ setPanelState }) {
           />
         </header>
 
-        <ActionBar
+        <BatchActionBar
           selectedCount={selected.size}
           onSelectAll={() => selectAll(filtered.map((n) => n.id))}
           onClearSelection={clearSelection}
@@ -82,13 +83,17 @@ export function Dashboard({ setPanelState }) {
       {(loading || !hasData) && <p>Loading...</p>}
 
       {!loading && hasData && (
-        <NotificationList
+        <NotificationListContainer
           notifications={filtered}
           selected={selected}
           onToggle={toggle}
-          onSelectRepo={addToSelection}
+          onSelectGroup={addToSelection}
         />
       )}
     </div>
   )
+}
+
+Dashboard.propTypes = {
+  setPanelState: PropTypes.func.isRequired
 }

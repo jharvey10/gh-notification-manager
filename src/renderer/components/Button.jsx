@@ -12,7 +12,7 @@ export function Button({
     <button
       type={type}
       className={clsx(
-        'btn btn-primary btn-sm',
+        'btn btn-primary',
         outline && 'btn-outline bg-base-100',
         !disabled && 'text-indigo-300',
         disabled && 'btn-disabled bg-base-content/1 border-base-content/10',

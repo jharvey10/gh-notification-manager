@@ -1,16 +1,13 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import SettingsIcon from '../../assets/icons/settings.svg?react'
 import { Button } from '../Button'
-import { PopoverCard } from './PopoverCard'
+import { Action } from '../actions-menu/Action.jsx'
+import { ActionsMenu } from '../actions-menu/ActionsMenu.jsx'
 
 export function SettingsMenu({ onChangeToken, onRefresh, onTestNotification }) {
-  const runActionAndClose = (action, close) => {
-    action()
-    close()
-  }
-
   return (
-    <PopoverCard
+    <ActionsMenu
       popoverId="top-bar-filter-popover"
       anchorName="--top-bar-popover-anchor"
       className="w-60"
@@ -20,22 +17,21 @@ export function SettingsMenu({ onChangeToken, onRefresh, onTestNotification }) {
         </Button>
       }
     >
-      {({ close }) => (
-        <div className="flex flex-col gap-2">
-          <Button className="justify-start" onClick={() => runActionAndClose(onChangeToken, close)}>
-            Change token
-          </Button>
-          <Button className="justify-start" onClick={() => runActionAndClose(onRefresh, close)}>
-            Refresh
-          </Button>
-          <Button
-            className="justify-start"
-            onClick={() => runActionAndClose(onTestNotification, close)}
-          >
-            Test notification
-          </Button>
-        </div>
-      )}
-    </PopoverCard>
+      <Action onSelect={onChangeToken}>
+        Change token
+      </Action>
+      <Action onSelect={onRefresh}>
+        Refresh
+      </Action>
+      <Action onSelect={onTestNotification}>
+        Test notification
+      </Action>
+    </ActionsMenu>
   )
+}
+
+SettingsMenu.propTypes = {
+  onChangeToken: PropTypes.func.isRequired,
+  onRefresh: PropTypes.func.isRequired,
+  onTestNotification: PropTypes.func.isRequired
 }

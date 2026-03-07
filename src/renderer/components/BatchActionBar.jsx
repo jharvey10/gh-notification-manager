@@ -1,7 +1,8 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { Button } from './Button'
 
-export function ActionBar({
+export function BatchActionBar({
   selectedCount,
   onSelectAll,
   onClearSelection,
@@ -20,4 +21,12 @@ export function ActionBar({
       </Button>
     </div>
   )
+}
+
+BatchActionBar.propTypes = {
+  selectedCount: PropTypes.number.isRequired,
+  onSelectAll: PropTypes.func.isRequired,
+  onClearSelection: PropTypes.func.isRequired,
+  onMarkRead: PropTypes.func.isRequired,
+  onMarkDone: PropTypes.func.isRequired
 }

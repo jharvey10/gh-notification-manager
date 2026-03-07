@@ -11,7 +11,7 @@ export async function reasonTagger(notification) {
   if (reason === 'ci_activity') return ['ci']
   if (reason === 'comment') return ['comment']
   if (reason === 'state_change') return ['state_change']
-  if (reason === 'review_requested') return ['review_requested']
+  if (reason === 'review_requested') return [] // This is handled by the reviewTypeTagger
 
   console.warn('unknown reason', reason)
   return ['unknown_reason']
