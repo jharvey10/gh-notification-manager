@@ -8,6 +8,7 @@ import { NotificationDetailsDialog } from './NotificationDetailsDialog.jsx'
 import { NotificationTitle } from './NotificationTitle.jsx'
 import { NotificationMetadata } from './NotificationMetadata.jsx'
 import { Button } from '../Button.jsx'
+import CheckmarkIcon from '../../assets/icons/checkmark.svg?react'
 import EmailIcon from '../../assets/icons/email.svg?react'
 import EmailNewIcon from '../../assets/icons/email-new.svg?react'
 import NotificationOffIcon from '../../assets/icons/notification-off.svg?react'
@@ -20,12 +21,14 @@ function buildMenuId(id) {
 }
 
 export function NotificationItem({ notification, isSelected, onToggle }) {
-  const { id, title, url, tags, lastUpdatedAt, isUnread, isSaved, optionalList } = notification
+  const { id, title, url, tags, lastUpdatedAt, isUnread, isSaved, optionalList, optionalSubject } =
+    notification
   const repo = optionalList?.nameWithOwner ?? 'unknown'
   const time = new Date(lastUpdatedAt).toLocaleString()
   const typeLabel = formatNotificationType(notification)
   const menuId = buildMenuId(id)
   const detailsDialogRef = React.useRef(null)
+  const openerLogin = optionalSubject?.author?.login
 
   const handleOpen = () => {
     globalThis.api.openExternal(url)
@@ -34,6 +37,7 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
 
   const handleMarkRead = () => globalThis.api.markAsRead([id])
   const handleMarkUnread = () => globalThis.api.markAsUnread([id])
+  const handleMarkDone = () => globalThis.api.markAsDone([id])
   const handleUnsubscribe = () => globalThis.api.unsubscribe([id])
   const handleSave = () => globalThis.api.saveThreads([id])
   const handleUnsave = () => globalThis.api.unsaveThreads([id])
@@ -56,18 +60,33 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
 
         {/* Center */}
         <div className="flex-1 flex flex-col gap-2">
-          <NotificationTitle title={title} url={url} isUnread={isUnread} isSaved={isSaved} onOpen={handleOpen} />
+          <NotificationTitle
+            title={title}
+            url={url}
+            isUnread={isUnread}
+            isSaved={isSaved}
+            onOpen={handleOpen}
+          />
           <NotificationMetadata typeLabel={typeLabel} repo={repo} tags={tags} isUnread={isUnread} />
         </div>
 
         {/* Right */}
         <div className="shrink-0 flex gap-4 items-center">
+          {openerLogin && (
+            <div className="badge badge-info badge-sm badge-soft whitespace-nowrap">
+              @{openerLogin}
+            </div>
+          )}
           <div className="whitespace-nowrap text-xs text-base-content/60">{time}</div>
+
+          <Button onClick={handleMarkDone} aria-label={`Mark ${title} done`} title="Mark done">
+            <CheckmarkIcon className="size-4 shrink-0 fill-current" />
+          </Button>
 
           <ActionsMenu
             popoverId={`notification-menu-${menuId}`}
             anchorName={`--notification-menu-anchor-${menuId}`}
-            trigger={<Button>Actions</Button>}
+            trigger={<Button>⋯</Button>}
           >
             {isUnread && (
               <Action icon={EmailIcon} onSelect={handleMarkRead}>
@@ -120,6 +139,11 @@ NotificationItem.propTypes = {
     lastUpdatedAt: PropTypes.string.isRequired,
     isUnread: PropTypes.bool.isRequired,
     isSaved: PropTypes.bool,
+    optionalSubject: PropTypes.shape({
+      author: PropTypes.shape({
+        login: PropTypes.string
+      })
+    }),
     optionalList: PropTypes.shape({
       nameWithOwner: PropTypes.string
     })

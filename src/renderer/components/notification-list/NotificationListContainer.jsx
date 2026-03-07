@@ -42,7 +42,7 @@ export function NotificationListContainer({ notifications, selected, onToggle, o
               onSelectGroup(current.map((n) => n.id))
             }}
           >
-            Select All
+            Select all
           </Button>
         </div>
         <NotificationList items={current} selected={selected} onToggle={onToggle} />
@@ -59,7 +59,7 @@ export function NotificationListContainer({ notifications, selected, onToggle, o
                 onSelectGroup(older.map((n) => n.id))
               }}
             >
-              Select All
+              Select all
             </Button>
           </summary>
           <div className="collapse-content">

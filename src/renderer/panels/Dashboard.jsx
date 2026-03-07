@@ -42,6 +42,18 @@ export function Dashboard({ setPanelState }) {
     clearSelection()
   }
 
+  const handleMarkUnread = async () => {
+    if (selected.size === 0) return
+    await globalThis.api.markAsUnread([...selected])
+    clearSelection()
+  }
+
+  const handleUnsubscribe = async () => {
+    if (selected.size === 0) return
+    await globalThis.api.unsubscribe([...selected])
+    clearSelection()
+  }
+
   const handleClearToken = async () => {
     await globalThis.api.clearToken()
     setPanelState(PanelState.TOKEN_PROMPT)
@@ -76,6 +88,8 @@ export function Dashboard({ setPanelState }) {
           onSelectAll={() => selectAll(filtered.map((n) => n.id))}
           onClearSelection={clearSelection}
           onMarkRead={handleMarkRead}
+          onMarkUnread={handleMarkUnread}
+          onUnsubscribe={handleUnsubscribe}
           onMarkDone={handleMarkDone}
         />
       </div>

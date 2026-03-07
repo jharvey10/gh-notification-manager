@@ -40,6 +40,7 @@ const NOTIFICATION_QUERY = `
             ... on Issue {
               state
               stateReason
+              author { login }
             }
             ... on CheckSuite {
               status
