@@ -17,6 +17,7 @@ const NOTIFICATION_QUERY = `
           url
           reason
           isUnread
+          isSaved
           lastUpdatedAt
           optionalSubject {
             __typename
@@ -66,16 +67,4 @@ const NOTIFICATION_QUERY = `
   }
 `
 
-const MARK_DONE_MUTATION = `
-  mutation MarkDone($input: MarkNotificationsAsDoneInput!) {
-    markNotificationsAsDone(input: $input) { success }
-  }
-`
-
-const MARK_READ_MUTATION = `
-  mutation MarkRead($input: MarkNotificationsAsReadInput!) {
-    markNotificationsAsRead(input: $input) { success }
-  }
-`
-
-export { NOTIFICATION_QUERY, MARK_DONE_MUTATION, MARK_READ_MUTATION }
+export { NOTIFICATION_QUERY }

@@ -2,9 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { clsx } from 'clsx'
 
-export function Action({ children, onSelect, onActionComplete, className }) {
-  const handleClick = async () => {
-    await onSelect()
+export function Action({ icon: Icon, children, onSelect, onActionComplete, className }) {
+  const handleClick = () => {
+    onSelect()
     onActionComplete?.()
   }
 
@@ -12,17 +12,19 @@ export function Action({ children, onSelect, onActionComplete, className }) {
     <button
       type="button"
       className={clsx(
-        'btn btn-primary btn-outline w-full justify-start bg-base-100 text-indigo-300',
+        'btn btn-primary btn-outline w-full pr-8 justify-start bg-base-100 text-indigo-300',
         className
       )}
       onClick={handleClick}
     >
+      {Icon && <Icon className="fill-indigo-300 size-4 shrink-0" />}
       {children}
     </button>
   )
 }
 
 Action.propTypes = {
+  icon: PropTypes.elementType,
   children: PropTypes.node.isRequired,
   onSelect: PropTypes.func.isRequired,
   onActionComplete: PropTypes.func,

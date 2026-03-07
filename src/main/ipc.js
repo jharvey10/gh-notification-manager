@@ -1,7 +1,14 @@
 import { ipcMain, shell, Notification } from 'electron'
 import * as store from './store.js'
 import * as auth from './auth.js'
-import { markThreadsAsDone, markThreadsAsRead } from './github/mutations.js'
+import {
+  markThreadsAsDone,
+  markThreadsAsRead,
+  markThreadsAsUnread,
+  unsubscribeFromThreads,
+  saveThreads,
+  unsaveThreads
+} from './github/mutations.js'
 import { start, stop, poll } from './poller.js'
 import { resetClients } from './github/client.js'
 
@@ -27,6 +34,34 @@ function registerIpcHandlers({ onNotificationsChanged }) {
   ipcMain.handle('notifications:markRead', async (_event, ids) => {
     await markThreadsAsRead(ids, (batch) => {
       for (const id of batch) store.markRead(id)
+      onNotificationsChanged()
+    })
+  })
+
+  ipcMain.handle('notifications:markUnread', async (_event, ids) => {
+    await markThreadsAsUnread(ids, (batch) => {
+      for (const id of batch) store.markUnread(id)
+      onNotificationsChanged()
+    })
+  })
+
+  ipcMain.handle('notifications:unsubscribe', async (_event, ids) => {
+    await unsubscribeFromThreads(ids, (batch) => {
+      for (const id of batch) store.remove(id)
+      onNotificationsChanged()
+    })
+  })
+
+  ipcMain.handle('notifications:save', async (_event, ids) => {
+    await saveThreads(ids, (id) => {
+      store.setSaved(id, true)
+      onNotificationsChanged()
+    })
+  })
+
+  ipcMain.handle('notifications:unsave', async (_event, ids) => {
+    await unsaveThreads(ids, (id) => {
+      store.setSaved(id, false)
       onNotificationsChanged()
     })
   })

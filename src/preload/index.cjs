@@ -14,6 +14,14 @@ contextBridge.exposeInMainWorld('api', {
 
   markAsRead: (threadIds) => ipcRenderer.invoke('notifications:markRead', threadIds),
 
+  markAsUnread: (threadIds) => ipcRenderer.invoke('notifications:markUnread', threadIds),
+
+  unsubscribe: (threadIds) => ipcRenderer.invoke('notifications:unsubscribe', threadIds),
+
+  saveThreads: (threadIds) => ipcRenderer.invoke('notifications:save', threadIds),
+
+  unsaveThreads: (threadIds) => ipcRenderer.invoke('notifications:unsave', threadIds),
+
   refreshNow: () => ipcRenderer.invoke('notifications:refresh'),
 
   setToken: (token) => ipcRenderer.invoke('auth:setToken', token),

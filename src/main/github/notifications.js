@@ -1,5 +1,5 @@
 import { getGraphql } from './client.js'
-import { NOTIFICATION_QUERY } from './queries/notifications.js'
+import { NOTIFICATION_QUERY } from './queries/fetchNotifications.js'
 import * as store from '../store.js'
 
 const MAX_NOTIFICATIONS = 1000

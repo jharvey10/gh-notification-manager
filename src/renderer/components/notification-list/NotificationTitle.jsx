@@ -1,10 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { clsx } from 'clsx'
+import BookmarkIcon from '../../assets/icons/bookmark.svg?react'
 
-export function NotificationTitle({ title, url, isUnread, onOpen }) {
+export function NotificationTitle({ title, url, isUnread, isSaved, onOpen }) {
   return (
-    <div className="flex min-w-0 flex-1">
+    <div className="flex items-center gap-1.5 min-w-0 flex-1">
+      {isSaved && <BookmarkIcon className="fill-primary size-4 shrink-0" />}
+
       {url && (
         <button
           className={clsx(
@@ -27,5 +30,6 @@ NotificationTitle.propTypes = {
   title: PropTypes.string.isRequired,
   url: PropTypes.string,
   isUnread: PropTypes.bool.isRequired,
+  isSaved: PropTypes.bool,
   onOpen: PropTypes.func.isRequired
 }

@@ -3,7 +3,7 @@ import { Button } from '../../Button'
 
 export function FilterOptionRow({ item, isIncluded, isExcluded, onToggle }) {
   return (
-    <div className="join">
+    <div className="join min-w-40">
       <Button
         className="join-item"
         outline={!isExcluded}
@@ -13,12 +13,12 @@ export function FilterOptionRow({ item, isIncluded, isExcluded, onToggle }) {
       >
         -
       </Button>
-      <span
-        className="join-item border border-primary truncate flex-1 text-sm flex items-center justify-center text-indigo-300"
+      <div
+        className="join-item px-4 border border-primary truncate flex-1 text-sm flex items-center justify-center text-indigo-300"
         title={item}
       >
         {item}
-      </span>
+      </div>
       <Button
         className="join-item"
         outline={!isIncluded}

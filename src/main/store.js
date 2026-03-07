@@ -31,4 +31,14 @@ function markRead(id) {
   if (n) notifications.set(id, { ...n, isUnread: false })
 }
 
-export { getAll, initialize, upsert, remove, has, clear, markRead }
+function markUnread(id) {
+  const n = notifications?.get(id)
+  if (n) notifications.set(id, { ...n, isUnread: true })
+}
+
+function setSaved(id, isSaved) {
+  const n = notifications?.get(id)
+  if (n) notifications.set(id, { ...n, isSaved })
+}
+
+export { getAll, initialize, upsert, remove, has, clear, markRead, markUnread, setSaved }

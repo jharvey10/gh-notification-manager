@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { PopoverCard } from '../PopoverCard'
 import { ActiveFilterList } from './ActiveFilterList'
 import { FilterOptionRow } from './FilterOptionRow'
@@ -49,4 +50,17 @@ export function FilterPopover({
       </div>
     </PopoverCard>
   )
+}
+
+FilterPopover.propTypes = {
+  popoverId: PropTypes.string.isRequired,
+  anchorName: PropTypes.string.isRequired,
+  triggerLabel: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  items: PropTypes.arrayOf(PropTypes.string).isRequired,
+  includedItems: PropTypes.instanceOf(Set).isRequired,
+  excludedItems: PropTypes.instanceOf(Set).isRequired,
+  onToggle: PropTypes.func.isRequired,
+  onClear: PropTypes.func.isRequired
 }

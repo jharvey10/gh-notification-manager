@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { FilterPopover } from './filter-popover/FilterPopover'
 
 export function Filters({
@@ -64,4 +65,23 @@ export function Filters({
       )}
     </div>
   )
+}
+
+Filters.propTypes = {
+  filters: PropTypes.shape({
+    text: PropTypes.string.isRequired,
+    includedTags: PropTypes.instanceOf(Set).isRequired,
+    excludedTags: PropTypes.instanceOf(Set).isRequired,
+    includedRepos: PropTypes.instanceOf(Set).isRequired,
+    excludedRepos: PropTypes.instanceOf(Set).isRequired,
+    unreadOnly: PropTypes.bool.isRequired
+  }).isRequired,
+  allTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+  allRepos: PropTypes.arrayOf(PropTypes.string).isRequired,
+  onTextChange: PropTypes.func.isRequired,
+  onTagToggle: PropTypes.func.isRequired,
+  onRepoToggle: PropTypes.func.isRequired,
+  onUnreadToggle: PropTypes.func.isRequired,
+  onClearTags: PropTypes.func.isRequired,
+  onClearRepos: PropTypes.func.isRequired
 }

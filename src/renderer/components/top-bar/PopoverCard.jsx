@@ -12,14 +12,14 @@ export function PopoverCard({ popoverId, anchorName, trigger, children, classNam
         popoverTarget: popoverId,
         style: {
           ...triggerStyle,
-          anchorName,
-        },
+          anchorName
+        }
       })}
 
       <div
         className={clsx(
-          'dropdown w-96 max-w-[calc(100vw-2rem)] rounded-box border border-base-300 bg-base-200 p-3 text-base-content shadow-sm',
-          className,
+          'dropdown max-w-[calc(100vw-2rem)] rounded-box border border-base-300 bg-base-200 p-3 text-base-content shadow-sm',
+          className
         )}
         popover="auto"
         id={popoverId}
