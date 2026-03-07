@@ -45,7 +45,11 @@ export function BatchActionBar({
       <ActionsMenu
         popoverId="batch-actions-menu"
         anchorName="--batch-actions-menu-anchor"
-        trigger={<Button disabled={selectedCount === 0}>⋯</Button>}
+        trigger={
+          <Button disabled={selectedCount === 0} tooltip="Actions">
+            ⋯
+          </Button>
+        }
       >
         <Action icon={EmailIcon} onSelect={onMarkRead}>
           Mark read

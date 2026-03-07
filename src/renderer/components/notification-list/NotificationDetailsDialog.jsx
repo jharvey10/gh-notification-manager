@@ -13,6 +13,7 @@ export function NotificationDetailsDialog({ dialogRef, title, notification }) {
             type="submit"
             className="absolute right-2 top-2"
             aria-label={`Close details for ${title}`}
+            tooltip="Close"
           >
             X
           </Button>

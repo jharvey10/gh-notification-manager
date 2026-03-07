@@ -79,14 +79,18 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
           )}
           <div className="whitespace-nowrap text-xs text-base-content/60">{time}</div>
 
-          <Button onClick={handleMarkDone} aria-label={`Mark ${title} done`} title="Mark done">
+          <Button
+            onClick={handleMarkDone}
+            aria-label={`Mark ${title} done`}
+            tooltip="Mark done"
+          >
             <CheckmarkIcon className="size-4 shrink-0 fill-current" />
           </Button>
 
           <ActionsMenu
             popoverId={`notification-menu-${menuId}`}
             anchorName={`--notification-menu-anchor-${menuId}`}
-            trigger={<Button>⋯</Button>}
+            trigger={<Button tooltip="Actions">⋯</Button>}
           >
             {isUnread && (
               <Action icon={EmailIcon} onSelect={handleMarkRead}>

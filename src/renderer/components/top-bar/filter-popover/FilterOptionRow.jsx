@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { Button } from '../../Button'
 
 export function FilterOptionRow({ item, isIncluded, isExcluded, onToggle }) {
@@ -30,4 +31,11 @@ export function FilterOptionRow({ item, isIncluded, isExcluded, onToggle }) {
       </Button>
     </div>
   )
+}
+
+FilterOptionRow.propTypes = {
+  item: PropTypes.string.isRequired,
+  isIncluded: PropTypes.bool.isRequired,
+  isExcluded: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func.isRequired
 }

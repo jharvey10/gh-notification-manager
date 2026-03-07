@@ -12,7 +12,7 @@ export function SettingsMenu({ onChangeToken, onRefresh, onTestNotification }) {
       anchorName="--top-bar-popover-anchor"
       className="w-60"
       trigger={
-        <Button>
+        <Button tooltip="Settings" aria-label="Settings">
           <SettingsIcon className="fill-indigo-300 size-5" alt="Settings" />
         </Button>
       }
