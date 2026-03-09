@@ -28,7 +28,7 @@ export function FilterPopover({
         <FilterPopoverTrigger triggerLabel={triggerLabel} activeItemCount={activeItemCount} />
       }
     >
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 min-w-80 max-w-96">
         <FilterPopoverHeader title={title} description={description} />
         <ActiveFilterList
           includedItems={includedItems}

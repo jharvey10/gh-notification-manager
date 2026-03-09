@@ -3,7 +3,7 @@ import { getGraphql } from './client.js'
 import { NOTIFICATION_QUERY } from './queries/fetchNotifications.js'
 
 const MAX_NOTIFICATIONS = 1000
-const FULL_REFRESH_INTERVAL_MS = 60 * 60 * 1000
+const FULL_REFRESH_INTERVAL_MS = 10 * 60 * 1000
 
 class GitHubNotifications {
   #cache = new Map()
@@ -82,27 +82,15 @@ class GitHubNotifications {
 
     const nodes = await this.#fetchFirstPage()
     const updates = new Map()
-    let needsFullRefresh = false
 
     for (const node of nodes) {
       const hash = this.#hash(node)
       const cached = this.#cache.get(node.id)
 
-      if (cached !== undefined && cached !== hash) {
-        needsFullRefresh = true
-        break
-      }
-
-      if (cached === undefined) {
+      if (cached !== hash) {
         updates.set(node.id, node)
         this.#cache.set(node.id, hash)
       }
-    }
-
-    if (needsFullRefresh) {
-      console.log('needs full refresh')
-      const fetched = await this.#fetchAllPages()
-      return this.#reconcileFull(fetched)
     }
 
     return updates

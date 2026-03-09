@@ -12,12 +12,12 @@ export function Action({ icon: Icon, children, onSelect, onActionComplete, class
     <button
       type="button"
       className={clsx(
-        'btn btn-primary btn-outline w-full pr-8 justify-start bg-base-100 text-indigo-300',
+        'btn btn-primary btn-outline w-full pr-8 justify-start bg-base-100',
         className
       )}
       onClick={handleClick}
     >
-      {Icon && <Icon className="fill-indigo-300 size-4 shrink-0" />}
+      {Icon && <Icon className="fill-primary size-4 shrink-0" />}
       {children}
     </button>
   )

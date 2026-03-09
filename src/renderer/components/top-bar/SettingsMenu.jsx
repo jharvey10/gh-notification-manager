@@ -13,19 +13,13 @@ export function SettingsMenu({ onChangeToken, onRefresh, onTestNotification }) {
       className="w-60"
       trigger={
         <Button tooltip="Settings" aria-label="Settings">
-          <SettingsIcon className="fill-indigo-300 size-5" alt="Settings" />
+          <SettingsIcon className="fill-primary size-5" alt="Settings" />
         </Button>
       }
     >
-      <Action onSelect={onChangeToken}>
-        Change token
-      </Action>
-      <Action onSelect={onRefresh}>
-        Refresh
-      </Action>
-      <Action onSelect={onTestNotification}>
-        Test notification
-      </Action>
+      <Action onSelect={onChangeToken}>Change token</Action>
+      <Action onSelect={onRefresh}>Refresh</Action>
+      <Action onSelect={onTestNotification}>Test notification</Action>
     </ActionsMenu>
   )
 }

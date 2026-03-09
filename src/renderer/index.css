@@ -1,6 +1,36 @@
-@import "tailwindcss";
-@plugin "daisyui";
+@import 'tailwindcss';
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark --prefersdark;
+}
+
+:root {
+  --color-primary-lightest: var(--color-primary);
+  --color-primary-lighter: var(--color-primary);
+}
+
+/* Adjust the primary text color to be lighter in dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary-lightest: oklch(88% 0.233 277.117);
+    --color-primary-lighter: oklch(67% 0.233 277.117);
+  }
+}
 
 html {
   font-size: 14px;
+}
+
+.text-primary,
+.btn-primary:not(:disabled):not(.btn-disabled) {
+  color: var(--color-primary-lightest);
+}
+
+.badge-primary {
+  color: var(--color-primary-lighter);
+}
+
+.fill-primary {
+  fill: var(--color-primary-lightest);
 }

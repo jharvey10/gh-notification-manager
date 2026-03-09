@@ -1,7 +1,7 @@
 import { GitHubNotifications } from './github/GitHubNotifications.js'
 import { runPipeline } from './pipeline/runner.js'
 
-const POLL_INTERVAL_MS = 30_000
+const POLL_INTERVAL_MS = 60_000
 
 class NotificationPoller {
   #timeoutId = null

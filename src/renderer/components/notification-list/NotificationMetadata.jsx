@@ -3,17 +3,15 @@ import PropTypes from 'prop-types'
 import { Badge } from '../Badge.jsx'
 import clsx from 'clsx'
 
-export function NotificationMetadata({ typeLabel, repo, tags, isUnread }) {
+export function NotificationMetadata({ repo, tags, isUnread }) {
   return (
     <div className="flex flex-wrap items-center justify-start gap-2">
-      <Badge className={clsx('badge-sm badge-primary', !isUnread && 'text-gray-400')}>{repo}</Badge>
-
-      <Badge className={clsx('badge-sm badge-primary', !isUnread && 'text-gray-400')}>
-        {typeLabel}
+      <Badge className={clsx('badge-sm badge-primary', !isUnread && 'text-primary/70')}>
+        {repo}
       </Badge>
 
       {tags.map((tag) => (
-        <Badge key={tag} className={clsx('badge-sm badge-primary', !isUnread && 'text-gray-400')}>
+        <Badge key={tag} className={clsx('badge-sm badge-primary', !isUnread && 'text-primary/70')}>
           {tag}
         </Badge>
       ))}
@@ -22,7 +20,6 @@ export function NotificationMetadata({ typeLabel, repo, tags, isUnread }) {
 }
 
 NotificationMetadata.propTypes = {
-  typeLabel: PropTypes.string.isRequired,
   repo: PropTypes.string.isRequired,
   tags: PropTypes.arrayOf(PropTypes.string).isRequired,
   isUnread: PropTypes.bool.isRequired

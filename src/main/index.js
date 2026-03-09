@@ -5,6 +5,7 @@ import { NotificationStore } from './NotificationStore.js'
 import { NotificationPoller } from './NotificationPoller.js'
 import { broadcastNotificationsUpdated } from './notificationsBroadcaster.js'
 import { registerTagger } from './pipeline/runner.js'
+import { subjectTagger } from './pipeline/taggers/subjectTagger.js'
 import { reviewTypeTagger } from './pipeline/taggers/reviewTypeTagger.js'
 import { reasonTagger } from './pipeline/taggers/reasonTagger.js'
 import { junkTagger } from './pipeline/taggers/junkTagger.js'
@@ -13,6 +14,7 @@ const DEV_SERVER_URL = 'http://localhost:5173'
 let mainWindow = null
 
 function registerTaggers() {
+  registerTagger(subjectTagger)
   registerTagger(reviewTypeTagger)
   registerTagger(reasonTagger)
   registerTagger(junkTagger)

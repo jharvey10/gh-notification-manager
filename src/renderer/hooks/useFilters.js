@@ -1,8 +1,70 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 
 const compareValues = (left, right) => left.localeCompare(right)
+const FILTER_STORAGE_KEY = 'gh-notification-manager.filters'
 
 const getNotificationRepo = (notification) => notification.optionalList?.nameWithOwner ?? 'unknown'
+
+const createEmptyFilters = () => ({
+  text: '',
+  includedTags: new Set(),
+  excludedTags: new Set(),
+  includedRepos: new Set(),
+  excludedRepos: new Set(),
+  unreadOnly: false
+})
+
+const toStoredValues = (value) =>
+  Array.isArray(value) ? value.filter((item) => typeof item === 'string') : []
+
+function readStoredFilters() {
+  if (typeof globalThis.localStorage?.getItem !== 'function') {
+    return createEmptyFilters()
+  }
+
+  try {
+    const stored = globalThis.localStorage.getItem(FILTER_STORAGE_KEY)
+    if (!stored) {
+      return createEmptyFilters()
+    }
+
+    const parsed = JSON.parse(stored)
+
+    return {
+      text: typeof parsed.text === 'string' ? parsed.text : '',
+      includedTags: new Set(toStoredValues(parsed.includedTags)),
+      excludedTags: new Set(toStoredValues(parsed.excludedTags)),
+      includedRepos: new Set(toStoredValues(parsed.includedRepos)),
+      excludedRepos: new Set(toStoredValues(parsed.excludedRepos)),
+      unreadOnly: parsed.unreadOnly === true
+    }
+  } catch (err) {
+    console.warn('Failed to restore filters from local storage:', err)
+    return createEmptyFilters()
+  }
+}
+
+function writeStoredFilters(filters) {
+  if (typeof globalThis.localStorage?.setItem !== 'function') {
+    return
+  }
+
+  try {
+    globalThis.localStorage.setItem(
+      FILTER_STORAGE_KEY,
+      JSON.stringify({
+        text: filters.text,
+        includedTags: [...filters.includedTags].sort(compareValues),
+        excludedTags: [...filters.excludedTags].sort(compareValues),
+        includedRepos: [...filters.includedRepos].sort(compareValues),
+        excludedRepos: [...filters.excludedRepos].sort(compareValues),
+        unreadOnly: filters.unreadOnly
+      })
+    )
+  } catch (err) {
+    console.warn('Failed to persist filters to local storage:', err)
+  }
+}
 
 const toggleExclusiveFilter = (setIncluded, setExcluded, value, mode) => {
   if (mode === 'include') {
@@ -48,12 +110,24 @@ const toggleExclusiveFilter = (setIncluded, setExcluded, value, mode) => {
 
 export function useFilters(notifications) {
   const notificationList = useMemo(() => notifications ?? [], [notifications])
-  const [text, setText] = useState('')
-  const [includedTags, setIncludedTags] = useState(new Set())
-  const [excludedTags, setExcludedTags] = useState(new Set())
-  const [includedRepos, setIncludedRepos] = useState(new Set())
-  const [excludedRepos, setExcludedRepos] = useState(new Set())
-  const [unreadOnly, setUnreadOnly] = useState(false)
+  const [initialFilters] = useState(() => readStoredFilters())
+  const [text, setText] = useState(initialFilters.text)
+  const [includedTags, setIncludedTags] = useState(initialFilters.includedTags)
+  const [excludedTags, setExcludedTags] = useState(initialFilters.excludedTags)
+  const [includedRepos, setIncludedRepos] = useState(initialFilters.includedRepos)
+  const [excludedRepos, setExcludedRepos] = useState(initialFilters.excludedRepos)
+  const [unreadOnly, setUnreadOnly] = useState(initialFilters.unreadOnly)
+
+  useEffect(() => {
+    writeStoredFilters({
+      text,
+      includedTags,
+      excludedTags,
+      includedRepos,
+      excludedRepos,
+      unreadOnly
+    })
+  }, [text, includedTags, excludedTags, includedRepos, excludedRepos, unreadOnly])
 
   const allTags = useMemo(() => {
     const tagSet = new Set([...includedTags, ...excludedTags])

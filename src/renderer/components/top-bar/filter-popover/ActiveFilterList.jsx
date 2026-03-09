@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import React from 'react'
+import PropTypes from 'prop-types'
 import { Button } from '../../Button'
 
 const compareValues = (left, right) => left.localeCompare(right)
@@ -21,13 +22,11 @@ export function ActiveFilterList({ includedItems, excludedItems, onToggle, onCle
   if (activeItems.length === 0) return null
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-base-content/70">{activeItems.length} selected</span>
-        <Button onClick={onClear} className="btn-xs">
-          Clear all
-        </Button>
-      </div>
+    <div className="flex flex-wrap gap-2 max-w-80">
+      <span className="text-sm text-base-content/70">{activeItems.length} selected</span>
+      <Button onClick={onClear} className="btn-xs">
+        Clear all
+      </Button>
 
       {activeItems.map((item) => (
         <button
@@ -44,4 +43,11 @@ export function ActiveFilterList({ includedItems, excludedItems, onToggle, onCle
       ))}
     </div>
   )
+}
+
+ActiveFilterList.propTypes = {
+  includedItems: PropTypes.instanceOf(Set).isRequired,
+  excludedItems: PropTypes.instanceOf(Set).isRequired,
+  onToggle: PropTypes.func.isRequired,
+  onClear: PropTypes.func.isRequired
 }

@@ -14,12 +14,14 @@ export function FilterOptionRow({ item, isIncluded, isExcluded, onToggle }) {
       >
         -
       </Button>
+
       <div
-        className="join-item px-4 border border-primary truncate flex-1 text-sm flex items-center justify-center text-indigo-300"
+        className="join-item px-4 border border-primary truncate flex-1 text-sm flex items-center justify-center text-primary"
         title={item}
       >
         {item}
       </div>
+
       <Button
         className="join-item"
         outline={!isIncluded}

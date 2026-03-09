@@ -26,7 +26,7 @@ export function Button({
   const variantClass = VARIANT_CLASSES[variant]
   const outlineClass = outline ? 'btn-outline bg-base-100' : ''
   const disabledClass = disabled ? 'btn-disabled bg-base-content/1 border-base-content/10' : ''
-  const textClass = disabled ? '' : 'text-indigo-300'
+  const textClass = disabled ? '' : 'text-primary'
   const classes = clsx(
     'btn',
     variantClass,

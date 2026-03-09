@@ -12,7 +12,7 @@ export function NotificationTitle({ title, url, isUnread, isSaved, onOpen }) {
         <button
           className={clsx(
             'btn btn-link w-full h-auto p-0 m-0 no-underline hover:underline inline text-left',
-            isUnread ? 'text-primary-content' : 'text-gray-400'
+            isUnread ? 'text-base-content' : 'text-base-content/50'
           )}
           type="button"
           onClick={onOpen}
@@ -21,7 +21,7 @@ export function NotificationTitle({ title, url, isUnread, isSaved, onOpen }) {
         </button>
       )}
 
-      {!url && <span className="font-medium text-base-content/80">{title}</span>}
+      {!url && <span className="font-medium text-base-content/70">{title}</span>}
     </div>
   )
 }

@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { formatNotificationType } from '../../../shared/formatNotificationType.js'
 import { Action } from '../actions-menu/Action.jsx'
 import { ActionsMenu } from '../actions-menu/ActionsMenu.jsx'
 import { UnreadMarker } from './UnreadMarker.jsx'
@@ -27,7 +26,6 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
     notification
   const repo = optionalList?.nameWithOwner ?? 'unknown'
   const { label: timeLabel, tooltip: timeTooltip } = formatTimeAgo(lastUpdatedAt)
-  const typeLabel = formatNotificationType(notification)
   const menuId = buildMenuId(id)
   const detailsDialogRef = React.useRef(null)
   const openerLogin = optionalSubject?.author?.login
@@ -70,7 +68,7 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
             isSaved={isSaved}
             onOpen={handleOpen}
           />
-          <NotificationMetadata typeLabel={typeLabel} repo={repo} tags={tags} isUnread={isUnread} />
+          <NotificationMetadata repo={repo} tags={tags} isUnread={isUnread} />
         </div>
 
         {/* Right */}
