@@ -1,4 +1,4 @@
-// This file is executed in a sanbox environment and therefore must be a CommonJS module
+// This file is executed in a sandbox environment and therefore must be a CommonJS module
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('api', {
@@ -18,9 +18,9 @@ contextBridge.exposeInMainWorld('api', {
 
   unsubscribe: (threadIds) => ipcRenderer.invoke('notifications:unsubscribe', threadIds),
 
-  saveThreads: (threadIds) => ipcRenderer.invoke('notifications:save', threadIds),
+  saveThread: (threadId) => ipcRenderer.invoke('notifications:save', threadId),
 
-  unsaveThreads: (threadIds) => ipcRenderer.invoke('notifications:unsave', threadIds),
+  unsaveThread: (threadId) => ipcRenderer.invoke('notifications:unsave', threadId),
 
   refreshNow: () => ipcRenderer.invoke('notifications:refresh'),
 

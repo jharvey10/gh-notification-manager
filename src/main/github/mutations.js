@@ -24,21 +24,6 @@ async function mutateInBatches(ids, mutation, label, onBatchDone) {
   }
 }
 
-async function mutateOneByOne(ids, mutation, label, onEachDone) {
-  const gql = getGraphql()
-
-  for (const id of ids) {
-    const result = await gql(mutation, { input: { id } })
-    const payload = result[label]
-    if (!payload?.success) {
-      console.error(`${label} returned success=false for id ${id}`)
-    }
-    if (onEachDone) {
-      await onEachDone(id)
-    }
-  }
-}
-
 async function markThreadsAsDone(ids, onBatchDone) {
   await mutateInBatches(ids, MARK_DONE_MUTATION, 'markNotificationsAsDone', onBatchDone)
 }
@@ -55,12 +40,20 @@ async function unsubscribeFromThreads(ids, onBatchDone) {
   await mutateInBatches(ids, UNSUBSCRIBE_MUTATION, 'unsubscribeFromNotifications', onBatchDone)
 }
 
-async function saveThreads(ids, onEachDone) {
-  await mutateOneByOne(ids, SAVE_THREAD_MUTATION, 'createSavedNotificationThread', onEachDone)
+async function saveThread(id) {
+  const gql = getGraphql()
+  const result = await gql(SAVE_THREAD_MUTATION, { input: { id } })
+  if (!result.createSavedNotificationThread?.success) {
+    console.error(`createSavedNotificationThread returned success=false for id ${id}`)
+  }
 }
 
-async function unsaveThreads(ids, onEachDone) {
-  await mutateOneByOne(ids, UNSAVE_THREAD_MUTATION, 'deleteSavedNotificationThread', onEachDone)
+async function unsaveThread(id) {
+  const gql = getGraphql()
+  const result = await gql(UNSAVE_THREAD_MUTATION, { input: { id } })
+  if (!result.deleteSavedNotificationThread?.success) {
+    console.error(`deleteSavedNotificationThread returned success=false for id ${id}`)
+  }
 }
 
 export {
@@ -68,6 +61,6 @@ export {
   markThreadsAsRead,
   markThreadsAsUnread,
   unsubscribeFromThreads,
-  saveThreads,
-  unsaveThreads
+  saveThread,
+  unsaveThread
 }

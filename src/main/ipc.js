@@ -1,18 +1,20 @@
 import { ipcMain, shell, Notification } from 'electron'
-import * as store from './store.js'
 import * as auth from './auth.js'
 import {
   markThreadsAsDone,
   markThreadsAsRead,
   markThreadsAsUnread,
   unsubscribeFromThreads,
-  saveThreads,
-  unsaveThreads
+  saveThread,
+  unsaveThread
 } from './github/mutations.js'
-import { start, stop, poll } from './poller.js'
+import { NotificationPoller } from './NotificationPoller.js'
 import { resetClients } from './github/client.js'
+import { findSubscribableId } from '../shared/findSubscribableId.js'
 
-function registerIpcHandlers({ onNotificationsChanged }) {
+function registerIpcHandlers({ store, poller: initialPoller }) {
+  let poller = initialPoller
+
   ipcMain.handle('shell:openExternal', (_event, url) => {
     const parsed = new URL(url)
     if (parsed.hostname === 'github.com' && parsed.protocol === 'https:') {
@@ -26,68 +28,104 @@ function registerIpcHandlers({ onNotificationsChanged }) {
 
   ipcMain.handle('notifications:markDone', async (_event, ids) => {
     await markThreadsAsDone(ids, (batch) => {
-      for (const id of batch) store.remove(id)
-      onNotificationsChanged()
+      store.upsert(batch.map((id) => [id, null]))
+      poller?.invalidateCacheEntries(batch)
     })
   })
 
   ipcMain.handle('notifications:markRead', async (_event, ids) => {
     await markThreadsAsRead(ids, (batch) => {
-      for (const id of batch) store.markRead(id)
-      onNotificationsChanged()
+      store.upsert(
+        batch
+          .map((id) => {
+            const n = store.get(id)
+            return n ? [id, { ...n, isUnread: false }] : null
+          })
+          .filter(Boolean)
+      )
+      poller?.invalidateCacheEntries(batch)
     })
   })
 
   ipcMain.handle('notifications:markUnread', async (_event, ids) => {
     await markThreadsAsUnread(ids, (batch) => {
-      for (const id of batch) store.markUnread(id)
-      onNotificationsChanged()
+      store.upsert(
+        batch
+          .map((id) => {
+            const n = store.get(id)
+            return n ? [id, { ...n, isUnread: true }] : null
+          })
+          .filter(Boolean)
+      )
+      poller?.invalidateCacheEntries(batch)
     })
   })
 
   ipcMain.handle('notifications:unsubscribe', async (_event, ids) => {
-    await unsubscribeFromThreads(ids, (batch) => {
-      for (const id of batch) store.remove(id)
-      onNotificationsChanged()
-    })
+    const subscribableMap = new Map()
+    for (const id of ids) {
+      const n = store.get(id)
+      const subjectId = findSubscribableId(n)
+      if (subjectId) {
+        subscribableMap.set(subjectId, id)
+      } else {
+        console.warn(`Cannot unsubscribe from notification ${id}: no subscribable subject`)
+      }
+    }
+    const subscribableIds = [...subscribableMap.keys()]
+    if (subscribableIds.length === 0) {
+      return
+    }
+
+    const threadIds = [...subscribableMap.values()]
+    await Promise.all([
+      unsubscribeFromThreads(subscribableIds),
+      markThreadsAsDone(threadIds, (batch) => {
+        store.upsert(batch.map((id) => [id, null]))
+        poller?.invalidateCacheEntries(batch)
+      })
+    ])
   })
 
-  ipcMain.handle('notifications:save', async (_event, ids) => {
-    await saveThreads(ids, (id) => {
-      store.setSaved(id, true)
-      onNotificationsChanged()
-    })
+  ipcMain.handle('notifications:save', async (_event, id) => {
+    await saveThread(id)
+    const n = store.get(id)
+    if (n) store.upsert([[id, { ...n, isSaved: true }]])
+    poller?.invalidateCacheEntries([id])
   })
 
-  ipcMain.handle('notifications:unsave', async (_event, ids) => {
-    await unsaveThreads(ids, (id) => {
-      store.setSaved(id, false)
-      onNotificationsChanged()
-    })
+  ipcMain.handle('notifications:unsave', async (_event, id) => {
+    await unsaveThread(id)
+    const n = store.get(id)
+    if (n) store.upsert([[id, { ...n, isSaved: false }]])
+    poller?.invalidateCacheEntries([id])
   })
 
   ipcMain.handle('notifications:refresh', async () => {
-    stop()
+    poller?.stop()
     store.clear()
-    onNotificationsChanged()
-    await poll({ shouldNotify: false, onPollComplete: onNotificationsChanged })
-    start({ onPollComplete: onNotificationsChanged })
+    poller = new NotificationPoller({ store })
+    await poller.start()
   })
 
   ipcMain.handle('auth:hasToken', () => {
     return auth.hasToken()
   })
 
-  ipcMain.handle('auth:setToken', (_event, token) => {
+  ipcMain.handle('auth:setToken', async (_event, token) => {
     auth.saveToken(token)
+    poller?.stop()
     resetClients()
+    poller = new NotificationPoller({ store })
+    await poller.start()
   })
 
   ipcMain.handle('auth:clearToken', () => {
     auth.clearToken()
+    poller?.stop()
+    poller = null
     store.clear()
     resetClients()
-    onNotificationsChanged()
   })
 
   ipcMain.handle('osnotification:test', () => {

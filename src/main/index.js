@@ -1,7 +1,8 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'node:path'
 import { registerIpcHandlers } from './ipc.js'
-import { start, stop } from './poller.js'
+import { NotificationStore } from './NotificationStore.js'
+import { NotificationPoller } from './NotificationPoller.js'
 import { broadcastNotificationsUpdated } from './notificationsBroadcaster.js'
 import { registerTagger } from './pipeline/runner.js'
 import { reviewTypeTagger } from './pipeline/taggers/reviewTypeTagger.js'
@@ -45,21 +46,26 @@ async function main() {
 
   registerTaggers()
   createWindow()
-  const onNotificationsChanged = () => broadcastNotificationsUpdated(mainWindow)
-  registerIpcHandlers({ onNotificationsChanged })
-  start({ onPollComplete: onNotificationsChanged })
+
+  const store = new NotificationStore({
+    onChange: () => broadcastNotificationsUpdated(mainWindow, store)
+  })
+  const poller = new NotificationPoller({ store })
+  registerIpcHandlers({ store, poller })
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
-      onNotificationsChanged()
+      broadcastNotificationsUpdated(mainWindow, store)
     }
   })
 
   app.on('window-all-closed', () => {
-    stop()
+    poller?.stop()
     app.quit()
   })
+
+  void poller.start()
 }
 
 main().catch((err) => {

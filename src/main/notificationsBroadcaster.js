@@ -1,7 +1,10 @@
-import * as store from './store.js'
+function broadcastNotificationsUpdated(mainWindow, store) {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    return
+  }
 
-function broadcastNotificationsUpdated(mainWindow) {
-  if (!mainWindow || mainWindow.isDestroyed()) return
+  console.log('broadcasting notifications updated')
+
   mainWindow.webContents.send('notifications:updated', store.getAll())
 }
 

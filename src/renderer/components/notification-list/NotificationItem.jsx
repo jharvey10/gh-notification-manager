@@ -15,6 +15,8 @@ import NotificationOffIcon from '../../assets/icons/notification-off.svg?react'
 import BookmarkAddIcon from '../../assets/icons/bookmark-add.svg?react'
 import BookmarkFilledIcon from '../../assets/icons/bookmark-filled.svg?react'
 import InformationSquareIcon from '../../assets/icons/information-square.svg?react'
+import { findSubscribableId } from '../../../shared/findSubscribableId.js'
+import { formatTimeAgo } from '../../../shared/formatTimeAgo.js'
 
 function buildMenuId(id) {
   return id.replaceAll(/[^a-zA-Z0-9_-]/g, '-')
@@ -24,11 +26,12 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
   const { id, title, url, tags, lastUpdatedAt, isUnread, isSaved, optionalList, optionalSubject } =
     notification
   const repo = optionalList?.nameWithOwner ?? 'unknown'
-  const time = new Date(lastUpdatedAt).toLocaleString()
+  const { label: timeLabel, tooltip: timeTooltip } = formatTimeAgo(lastUpdatedAt)
   const typeLabel = formatNotificationType(notification)
   const menuId = buildMenuId(id)
   const detailsDialogRef = React.useRef(null)
   const openerLogin = optionalSubject?.author?.login
+  const canUnsubscribe = findSubscribableId(notification) !== null
 
   const handleOpen = () => {
     globalThis.api.openExternal(url)
@@ -39,8 +42,8 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
   const handleMarkUnread = () => globalThis.api.markAsUnread([id])
   const handleMarkDone = () => globalThis.api.markAsDone([id])
   const handleUnsubscribe = () => globalThis.api.unsubscribe([id])
-  const handleSave = () => globalThis.api.saveThreads([id])
-  const handleUnsave = () => globalThis.api.unsaveThreads([id])
+  const handleSave = () => globalThis.api.saveThread(id)
+  const handleUnsave = () => globalThis.api.unsaveThread(id)
   const handleShowDetails = () => detailsDialogRef.current?.showModal()
 
   return (
@@ -77,13 +80,14 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
               @{openerLogin}
             </div>
           )}
-          <div className="whitespace-nowrap text-xs text-base-content/60">{time}</div>
-
-          <Button
-            onClick={handleMarkDone}
-            aria-label={`Mark ${title} done`}
-            tooltip="Mark done"
+          <div
+            className="whitespace-nowrap text-xs text-base-content/60 tooltip tooltip-bottom"
+            data-tip={timeTooltip}
           >
+            {timeLabel}
+          </div>
+
+          <Button onClick={handleMarkDone} aria-label={`Mark ${title} done`} tooltip="Mark done">
             <CheckmarkIcon className="size-4 shrink-0 fill-current" />
           </Button>
 
@@ -103,9 +107,11 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
               </Action>
             )}
 
-            <Action icon={NotificationOffIcon} onSelect={handleUnsubscribe}>
-              Unsubscribe
-            </Action>
+            {canUnsubscribe && (
+              <Action icon={NotificationOffIcon} onSelect={handleUnsubscribe}>
+                Unsubscribe
+              </Action>
+            )}
 
             {isSaved && (
               <Action icon={BookmarkFilledIcon} onSelect={handleUnsave}>
@@ -144,9 +150,12 @@ NotificationItem.propTypes = {
     isUnread: PropTypes.bool.isRequired,
     isSaved: PropTypes.bool,
     optionalSubject: PropTypes.shape({
+      id: PropTypes.string,
       author: PropTypes.shape({
         login: PropTypes.string
-      })
+      }),
+      commit: PropTypes.shape({ id: PropTypes.string }),
+      tagCommit: PropTypes.shape({ id: PropTypes.string })
     }),
     optionalList: PropTypes.shape({
       nameWithOwner: PropTypes.string

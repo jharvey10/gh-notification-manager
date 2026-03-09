@@ -22,6 +22,7 @@ const NOTIFICATION_QUERY = `
           optionalSubject {
             __typename
             ... on PullRequest {
+              id
               state
               isDraft
               merged
@@ -38,6 +39,7 @@ const NOTIFICATION_QUERY = `
               }
             }
             ... on Issue {
+              id
               state
               stateReason
               author { login }
@@ -45,12 +47,15 @@ const NOTIFICATION_QUERY = `
             ... on CheckSuite {
               status
               conclusion
+              commit { id }
             }
             ... on Release {
               tagName
               isPrerelease
+              tagCommit { id }
             }
             ... on Discussion {
+              id
               isAnswered
               stateReason
             }

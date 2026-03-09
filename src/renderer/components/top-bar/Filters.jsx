@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useDeferredValue, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { FilterPopover } from './filter-popover/FilterPopover'
 
@@ -13,14 +13,25 @@ export function Filters({
   onClearTags,
   onClearRepos
 }) {
+  const [text, setText] = useState(filters.text)
+  const deferredText = useDeferredValue(text)
+
+  useEffect(() => {
+    onTextChange(deferredText)
+  }, [deferredText, onTextChange])
+
+  useEffect(() => {
+    setText(filters.text)
+  }, [filters.text])
+
   return (
     // center items vertically
     <div className="flex min-w-0 flex-1 flex-wrap items-center gap-4">
       <input
         type="text"
         placeholder="Search notifications..."
-        value={filters.text}
-        onChange={(e) => onTextChange(e.target.value)}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
         className="input input-primary"
       />
 
