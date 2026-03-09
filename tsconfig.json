@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/main/**/*", "src/shared/**/*", "src/preload/**/*", "vite.config.mjs"],
+  "exclude": ["dist", "release", "node_modules"]
+}

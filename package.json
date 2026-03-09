@@ -14,7 +14,8 @@
     "dist:mac": "npm run build && electron-builder --mac",
     "dist:win": "npm run build && electron-builder --win",
     "dist:linux": "npm run build && electron-builder --linux",
-    "start": "electron ."
+    "start": "electron .",
+    "typecheck": "tsc --project tsconfig.json"
   },
   "keywords": [],
   "author": {
@@ -64,6 +65,9 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.0",
+    "@types/node": "^25.4.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "concurrently": "^9.2.1",
     "daisyui": "^5.5.19",
@@ -71,6 +75,7 @@
     "electron-builder": "^26.8.1",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.2.0",
+    "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-svgr": "^4.5.0",
     "wait-on": "^9.0.4"

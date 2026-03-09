@@ -14,10 +14,25 @@ const DEFAULT_PROCESSORS = Object.freeze([
   autoDoneProcessor
 ])
 
+/**
+ * @typedef {Record<string, any>} PipelineNotification
+ * @typedef {[string, PipelineNotification | null]} NotificationEntry
+ * @typedef {Map<string, PipelineNotification | null> | NotificationEntry[]} NotificationUpdates
+ * @typedef {{
+ *   userPreferences?: { autoMarkDoneEnabled?: boolean },
+ *   shouldNotify?: boolean,
+ *   invalidateCacheEntries?: (ids: string[]) => void,
+ *   customProcessors?: Array<(notification: PipelineNotification, context: Record<string, any>) => Promise<PipelineNotification | null> | PipelineNotification | null>
+ * }} PipelineOptions
+ */
+
 class Pipeline {
   #processors
   #context
 
+  /**
+   * @param {PipelineOptions} [options]
+   */
   constructor({
     userPreferences = { autoMarkDoneEnabled: false },
     shouldNotify = false,
@@ -32,8 +47,12 @@ class Pipeline {
     }
   }
 
+  /**
+   * @param {NotificationUpdates} updates
+   */
   async run(updates) {
-    const notifications = updates.map(([, notification]) => notification).filter(Boolean)
+    const entries = Array.isArray(updates) ? updates : Array.from(updates)
+    const notifications = entries.map(([, notification]) => notification).filter(Boolean)
 
     for (const notification of notifications) {
       notification.tags = []
@@ -41,7 +60,7 @@ class Pipeline {
 
     const results = []
 
-    for (const [id, notification] of updates) {
+    for (const [id, notification] of entries) {
       if (notification === null) {
         results.push([id, null])
         continue

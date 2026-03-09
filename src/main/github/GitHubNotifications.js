@@ -5,6 +5,70 @@ import { NOTIFICATION_QUERY } from './queries/fetchNotifications.js'
 const MAX_NOTIFICATIONS = 1000
 const FULL_REFRESH_INTERVAL_MS = 10 * 60 * 1000
 
+/**
+ * @typedef {{ login: string }} GitHubActor
+ * @typedef {{ name: string }} GitHubLabel
+ * @typedef {{ nodes: GitHubLabel[] }} GitHubLabelConnection
+ * @typedef {{ __typename: 'User', login: string } | { __typename: 'Team', slug: string, organization: GitHubActor }} GitHubRequestedReviewer
+ * @typedef {{ requestedReviewer: GitHubRequestedReviewer | null }} GitHubReviewRequest
+ * @typedef {{ nodes: GitHubReviewRequest[] }} GitHubReviewRequestConnection
+ * @typedef {{
+ *   __typename: 'PullRequest',
+ *   id: string,
+ *   state: string,
+ *   isDraft: boolean,
+ *   merged: boolean,
+ *   reviewDecision: string | null,
+ *   author: GitHubActor | null,
+ *   labels: GitHubLabelConnection | null,
+ *   reviewRequests: GitHubReviewRequestConnection | null
+ * }} GitHubPullRequestSubject
+ * @typedef {{
+ *   __typename: 'Issue',
+ *   id: string,
+ *   state: string,
+ *   stateReason: string | null,
+ *   author: GitHubActor | null
+ * }} GitHubIssueSubject
+ * @typedef {{
+ *   __typename: 'CheckSuite',
+ *   status: string | null,
+ *   conclusion: string | null,
+ *   commit: { id: string } | null
+ * }} GitHubCheckSuiteSubject
+ * @typedef {{
+ *   __typename: 'Release',
+ *   tagName: string,
+ *   isPrerelease: boolean,
+ *   tagCommit: { id: string } | null
+ * }} GitHubReleaseSubject
+ * @typedef {{
+ *   __typename: 'Discussion',
+ *   id: string,
+ *   isAnswered: boolean,
+ *   stateReason: string | null
+ * }} GitHubDiscussionSubject
+ * @typedef {GitHubPullRequestSubject | GitHubIssueSubject | GitHubCheckSuiteSubject | GitHubReleaseSubject | GitHubDiscussionSubject} GitHubNotificationSubject
+ * @typedef {{
+ *   nameWithOwner: string,
+ *   name: string,
+ *   owner: GitHubActor | null
+ * }} GitHubRepositoryList
+ * @typedef {{
+ *   id: string,
+ *   title: string,
+ *   threadType: string,
+ *   url: string,
+ *   reason: string | null,
+ *   isUnread: boolean,
+ *   isSaved: boolean,
+ *   lastUpdatedAt: string,
+ *   optionalSubject: GitHubNotificationSubject | null,
+ *   optionalList: GitHubRepositoryList | null,
+ *   tags?: string[]
+ * }} GitHubNotificationNode
+ */
+
 class GitHubNotifications {
   #cache = new Map()
   #lastFullRefreshAt = 0
@@ -13,8 +77,12 @@ class GitHubNotifications {
     return createHash('md5').update(JSON.stringify(notification)).digest('hex')
   }
 
+  /**
+   * @returns {Promise<Map<string, GitHubNotificationNode>>}
+   */
   async #fetchAllPages() {
     const gql = getGraphql()
+    /** @type {Map<string, GitHubNotificationNode>} */
     const all = new Map()
     let cursor = null
 
@@ -33,6 +101,9 @@ class GitHubNotifications {
     return all
   }
 
+  /**
+   * @returns {Promise<GitHubNotificationNode[]>}
+   */
   async #fetchFirstPage() {
     const gql = getGraphql()
     const data = await gql(NOTIFICATION_QUERY, { cursor: null })
