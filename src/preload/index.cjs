@@ -24,6 +24,10 @@ contextBridge.exposeInMainWorld('api', {
 
   refreshNow: () => ipcRenderer.invoke('notifications:refresh'),
 
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+
+  updateSettings: (settings) => ipcRenderer.invoke('settings:update', settings),
+
   setToken: (token) => ipcRenderer.invoke('auth:setToken', token),
 
   hasToken: () => ipcRenderer.invoke('auth:hasToken'),

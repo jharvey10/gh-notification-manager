@@ -1,5 +1,5 @@
 import { GitHubNotifications } from './github/GitHubNotifications.js'
-import { runPipeline } from './pipeline/runner.js'
+import { Pipeline } from './pipeline/Pipeline.js'
 
 const POLL_INTERVAL_MS = 60_000
 
@@ -8,11 +8,13 @@ class NotificationPoller {
   #stopped = false
   #notifications = new GitHubNotifications()
   #store
+  #preferencesStore
 
-  constructor({ store }) {
+  constructor({ store, preferencesStore }) {
     console.log('constructed new notification poller')
 
     this.#store = store
+    this.#preferencesStore = preferencesStore
   }
 
   async #poll({ shouldNotify = false } = {}) {
@@ -20,25 +22,22 @@ class NotificationPoller {
 
     try {
       const updates = await this.#notifications.fetchNotifications()
+      const userPreferences = this.#preferencesStore.get()
+      const shouldSendOsNotifications = shouldNotify && userPreferences.osNotificationsEnabled
 
       if (this.#stopped) {
         return
       }
 
-      const results = []
+      const pipeline = new Pipeline({
+        userPreferences,
+        shouldNotify: shouldSendOsNotifications,
+        invalidateCacheEntries: (ids) => this.#notifications.invalidate(ids)
+      })
+      const results = await pipeline.run(updates)
 
-      for (const [id, thread] of updates) {
-        if (thread === null) {
-          results.push([id, null])
-          continue
-        }
-
-        thread.tags = []
-        const tagged = await runPipeline(thread, { shouldNotify })
-        if (this.#stopped) {
-          return
-        }
-        results.push([tagged.id, tagged])
+      if (this.#stopped) {
+        return
       }
 
       if (results.length > 0) {

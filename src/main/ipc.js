@@ -12,7 +12,7 @@ import { NotificationPoller } from './NotificationPoller.js'
 import { resetClients } from './github/client.js'
 import { findSubscribableId } from '../shared/findSubscribableId.js'
 
-function registerIpcHandlers({ store, poller: initialPoller }) {
+function registerIpcHandlers({ store, preferencesStore, poller: initialPoller }) {
   let poller = initialPoller
 
   ipcMain.handle('shell:openExternal', (_event, url) => {
@@ -104,8 +104,16 @@ function registerIpcHandlers({ store, poller: initialPoller }) {
   ipcMain.handle('notifications:refresh', async () => {
     poller?.stop()
     store.clear()
-    poller = new NotificationPoller({ store })
+    poller = new NotificationPoller({ store, preferencesStore })
     await poller.start()
+  })
+
+  ipcMain.handle('settings:get', () => {
+    return preferencesStore.get()
+  })
+
+  ipcMain.handle('settings:update', (_event, partialSettings) => {
+    return preferencesStore.update(partialSettings)
   })
 
   ipcMain.handle('auth:hasToken', () => {
@@ -116,8 +124,8 @@ function registerIpcHandlers({ store, poller: initialPoller }) {
     auth.saveToken(token)
     poller?.stop()
     resetClients()
-    poller = new NotificationPoller({ store })
-    await poller.start()
+    poller = new NotificationPoller({ store, preferencesStore })
+    void poller.start() // Don't await. Let the UI refresh on notification change.
   })
 
   ipcMain.handle('auth:clearToken', () => {
