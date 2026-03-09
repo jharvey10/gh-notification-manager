@@ -14,6 +14,7 @@ export async function autoDoneProcessor(notification, { userPreferences, invalid
   }
 
   try {
+    console.log('Marking notification as done:', notification.id)
     await markThreadsAsDone([notification.id])
     invalidateCacheEntries?.([notification.id])
     return null

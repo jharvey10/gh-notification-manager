@@ -27,6 +27,16 @@ export function AutoDoneSection({
         </Button>
       }
     >
+      <label className="label cursor-pointer justify-start gap-3 rounded-box border border-base-300 px-4 py-3">
+        <input
+          type="checkbox"
+          className="toggle toggle-primary"
+          checked={autoMarkDoneEnabled}
+          onChange={(event) => onAutoMarkDoneEnabledChange(event.target.checked)}
+        />
+        <span className="label-text">Enable auto-done</span>
+      </label>
+
       <label className="form-control flex flex-col gap-2">
         <span className="text-sm font-medium">Age threshold (days)</span>
         <input
@@ -34,6 +44,7 @@ export function AutoDoneSection({
           min={SETTINGS_LIMITS.minDays}
           max={SETTINGS_LIMITS.maxDays}
           className="input input-bordered w-full max-w-xs"
+          disabled={!autoMarkDoneEnabled}
           value={autoMarkDoneDays}
           onChange={(event) => onAutoMarkDoneDaysChange(event.target.value)}
         />

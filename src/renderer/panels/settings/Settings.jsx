@@ -13,7 +13,10 @@ export function Settings({ setPanelState }) {
   const [savingOsNotifications, setSavingOsNotifications] = useState(false)
   const [savingAutoMarkDone, setSavingAutoMarkDone] = useState(false)
   const [savingOlderWindow, setSavingOlderWindow] = useState(false)
-  const [osNotificationsEnabled, setOsNotificationsEnabled] = useState(settings.osNotificationsEnabled)
+  const [toast, setToast] = useState(null)
+  const [osNotificationsEnabled, setOsNotificationsEnabled] = useState(
+    settings.osNotificationsEnabled
+  )
   const [autoMarkDoneEnabled, setAutoMarkDoneEnabled] = useState(settings.autoMarkDoneEnabled)
   const [autoMarkDoneDays, setAutoMarkDoneDays] = useState(String(settings.autoMarkDoneDays))
   const [olderThanDays, setOlderThanDays] = useState(String(settings.olderThanDays))
@@ -25,10 +28,29 @@ export function Settings({ setPanelState }) {
     setOlderThanDays(String(settings.olderThanDays))
   }, [settings])
 
+  useEffect(() => {
+    if (!toast) {
+      return undefined
+    }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      setToast(null)
+    }, 2500)
+
+    return () => {
+      globalThis.clearTimeout(timeoutId)
+    }
+  }, [toast])
+
+  const showSavedToast = (message) => {
+    setToast({ id: Date.now(), message })
+  }
+
   const handleSaveOsNotifications = async () => {
     setSavingOsNotifications(true)
     try {
       await updateSettings({ osNotificationsEnabled })
+      showSavedToast('OS notifications saved')
     } finally {
       setSavingOsNotifications(false)
     }
@@ -41,7 +63,11 @@ export function Settings({ setPanelState }) {
         autoMarkDoneEnabled,
         autoMarkDoneDays
       })
-      await globalThis.api.refreshNow()
+      if (autoMarkDoneEnabled) {
+        showSavedToast('Auto-done settings saved. Cleanup will run in the background.')
+      } else {
+        showSavedToast('Auto-done settings saved.')
+      }
     } finally {
       setSavingAutoMarkDone(false)
     }
@@ -51,6 +77,7 @@ export function Settings({ setPanelState }) {
     setSavingOlderWindow(true)
     try {
       await updateSettings({ olderThanDays })
+      showSavedToast('Older section settings saved')
     } finally {
       setSavingOlderWindow(false)
     }
@@ -71,41 +98,51 @@ export function Settings({ setPanelState }) {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-6 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-3xl">Settings</h2>
-          <p className="text-base-content/70">Configure application settings.</p>
-        </div>
-        <Button onClick={() => setPanelState(PanelState.DASHBOARD)}>&larr; Back</Button>
+    <>
+      <div className="toast z-50">
+        {toast ? (
+          <div className="alert alert-success shadow-lg">
+            <span>{toast.message}</span>
+          </div>
+        ) : null}
       </div>
 
-      <AutoDoneSection
-        autoMarkDoneEnabled={autoMarkDoneEnabled}
-        autoMarkDoneDays={autoMarkDoneDays}
-        savingAutoMarkDone={savingAutoMarkDone}
-        onAutoMarkDoneEnabledChange={setAutoMarkDoneEnabled}
-        onAutoMarkDoneDaysChange={setAutoMarkDoneDays}
-        onSave={handleSaveAutoMarkDone}
-      />
+      <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-6 p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-3xl">Settings</h2>
+            <p className="text-base-content/70">Configure application settings.</p>
+          </div>
+          <Button onClick={() => setPanelState(PanelState.DASHBOARD)}>&larr; Back</Button>
+        </div>
 
-      <OsNotificationsSection
-        osNotificationsEnabled={osNotificationsEnabled}
-        savingOsNotifications={savingOsNotifications}
-        onOsNotificationsEnabledChange={setOsNotificationsEnabled}
-        onSave={handleSaveOsNotifications}
-        onTestNotification={handleTestNotification}
-      />
+        <AutoDoneSection
+          autoMarkDoneEnabled={autoMarkDoneEnabled}
+          autoMarkDoneDays={autoMarkDoneDays}
+          savingAutoMarkDone={savingAutoMarkDone}
+          onAutoMarkDoneEnabledChange={setAutoMarkDoneEnabled}
+          onAutoMarkDoneDaysChange={setAutoMarkDoneDays}
+          onSave={handleSaveAutoMarkDone}
+        />
 
-      <OlderSectionSettings
-        olderThanDays={olderThanDays}
-        savingOlderWindow={savingOlderWindow}
-        onOlderThanDaysChange={setOlderThanDays}
-        onSave={handleSaveOlderWindow}
-      />
+        <OsNotificationsSection
+          osNotificationsEnabled={osNotificationsEnabled}
+          savingOsNotifications={savingOsNotifications}
+          onOsNotificationsEnabledChange={setOsNotificationsEnabled}
+          onSave={handleSaveOsNotifications}
+          onTestNotification={handleTestNotification}
+        />
 
-      <AuthTokenSection onChangeToken={handleChangeToken} onClearToken={handleClearToken} />
-    </div>
+        <OlderSectionSettings
+          olderThanDays={olderThanDays}
+          savingOlderWindow={savingOlderWindow}
+          onOlderThanDaysChange={setOlderThanDays}
+          onSave={handleSaveOlderWindow}
+        />
+
+        <AuthTokenSection onChangeToken={handleChangeToken} onClearToken={handleClearToken} />
+      </div>
+    </>
   )
 }
 

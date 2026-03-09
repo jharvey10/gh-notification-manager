@@ -12,7 +12,7 @@ export function OlderSectionSettings({
 }) {
   return (
     <SettingsSection
-      title="Older section"
+      title="Older notifications"
       description={
         <span>
           Choose when notifications move into the collapsible <strong>Older</strong> section.

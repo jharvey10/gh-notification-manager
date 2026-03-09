@@ -17,7 +17,7 @@ export function OsNotificationsSection({
       actions={
         <>
           <Button disabled={savingOsNotifications} onClick={onSave}>
-            {savingOsNotifications ? 'Saving...' : 'Save OS notifications'}
+            {savingOsNotifications ? 'Saving...' : 'Save'}
           </Button>
           <Button onClick={onTestNotification}>Test notification</Button>
         </>
