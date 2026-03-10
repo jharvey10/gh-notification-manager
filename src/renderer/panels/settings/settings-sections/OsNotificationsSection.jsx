@@ -7,6 +7,7 @@ import { SettingsSection } from '../SettingsSection'
 export function OsNotificationsSection({
   settings,
   savingOsNotifications,
+  dirty,
   onSettingChange,
   onSave,
   onTestNotification
@@ -17,7 +18,7 @@ export function OsNotificationsSection({
       description="Control which GitHub events trigger desktop notifications."
       actions={
         <>
-          <Button disabled={savingOsNotifications} onClick={onSave}>
+          <Button disabled={!dirty || savingOsNotifications} onClick={onSave}>
             {savingOsNotifications ? 'Saving...' : 'Save'}
           </Button>
           <Button onClick={onTestNotification}>Test notification</Button>
@@ -66,6 +67,7 @@ OsNotificationsSection.propTypes = {
     osNotifyOnAllNew: PropTypes.bool.isRequired
   }).isRequired,
   savingOsNotifications: PropTypes.bool.isRequired,
+  dirty: PropTypes.bool.isRequired,
   onSettingChange: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   onTestNotification: PropTypes.func.isRequired

@@ -153,7 +153,8 @@ export function useFilters(notifications) {
 
       if (unreadOnly && !n.isUnread) return false
       if (lowerText) {
-        const haystack = `${n.title} ${repo}`.toLowerCase()
+        const author = n.optionalSubject?.author?.login ?? ''
+        const haystack = `${n.title} ${repo} ${author}`.toLowerCase()
         if (!haystack.includes(lowerText)) return false
       }
       if (includedTags.size > 0) {

@@ -8,6 +8,7 @@ export function AutoDoneSection({
   autoMarkDoneEnabled,
   autoMarkDoneDays,
   savingAutoMarkDone,
+  dirty,
   onAutoMarkDoneEnabledChange,
   onAutoMarkDoneDaysChange,
   onSave
@@ -22,7 +23,7 @@ export function AutoDoneSection({
         </span>
       }
       actions={
-        <Button disabled={savingAutoMarkDone} onClick={onSave}>
+        <Button disabled={!dirty || savingAutoMarkDone} onClick={onSave}>
           {savingAutoMarkDone ? 'Saving...' : 'Save'}
         </Button>
       }
@@ -57,6 +58,7 @@ AutoDoneSection.propTypes = {
   autoMarkDoneEnabled: PropTypes.bool.isRequired,
   autoMarkDoneDays: PropTypes.string.isRequired,
   savingAutoMarkDone: PropTypes.bool.isRequired,
+  dirty: PropTypes.bool.isRequired,
   onAutoMarkDoneEnabledChange: PropTypes.func.isRequired,
   onAutoMarkDoneDaysChange: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired

@@ -7,6 +7,7 @@ import { SettingsSection } from '../SettingsSection'
 export function OlderSectionSettings({
   olderThanDays,
   savingOlderWindow,
+  dirty,
   onOlderThanDaysChange,
   onSave
 }) {
@@ -19,7 +20,7 @@ export function OlderSectionSettings({
         </span>
       }
       actions={
-        <Button disabled={savingOlderWindow} onClick={onSave}>
+        <Button disabled={!dirty || savingOlderWindow} onClick={onSave}>
           {savingOlderWindow ? 'Saving...' : 'Save'}
         </Button>
       }
@@ -42,6 +43,7 @@ export function OlderSectionSettings({
 OlderSectionSettings.propTypes = {
   olderThanDays: PropTypes.string.isRequired,
   savingOlderWindow: PropTypes.bool.isRequired,
+  dirty: PropTypes.bool.isRequired,
   onOlderThanDaysChange: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired
 }

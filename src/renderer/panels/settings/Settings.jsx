@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import { Button } from '../../components/Button'
 import { useSettings } from '../../hooks/useSettings'
-import { pickOSSettings } from '../../../shared/settings.js'
+import { pickOSSettings, OS_NOTIFICATION_KEYS } from '../../../shared/settings.js'
 import { PanelState } from '../../utils/PanelState'
 import { AutoDoneSection } from './settings-sections/AutoDoneSection'
 import { AuthTokenSection } from './settings-sections/AuthTokenSection'
@@ -43,6 +43,26 @@ export function Settings({ setPanelState }) {
 
   const showSavedToast = (message) => {
     setToast({ id: Date.now(), message })
+  }
+
+  const sectionDirty = useMemo(() => {
+    const savedOs = pickOSSettings(settings)
+    return {
+      osNotifications: OS_NOTIFICATION_KEYS.some((key) => osSettings[key] !== savedOs[key]),
+      autoDone:
+        autoMarkDoneEnabled !== settings.autoMarkDoneEnabled ||
+        autoMarkDoneDays !== String(settings.autoMarkDoneDays),
+      older: olderThanDays !== String(settings.olderThanDays)
+    }
+  }, [osSettings, autoMarkDoneEnabled, autoMarkDoneDays, olderThanDays, settings])
+
+  const isDirty = sectionDirty.osNotifications || sectionDirty.autoDone || sectionDirty.older
+
+  const handleBack = () => {
+    if (isDirty && !globalThis.confirm('You have unsaved changes. Leave without saving?')) {
+      return
+    }
+    setPanelState(PanelState.DASHBOARD)
   }
 
   const handleOSSettingChange = (key, value) => {
@@ -86,11 +106,6 @@ export function Settings({ setPanelState }) {
     }
   }
 
-  const handleChangeToken = async () => {
-    await globalThis.api.clearToken()
-    setPanelState(PanelState.TOKEN_PROMPT)
-  }
-
   const handleClearToken = async () => {
     await globalThis.api.clearToken()
     setPanelState(PanelState.TOKEN_PROMPT)
@@ -116,13 +131,14 @@ export function Settings({ setPanelState }) {
             <h2 className="text-3xl">Settings</h2>
             <p className="text-base-content/70">Configure application settings.</p>
           </div>
-          <Button onClick={() => setPanelState(PanelState.DASHBOARD)}>&larr; Back</Button>
+          <Button onClick={handleBack}>&larr; Back</Button>
         </div>
 
         <AutoDoneSection
           autoMarkDoneEnabled={autoMarkDoneEnabled}
           autoMarkDoneDays={autoMarkDoneDays}
           savingAutoMarkDone={savingAutoMarkDone}
+          dirty={sectionDirty.autoDone}
           onAutoMarkDoneEnabledChange={setAutoMarkDoneEnabled}
           onAutoMarkDoneDaysChange={setAutoMarkDoneDays}
           onSave={handleSaveAutoMarkDone}
@@ -131,6 +147,7 @@ export function Settings({ setPanelState }) {
         <OlderSectionSettings
           olderThanDays={olderThanDays}
           savingOlderWindow={savingOlderWindow}
+          dirty={sectionDirty.older}
           onOlderThanDaysChange={setOlderThanDays}
           onSave={handleSaveOlderWindow}
         />
@@ -138,12 +155,13 @@ export function Settings({ setPanelState }) {
         <OsNotificationsSection
           settings={osSettings}
           savingOsNotifications={savingOsNotifications}
+          dirty={sectionDirty.osNotifications}
           onSettingChange={handleOSSettingChange}
           onSave={handleSaveOsNotifications}
           onTestNotification={handleTestNotification}
         />
 
-        <AuthTokenSection onChangeToken={handleChangeToken} onClearToken={handleClearToken} />
+        <AuthTokenSection onClearToken={handleClearToken} />
       </div>
     </>
   )
