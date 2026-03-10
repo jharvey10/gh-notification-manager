@@ -1,9 +1,34 @@
 const OS_NOTIFICATION_RULES = Object.freeze([
-  { key: 'osNotifyOnDirectMention', label: 'Direct mentions', description: 'Notify when you are @mentioned', defaultValue: true },
-  { key: 'osNotifyOnDirectReviewRequest', label: 'Review requests', description: 'Notify when you are requested as a reviewer', defaultValue: true },
-  { key: 'osNotifyOnDirectAssignment', label: 'Assignments', description: 'Notify when you are assigned', defaultValue: true },
-  { key: 'osNotifyOnSavedThreadActivity', label: 'Saved threads', description: 'Notify on any update to threads you have saved', defaultValue: false },
-  { key: 'osNotifyOnAllNew', label: 'All activity', description: 'Notify on every new or updated notification', defaultValue: false }
+  {
+    key: 'osNotifyOnDirectMention',
+    label: 'Direct mentions',
+    description: 'Notify when you are @mentioned',
+    defaultValue: true
+  },
+  {
+    key: 'osNotifyOnDirectReviewRequest',
+    label: 'Review requests',
+    description: 'Notify when you are requested as a reviewer',
+    defaultValue: true
+  },
+  {
+    key: 'osNotifyOnDirectAssignment',
+    label: 'Assignments',
+    description: 'Notify when you are assigned',
+    defaultValue: true
+  },
+  {
+    key: 'osNotifyOnSavedThreadActivity',
+    label: 'Saved threads',
+    description: 'Notify on any update to threads you have saved',
+    defaultValue: false
+  },
+  {
+    key: 'osNotifyOnAllNew',
+    label: 'All activity',
+    description: 'Notify on every new or updated notification',
+    defaultValue: false
+  }
 ])
 
 const OS_NOTIFICATION_KEYS = Object.freeze([
@@ -42,14 +67,20 @@ function sanitizeSettings(settings = {}, fallbackSettings = DEFAULT_SETTINGS) {
     sanitized[key] = sanitizeBool(settings[key], fallbackSettings[key])
   }
 
-  sanitized.autoMarkDoneEnabled = sanitizeBool(settings.autoMarkDoneEnabled, fallbackSettings.autoMarkDoneEnabled)
-  sanitized.autoMarkDoneDays = sanitizeDayCount(settings.autoMarkDoneDays, fallbackSettings.autoMarkDoneDays)
+  sanitized.autoMarkDoneEnabled = sanitizeBool(
+    settings.autoMarkDoneEnabled,
+    fallbackSettings.autoMarkDoneEnabled
+  )
+  sanitized.autoMarkDoneDays = sanitizeDayCount(
+    settings.autoMarkDoneDays,
+    fallbackSettings.autoMarkDoneDays
+  )
   sanitized.olderThanDays = sanitizeDayCount(settings.olderThanDays, fallbackSettings.olderThanDays)
 
   return sanitized
 }
 
-function pickOsSettings(source) {
+function pickOSSettings(source) {
   const result = {}
   for (const key of OS_NOTIFICATION_KEYS) {
     result[key] = source[key]
@@ -57,4 +88,11 @@ function pickOsSettings(source) {
   return result
 }
 
-export { DEFAULT_SETTINGS, SETTINGS_LIMITS, OS_NOTIFICATION_RULES, OS_NOTIFICATION_KEYS, sanitizeSettings, pickOsSettings }
+export {
+  DEFAULT_SETTINGS,
+  SETTINGS_LIMITS,
+  OS_NOTIFICATION_RULES,
+  OS_NOTIFICATION_KEYS,
+  sanitizeSettings,
+  pickOSSettings
+}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { Button } from '../../components/Button'
 import { useSettings } from '../../hooks/useSettings'
-import { pickOsSettings } from '../../../shared/settings.js'
+import { pickOSSettings } from '../../../shared/settings.js'
 import { PanelState } from '../../utils/PanelState'
 import { AutoDoneSection } from './settings-sections/AutoDoneSection'
 import { AuthTokenSection } from './settings-sections/AuthTokenSection'
@@ -15,13 +15,13 @@ export function Settings({ setPanelState }) {
   const [savingAutoMarkDone, setSavingAutoMarkDone] = useState(false)
   const [savingOlderWindow, setSavingOlderWindow] = useState(false)
   const [toast, setToast] = useState(null)
-  const [osSettings, setOsSettings] = useState(() => pickOsSettings(settings))
+  const [osSettings, setOSSettings] = useState(() => pickOSSettings(settings))
   const [autoMarkDoneEnabled, setAutoMarkDoneEnabled] = useState(settings.autoMarkDoneEnabled)
   const [autoMarkDoneDays, setAutoMarkDoneDays] = useState(String(settings.autoMarkDoneDays))
   const [olderThanDays, setOlderThanDays] = useState(String(settings.olderThanDays))
 
   useEffect(() => {
-    setOsSettings(pickOsSettings(settings))
+    setOSSettings(pickOSSettings(settings))
     setAutoMarkDoneEnabled(settings.autoMarkDoneEnabled)
     setAutoMarkDoneDays(String(settings.autoMarkDoneDays))
     setOlderThanDays(String(settings.olderThanDays))
@@ -45,8 +45,8 @@ export function Settings({ setPanelState }) {
     setToast({ id: Date.now(), message })
   }
 
-  const handleOsSettingChange = (key, value) => {
-    setOsSettings((prev) => ({ ...prev, [key]: value }))
+  const handleOSSettingChange = (key, value) => {
+    setOSSettings((prev) => ({ ...prev, [key]: value }))
   }
 
   const handleSaveOsNotifications = async () => {
@@ -138,7 +138,7 @@ export function Settings({ setPanelState }) {
         <OsNotificationsSection
           settings={osSettings}
           savingOsNotifications={savingOsNotifications}
-          onSettingChange={handleOsSettingChange}
+          onSettingChange={handleOSSettingChange}
           onSave={handleSaveOsNotifications}
           onTestNotification={handleTestNotification}
         />
