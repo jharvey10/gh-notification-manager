@@ -1,10 +1,10 @@
 /**
- * Tags review_requested notifications as either direct_review
- * (you personally) or team_review (one of your teams).
+ * Tags notifications with direct_review (you personally) or
+ * team_review (one of your teams) based on the PR's current review
+ * request list — regardless of what notification.reason reports,
+ * since GitHub only surfaces the single most "important" reason.
  */
 export async function reviewTypeTagProcessor(notification, context) {
-  if (notification.reason?.toLowerCase() !== 'review_requested') return notification
-
   const nodes = notification.optionalSubject?.reviewRequests?.nodes
   if (!Array.isArray(nodes)) return notification
 
@@ -19,6 +19,8 @@ export async function reviewTypeTagProcessor(notification, context) {
     }
   }
 
-  notification.tags = [...new Set([...(notification.tags ?? []), ...tags])]
+  if (tags.length > 0) {
+    notification.tags = [...new Set([...(notification.tags ?? []), ...tags])]
+  }
   return notification
 }
