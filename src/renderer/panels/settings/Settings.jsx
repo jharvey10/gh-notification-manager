@@ -125,19 +125,19 @@ export function Settings({ setPanelState }) {
           onSave={handleSaveAutoMarkDone}
         />
 
+        <OlderSectionSettings
+          olderThanDays={olderThanDays}
+          savingOlderWindow={savingOlderWindow}
+          onOlderThanDaysChange={setOlderThanDays}
+          onSave={handleSaveOlderWindow}
+        />
+
         <OsNotificationsSection
           osNotificationsEnabled={osNotificationsEnabled}
           savingOsNotifications={savingOsNotifications}
           onOsNotificationsEnabledChange={setOsNotificationsEnabled}
           onSave={handleSaveOsNotifications}
           onTestNotification={handleTestNotification}
-        />
-
-        <OlderSectionSettings
-          olderThanDays={olderThanDays}
-          savingOlderWindow={savingOlderWindow}
-          onOlderThanDaysChange={setOlderThanDays}
-          onSave={handleSaveOlderWindow}
         />
 
         <AuthTokenSection onChangeToken={handleChangeToken} onClearToken={handleClearToken} />
