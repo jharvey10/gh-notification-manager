@@ -10,6 +10,12 @@ contextBridge.exposeInMainWorld('api', {
     return () => ipcRenderer.removeListener('notifications:updated', handler)
   },
 
+  onMainError: (callback) => {
+    const handler = (_event, data) => callback(data)
+    ipcRenderer.on('main:error', handler)
+    return () => ipcRenderer.removeListener('main:error', handler)
+  },
+
   markAsDone: (threadIds) => ipcRenderer.invoke('notifications:markDone', threadIds),
 
   markAsRead: (threadIds) => ipcRenderer.invoke('notifications:markRead', threadIds),

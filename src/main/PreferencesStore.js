@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { app } from 'electron'
 import { DEFAULT_SETTINGS, sanitizeSettings } from '../shared/settings.js'
+import { broadcastError } from './broadcastError.js'
 
 class PreferencesStore {
   #filePath
@@ -19,6 +20,7 @@ class PreferencesStore {
     } catch (err) {
       if (err.code !== 'ENOENT') {
         console.error('Failed to load settings:', err)
+        broadcastError('settings', `Failed to load: ${err.message}`)
       }
       return { ...DEFAULT_SETTINGS }
     }
@@ -30,6 +32,7 @@ class PreferencesStore {
       fs.writeFileSync(this.#filePath, JSON.stringify(this.#settings, null, 2))
     } catch (err) {
       console.error('Failed to save settings:', err)
+      broadcastError('settings', `Failed to save: ${err.message}`)
       throw err
     }
   }

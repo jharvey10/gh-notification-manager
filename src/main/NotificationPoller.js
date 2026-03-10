@@ -1,5 +1,8 @@
 import { GitHubNotifications } from './github/GitHubNotifications.js'
+import { getGraphql } from './github/client.js'
+import { VIEWER_LOGIN_QUERY } from './github/queries/viewer.js'
 import { Pipeline } from './pipeline/Pipeline.js'
+import { broadcastError } from './broadcastError.js'
 
 const POLL_INTERVAL_MS = 60_000
 
@@ -9,6 +12,7 @@ class NotificationPoller {
   #notifications = new GitHubNotifications()
   #store
   #preferencesStore
+  #viewerLogin = null
 
   constructor({ store, preferencesStore }) {
     console.log('constructed new notification poller')
@@ -17,11 +21,22 @@ class NotificationPoller {
     this.#preferencesStore = preferencesStore
   }
 
+  async #resolveViewerLogin() {
+    if (!this.#viewerLogin) {
+      const data = await getGraphql()(VIEWER_LOGIN_QUERY)
+      this.#viewerLogin = data.viewer.login
+    }
+    return this.#viewerLogin
+  }
+
   async #poll({ shouldNotify = false } = {}) {
     console.log('polling notifications')
 
     try {
-      const updates = await this.#notifications.fetchNotifications()
+      const [updates, viewerLogin] = await Promise.all([
+        this.#notifications.fetchNotifications(),
+        this.#resolveViewerLogin()
+      ])
       const userPreferences = this.#preferencesStore.get()
       const shouldSendOsNotifications = shouldNotify && userPreferences.osNotificationsEnabled
 
@@ -32,6 +47,7 @@ class NotificationPoller {
       const pipeline = new Pipeline({
         userPreferences,
         shouldNotify: shouldSendOsNotifications,
+        viewerLogin,
         invalidateCacheEntries: (ids) => this.#notifications.invalidate(ids)
       })
       const results = await pipeline.run(updates)
@@ -47,6 +63,7 @@ class NotificationPoller {
       }
     } catch (err) {
       console.error('Poll failed:', err.message)
+      broadcastError('poller', err.message)
     }
 
     if (this.#stopped) {

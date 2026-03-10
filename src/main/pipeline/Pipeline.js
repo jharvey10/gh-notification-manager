@@ -21,6 +21,7 @@ const DEFAULT_PROCESSORS = Object.freeze([
  * @typedef {{
  *   userPreferences?: { autoMarkDoneEnabled?: boolean },
  *   shouldNotify?: boolean,
+ *   viewerLogin?: string | null,
  *   invalidateCacheEntries?: (ids: string[]) => void,
  *   customProcessors?: Array<(notification: PipelineNotification, context: Record<string, any>) => Promise<PipelineNotification | null> | PipelineNotification | null>
  * }} PipelineOptions
@@ -36,6 +37,7 @@ class Pipeline {
   constructor({
     userPreferences = { autoMarkDoneEnabled: false },
     shouldNotify = false,
+    viewerLogin = null,
     invalidateCacheEntries,
     customProcessors = []
   } = {}) {
@@ -43,6 +45,7 @@ class Pipeline {
     this.#context = {
       userPreferences,
       shouldNotify,
+      viewerLogin,
       invalidateCacheEntries
     }
   }

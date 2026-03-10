@@ -2,73 +2,51 @@ import { createHash } from 'node:crypto'
 import { getGraphql } from './client.js'
 import { NOTIFICATION_QUERY } from './queries/fetchNotifications.js'
 
+/** @typedef {import('./queries/fetchNotifications.js').GitHubNotificationNode} GitHubNotificationNode */
+
 const MAX_NOTIFICATIONS = 1000
 const FULL_REFRESH_INTERVAL_MS = 10 * 60 * 1000
 
-/**
- * @typedef {{ login: string }} GitHubActor
- * @typedef {{ name: string }} GitHubLabel
- * @typedef {{ nodes: GitHubLabel[] }} GitHubLabelConnection
- * @typedef {{ __typename: 'User', login: string } | { __typename: 'Team', slug: string, organization: GitHubActor }} GitHubRequestedReviewer
- * @typedef {{ requestedReviewer: GitHubRequestedReviewer | null }} GitHubReviewRequest
- * @typedef {{ nodes: GitHubReviewRequest[] }} GitHubReviewRequestConnection
- * @typedef {{
- *   __typename: 'PullRequest',
- *   id: string,
- *   state: string,
- *   isDraft: boolean,
- *   merged: boolean,
- *   reviewDecision: string | null,
- *   author: GitHubActor | null,
- *   labels: GitHubLabelConnection | null,
- *   reviewRequests: GitHubReviewRequestConnection | null
- * }} GitHubPullRequestSubject
- * @typedef {{
- *   __typename: 'Issue',
- *   id: string,
- *   state: string,
- *   stateReason: string | null,
- *   author: GitHubActor | null
- * }} GitHubIssueSubject
- * @typedef {{
- *   __typename: 'CheckSuite',
- *   status: string | null,
- *   conclusion: string | null,
- *   commit: { id: string } | null
- * }} GitHubCheckSuiteSubject
- * @typedef {{
- *   __typename: 'Release',
- *   tagName: string,
- *   isPrerelease: boolean,
- *   tagCommit: { id: string } | null
- * }} GitHubReleaseSubject
- * @typedef {{
- *   __typename: 'Discussion',
- *   id: string,
- *   isAnswered: boolean,
- *   stateReason: string | null
- * }} GitHubDiscussionSubject
- * @typedef {GitHubPullRequestSubject | GitHubIssueSubject | GitHubCheckSuiteSubject | GitHubReleaseSubject | GitHubDiscussionSubject} GitHubNotificationSubject
- * @typedef {{
- *   nameWithOwner: string,
- *   name: string,
- *   owner: GitHubActor | null
- * }} GitHubRepositoryList
- * @typedef {{
- *   id: string,
- *   title: string,
- *   threadType: string,
- *   url: string,
- *   reason: string | null,
- *   isUnread: boolean,
- *   isSaved: boolean,
- *   lastUpdatedAt: string,
- *   optionalSubject: GitHubNotificationSubject | null,
- *   optionalList: GitHubRepositoryList | null,
- *   tags?: string[]
- * }} GitHubNotificationNode
- */
+function extractDirectEventTimestamps(node) {
+  const subject = node.optionalSubject
+  if (!subject) return { lastMentionedAt: null, lastAssignedAt: null, lastReviewRequestedAt: null }
 
+  const mentionNode = subject.latestMention?.nodes?.[0]
+  const assignNode = subject.latestAssignment?.nodes?.[0]
+  const reviewNode = subject.latestReviewRequest?.nodes?.[0]
+
+  return {
+    lastMentionedAt: mentionNode?.createdAt ?? null,
+    lastAssignedAt: assignNode?.createdAt ?? null,
+    lastReviewRequestedAt: reviewNode?.createdAt ?? null,
+    mentionedLogin: mentionNode?.actor?.login ?? null,
+    assignedLogin: assignNode?.assignee?.login ?? null,
+    reviewRequestedLogin: reviewNode?.requestedReviewer?.login ?? null
+  }
+}
+
+/**
+ * Fetches GitHub notification threads via GraphQL and figures out what's
+ * actually changed since the last poll.
+ *
+ * The core idea: we keep an in-memory cache of MD5 hashes per thread. On
+ * each poll we compare hashes to find new, changed, and deleted threads,
+ * then only emit those as updates. Most polls are "incremental" — just the
+ * first page of results. Every 10 minutes we do a full paginated fetch to
+ * catch threads that fell off the first page or were removed entirely.
+ *
+ * Alongside each hash we also cache the timestamps of the latest
+ * MentionedEvent, AssignedEvent, and ReviewRequestedEvent from the
+ * thread's timeline. When a thread comes back as changed, we attach both
+ * the previous and current timestamps (as `_directEvents`) so downstream
+ * processors can tell whether a particular direct event (mention,
+ * assignment, review request) is genuinely new vs. already seen. This is
+ * what powers the per-rule OS notification logic. The silent first poll seeds
+ * the cache, and subsequent polls compare against it.
+ *
+ * `invalidate(ids)` lets the rest of the app force a re-fetch for
+ * specific threads (e.g. after marking something as done or read).
+ */
 class GitHubNotifications {
   #cache = new Map()
   #lastFullRefreshAt = 0
@@ -110,29 +88,53 @@ class GitHubNotifications {
     return data.viewer.notificationThreads.nodes
   }
 
+  #enrichWithTimestamps(node, prevEntry) {
+    const curr = extractDirectEventTimestamps(node)
+    const prev = prevEntry
+      ? {
+          lastMentionedAt: prevEntry.lastMentionedAt,
+          lastAssignedAt: prevEntry.lastAssignedAt,
+          lastReviewRequestedAt: prevEntry.lastReviewRequestedAt
+        }
+      : { lastMentionedAt: null, lastAssignedAt: null, lastReviewRequestedAt: null }
+
+    return { ...node, _directEvents: { prev, curr } }
+  }
+
+  #buildCacheEntry(node) {
+    const timestamps = extractDirectEventTimestamps(node)
+    return {
+      hash: this.#hash(node),
+      lastMentionedAt: timestamps.lastMentionedAt,
+      lastAssignedAt: timestamps.lastAssignedAt,
+      lastReviewRequestedAt: timestamps.lastReviewRequestedAt,
+      mentionedLogin: timestamps.mentionedLogin,
+      assignedLogin: timestamps.assignedLogin,
+      reviewRequestedLogin: timestamps.reviewRequestedLogin
+    }
+  }
+
   #reconcileFull(fetched) {
     const updates = new Map()
 
-    // Pass 1: walk cache — find deleted and changed notifications
-    for (const [id, oldHash] of this.#cache) {
+    for (const [id, oldEntry] of this.#cache) {
       const node = fetched.get(id)
       if (!node) {
         updates.set(id, null)
-      } else if (this.#hash(node) !== oldHash) {
-        updates.set(id, node)
+      } else if (this.#hash(node) !== oldEntry.hash) {
+        updates.set(id, this.#enrichWithTimestamps(node, oldEntry))
       }
     }
 
-    // Pass 2: walk fetched — find net-new notifications
     for (const [id, node] of fetched) {
       if (!this.#cache.has(id)) {
-        updates.set(id, node)
+        updates.set(id, this.#enrichWithTimestamps(node, null))
       }
     }
 
     this.#cache.clear()
     for (const [id, node] of fetched) {
-      this.#cache.set(id, this.#hash(node))
+      this.#cache.set(id, this.#buildCacheEntry(node))
     }
 
     this.#lastFullRefreshAt = Date.now()
@@ -158,9 +160,9 @@ class GitHubNotifications {
       const hash = this.#hash(node)
       const cached = this.#cache.get(node.id)
 
-      if (cached !== hash) {
-        updates.set(node.id, node)
-        this.#cache.set(node.id, hash)
+      if (cached?.hash !== hash) {
+        updates.set(node.id, this.#enrichWithTimestamps(node, cached ?? null))
+        this.#cache.set(node.id, this.#buildCacheEntry(node))
       }
     }
 

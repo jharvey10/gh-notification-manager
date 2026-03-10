@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { TokenPrompt } from './panels/token-prompt/TokenPrompt'
 import { Dashboard } from './panels/dashboard/Dashboard'
 import { Settings } from './panels/settings/Settings'
@@ -7,6 +7,12 @@ import { Loading } from './panels/loading/Loading'
 
 export function App() {
   const [panelState, setPanelState] = useState(PanelState.LOADING)
+
+  useEffect(() => {
+    return globalThis.api.onMainError(({ source, message }) => {
+      console.error(`[main/${source}]`, message)
+    })
+  }, [])
 
   useLayoutEffect(() => {
     globalThis.scrollTo?.(0, 0)

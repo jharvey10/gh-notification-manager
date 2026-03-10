@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { Button } from '../../components/Button'
 import { useSettings } from '../../hooks/useSettings'
+import { pickOsSettings } from '../../../shared/settings.js'
 import { PanelState } from '../../utils/PanelState'
 import { AutoDoneSection } from './settings-sections/AutoDoneSection'
 import { AuthTokenSection } from './settings-sections/AuthTokenSection'
@@ -14,15 +15,13 @@ export function Settings({ setPanelState }) {
   const [savingAutoMarkDone, setSavingAutoMarkDone] = useState(false)
   const [savingOlderWindow, setSavingOlderWindow] = useState(false)
   const [toast, setToast] = useState(null)
-  const [osNotificationsEnabled, setOsNotificationsEnabled] = useState(
-    settings.osNotificationsEnabled
-  )
+  const [osSettings, setOsSettings] = useState(() => pickOsSettings(settings))
   const [autoMarkDoneEnabled, setAutoMarkDoneEnabled] = useState(settings.autoMarkDoneEnabled)
   const [autoMarkDoneDays, setAutoMarkDoneDays] = useState(String(settings.autoMarkDoneDays))
   const [olderThanDays, setOlderThanDays] = useState(String(settings.olderThanDays))
 
   useEffect(() => {
-    setOsNotificationsEnabled(settings.osNotificationsEnabled)
+    setOsSettings(pickOsSettings(settings))
     setAutoMarkDoneEnabled(settings.autoMarkDoneEnabled)
     setAutoMarkDoneDays(String(settings.autoMarkDoneDays))
     setOlderThanDays(String(settings.olderThanDays))
@@ -46,10 +45,14 @@ export function Settings({ setPanelState }) {
     setToast({ id: Date.now(), message })
   }
 
+  const handleOsSettingChange = (key, value) => {
+    setOsSettings((prev) => ({ ...prev, [key]: value }))
+  }
+
   const handleSaveOsNotifications = async () => {
     setSavingOsNotifications(true)
     try {
-      await updateSettings({ osNotificationsEnabled })
+      await updateSettings(osSettings)
       showSavedToast('OS notifications saved')
     } finally {
       setSavingOsNotifications(false)
@@ -133,9 +136,9 @@ export function Settings({ setPanelState }) {
         />
 
         <OsNotificationsSection
-          osNotificationsEnabled={osNotificationsEnabled}
+          settings={osSettings}
           savingOsNotifications={savingOsNotifications}
-          onOsNotificationsEnabledChange={setOsNotificationsEnabled}
+          onSettingChange={handleOsSettingChange}
           onSave={handleSaveOsNotifications}
           onTestNotification={handleTestNotification}
         />
