@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { LRUCache } from 'lru-cache'
 import { getGraphql } from './client.js'
 import { NOTIFICATION_QUERY } from './queries/fetchNotifications.js'
 
@@ -49,6 +50,7 @@ function extractDirectEventTimestamps(node) {
  */
 class GitHubNotifications {
   #cache = new Map()
+  #seenTimestamps = new LRUCache({ max: MAX_NOTIFICATIONS })
   #lastFullRefreshAt = 0
 
   #hash(notification) {
@@ -90,11 +92,12 @@ class GitHubNotifications {
 
   #enrichWithTimestamps(node, prevEntry) {
     const curr = extractDirectEventTimestamps(node)
-    const prev = prevEntry
+    const saved = prevEntry ?? this.#seenTimestamps.get(node.id)
+    const prev = saved
       ? {
-          lastMentionedAt: prevEntry.lastMentionedAt,
-          lastAssignedAt: prevEntry.lastAssignedAt,
-          lastReviewRequestedAt: prevEntry.lastReviewRequestedAt
+          lastMentionedAt: saved.lastMentionedAt,
+          lastAssignedAt: saved.lastAssignedAt,
+          lastReviewRequestedAt: saved.lastReviewRequestedAt
         }
       : { lastMentionedAt: null, lastAssignedAt: null, lastReviewRequestedAt: null }
 
@@ -103,6 +106,11 @@ class GitHubNotifications {
 
   #buildCacheEntry(node) {
     const timestamps = extractDirectEventTimestamps(node)
+    this.#seenTimestamps.set(node.id, {
+      lastMentionedAt: timestamps.lastMentionedAt,
+      lastAssignedAt: timestamps.lastAssignedAt,
+      lastReviewRequestedAt: timestamps.lastReviewRequestedAt
+    })
     return {
       hash: this.#hash(node),
       lastMentionedAt: timestamps.lastMentionedAt,

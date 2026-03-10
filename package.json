@@ -59,6 +59,7 @@
   "dependencies": {
     "@octokit/graphql": "^9.0.3",
     "clsx": "^2.1.1",
+    "lru-cache": "^11.2.6",
     "prop-types": "^15.8.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"

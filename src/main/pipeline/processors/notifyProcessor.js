@@ -1,5 +1,5 @@
 import { Notification } from 'electron'
-import { formatNotificationType } from '../../../shared/formatNotificationType.js'
+import { getDisplayableTypeName } from '../../../shared/getDisplayableTypeName.js'
 
 function hasNewDirectEvent(type, directEvents, viewerLogin) {
   const { prev, curr } = directEvents
@@ -28,45 +28,87 @@ function hasNewDirectEvent(type, directEvents, viewerLogin) {
   }
 }
 
-function shouldFireNotification(notification, { userPreferences, viewerLogin }) {
-  const prefs = userPreferences
+const DIRECT_EVENT_LABELS = {
+  mention: 'Mention',
+  reviewRequest: 'Review Request',
+  assignment: 'Assigned'
+}
 
-  if (prefs.osNotifyOnAllNew) {
-    return true
+const GITHUB_REASON_LABELS = {
+  mention: 'Mention',
+  team_mention: 'Team Mention',
+  assign: 'Assigned',
+  author: 'Author Activity',
+  ci_activity: 'CI Activity',
+  comment: 'Comment',
+  state_change: 'State Change',
+  review_requested: 'Review Request',
+  security_alert: 'Security Alert'
+}
+
+function classifyNotificationReason(notification, { userPreferences, viewerLogin }) {
+  const prefs = userPreferences
+  const directEvents = notification._directEvents
+
+  if (directEvents) {
+    if (prefs.osNotifyOnDirectMention && hasNewDirectEvent('mention', directEvents, viewerLogin)) {
+      return { source: 'direct', key: 'mention' }
+    }
+    if (
+      prefs.osNotifyOnDirectReviewRequest &&
+      hasNewDirectEvent('reviewRequest', directEvents, viewerLogin)
+    ) {
+      return { source: 'direct', key: 'reviewRequest' }
+    }
+    if (
+      prefs.osNotifyOnDirectAssignment &&
+      hasNewDirectEvent('assignment', directEvents, viewerLogin)
+    ) {
+      return { source: 'direct', key: 'assignment' }
+    }
   }
 
   if (prefs.osNotifyOnSavedThreadActivity && notification.isSaved) {
-    return true
+    return { source: 'github', key: notification.reason?.toLowerCase() }
   }
 
-  const directEvents = notification._directEvents
-  if (!directEvents) {
-    return false
+  if (prefs.osNotifyOnAllNew) {
+    return { source: 'github', key: notification.reason?.toLowerCase() }
   }
 
-  if (prefs.osNotifyOnDirectMention && hasNewDirectEvent('mention', directEvents, viewerLogin)) {
-    return true
-  }
+  return null
+}
 
-  if (prefs.osNotifyOnDirectReviewRequest && hasNewDirectEvent('reviewRequest', directEvents, viewerLogin)) {
-    return true
-  }
+function subjectSuffix(subject) {
+  const typeName = getDisplayableTypeName(subject?.__typename)
+  if (!typeName) return ''
+  const num = subject.number
+  return num ? `${typeName} #${num}` : typeName
+}
 
-  if (prefs.osNotifyOnDirectAssignment && hasNewDirectEvent('assignment', directEvents, viewerLogin)) {
-    return true
-  }
-
-  return false
+function buildNotificationTitle(reason, notification) {
+  const label =
+    reason.source === 'direct' ? DIRECT_EVENT_LABELS[reason.key] : GITHUB_REASON_LABELS[reason.key]
+  const suffix = subjectSuffix(notification.optionalSubject)
+  const prefix = label ?? 'Activity'
+  return suffix ? `${prefix} · ${suffix}` : prefix
 }
 
 export async function notifyProcessor(notification, context) {
-  if (!context.shouldNotify || !shouldFireNotification(notification, context)) {
+  if (!context.shouldNotify) {
     return notification
   }
 
+  const reason = classifyNotificationReason(notification, context)
+  if (!reason) {
+    return notification
+  }
+
+  const repo = notification.optionalList?.nameWithOwner ?? ''
+
   new Notification({
-    title: `${formatNotificationType(notification)} [${notification.optionalList?.nameWithOwner ?? 'unknown'}]`,
-    body: `${notification.title}`
+    title: buildNotificationTitle(reason, notification),
+    body: repo ? `[${repo}] ${notification.title}` : notification.title
   }).show()
 
   return notification

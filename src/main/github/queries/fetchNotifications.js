@@ -14,6 +14,7 @@
  * @typedef {{
  *   __typename: 'PullRequest',
  *   id: string,
+ *   number: number,
  *   state: string,
  *   isDraft: boolean,
  *   merged: boolean,
@@ -28,6 +29,7 @@
  * @typedef {{
  *   __typename: 'Issue',
  *   id: string,
+ *   number: number,
  *   state: string,
  *   stateReason: string | null,
  *   author: GitHubActor | null,
@@ -49,6 +51,7 @@
  * @typedef {{
  *   __typename: 'Discussion',
  *   id: string,
+ *   number: number,
  *   isAnswered: boolean,
  *   stateReason: string | null
  * }} GitHubDiscussionSubject
@@ -107,6 +110,7 @@ const NOTIFICATION_QUERY = `
             __typename
             ... on PullRequest {
               id
+              number
               state
               isDraft
               merged
@@ -133,6 +137,7 @@ const NOTIFICATION_QUERY = `
             }
             ... on Issue {
               id
+              number
               state
               stateReason
               author { login }
@@ -155,6 +160,7 @@ const NOTIFICATION_QUERY = `
             }
             ... on Discussion {
               id
+              number
               isAnswered
               stateReason
             }

@@ -72,7 +72,7 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
         <div className="flex shrink-0 items-center gap-4">
           {openerLogin && (
             <div className="badge badge-info badge-sm badge-soft whitespace-nowrap">
-              @{openerLogin}
+              author: @{openerLogin}
             </div>
           )}
           <div

@@ -40,7 +40,7 @@ export function NotificationListContainer({
     <div className="m-1 mb-4 flex flex-col gap-4">
       <section className="bg-base-100">
         <div className="flex items-center gap-2 p-4">
-          <span className="font-medium">Notifications ({current.length})</span>
+          <span className="font-medium">Recent ({current.length})</span>
           <Button
             onClick={() => {
               onSelectGroup(current.map((n) => n.id))
