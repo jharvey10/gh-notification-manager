@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Button } from '../../../components/Button'
+import CloseIcon from '../../../assets/icons/close.svg?react'
 
 export function NotificationDetailsDialog({ dialogRef, title, notification }) {
   const detailsJson = React.useMemo(() => JSON.stringify(notification, null, 2), [notification])
@@ -8,14 +9,9 @@ export function NotificationDetailsDialog({ dialogRef, title, notification }) {
   return (
     <dialog ref={dialogRef} className="modal modal-bottom sm:modal-middle">
       <div className="modal-box w-11/12 max-w-4xl">
-        <form method="dialog">
-          <Button
-            type="submit"
-            className="absolute right-2 top-2"
-            aria-label={`Close details for ${title}`}
-            tooltip="Close"
-          >
-            X
+        <form method="dialog" className="flex justify-end">
+          <Button type="submit" aria-label={`Close details for ${title}`} tooltip="Close">
+            <CloseIcon className="size-4 shrink-0 fill-current" />
           </Button>
         </form>
 

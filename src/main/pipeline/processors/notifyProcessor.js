@@ -1,7 +1,11 @@
 import { Notification } from 'electron'
 import { formatNotificationType } from '../../../shared/formatNotificationType.js'
 
-function shouldDisplayNotification(notification) {
+function shouldFireNotification(notification) {
+  if (!notification.isUnread) {
+    return false
+  }
+
   const { tags } = notification
 
   if (tags.includes('direct_review')) {
@@ -15,7 +19,7 @@ function shouldDisplayNotification(notification) {
 }
 
 export async function notifyProcessor(notification, { shouldNotify }) {
-  if (!shouldNotify || !shouldDisplayNotification(notification)) {
+  if (!shouldNotify || !shouldFireNotification(notification)) {
     return notification
   }
 

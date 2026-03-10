@@ -23,17 +23,12 @@ export function Button({
   tooltip,
   ...buttonProps
 }) {
-  const variantClass = VARIANT_CLASSES[variant]
-  const outlineClass = outline ? 'btn-outline bg-base-100' : ''
-  const disabledClass = disabled ? 'btn-disabled bg-base-content/1 border-base-content/10' : ''
-  const textClass = disabled ? '' : 'text-primary'
   const classes = clsx(
     'btn',
-    variantClass,
+    VARIANT_CLASSES[variant],
+    outline && 'btn-outline',
     tooltip && 'relative tooltip tooltip-bottom hover:z-60 focus:z-60 before:z-60 after:z-60',
-    outlineClass,
-    disabledClass,
-    textClass,
+    disabled && 'btn-disabled bg-base-content/1 border-base-content/10',
     className
   )
   return (
