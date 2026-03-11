@@ -61,7 +61,7 @@ GitHub's flatter built-in categories.
 
 ## Developing
 
-- Node.js 22 or newer
+- Node.js 24 or newer
 - npm
 - A GitHub token with `notifications` and `repo` scopes, or access to a token from `gh auth token`
 
