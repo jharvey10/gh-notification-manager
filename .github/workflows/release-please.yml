@@ -1,0 +1,81 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  build-and-upload:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: mac
+            runs_on: macos-latest
+          - target: win
+            runs_on: windows-latest
+          - target: linux
+            runs_on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build ${{ matrix.target }} package
+        run: npm run dist:${{ matrix.target }}
+
+      - name: Upload release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ needs.release-please.outputs.tag_name }}
+          BUILD_TARGET: ${{ matrix.target }}
+        run: |
+          shopt -s nullglob
+
+          files=()
+          case "$BUILD_TARGET" in
+            mac)
+              files=(release/*.dmg release/*.zip)
+              ;;
+            win)
+              files=(release/*.exe)
+              ;;
+            linux)
+              files=(release/*.AppImage)
+              ;;
+          esac
+
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No release assets found for $BUILD_TARGET"
+            exit 1
+          fi
+
+          gh release upload "$TAG_NAME" "${files[@]}" --clobber

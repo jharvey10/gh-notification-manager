@@ -2,7 +2,7 @@
   "name": "gh-notification-manager",
   "productName": "gh-notification-manager",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "A better GitHub notification experience",
   "main": "src/main/index.js",
   "private": true,
   "type": "module",
@@ -22,7 +22,7 @@
     "name": "Joe Harvey",
     "email": "51208233+jharvey10@users.noreply.github.com"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "build": {
     "appId": "com.jharvey10.gh-notification-manager",
     "productName": "GitHub Notification Manager",
