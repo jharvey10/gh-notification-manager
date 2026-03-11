@@ -63,7 +63,7 @@ jobs:
           files=()
           case "$BUILD_TARGET" in
             mac)
-              files=(release/*.dmg release/*.zip)
+              files=(release/*.dmg)
               ;;
             win)
               files=(release/*.exe)

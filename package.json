@@ -43,8 +43,7 @@
     "mac": {
       "icon": "assets/app-icon.png",
       "target": [
-        "dmg",
-        "zip"
+        "dmg"
       ]
     },
     "win": {
