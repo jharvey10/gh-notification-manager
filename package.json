@@ -14,9 +14,9 @@
     "dev:renderer": "vite",
     "dev:electron": "wait-on tcp:5173 && electron .",
     "build": "vite build",
-    "dist:mac": "npm run build && electron-builder --mac",
-    "dist:win": "npm run build && electron-builder --win",
-    "dist:linux": "npm run build && electron-builder --linux",
+    "dist:mac": "npm run build && electron-builder --mac --publish never",
+    "dist:win": "npm run build && electron-builder --win --publish never",
+    "dist:linux": "npm run build && electron-builder --linux --publish never",
     "start": "electron .",
     "typecheck": "tsc --project tsconfig.json"
   },
@@ -29,6 +29,7 @@
   "build": {
     "appId": "com.jharvey10.gh-notification-manager",
     "productName": "GitHub Notification Manager",
+    "publish": null,
     "directories": {
       "output": "release"
     },
@@ -54,6 +55,7 @@
     },
     "linux": {
       "icon": "assets/app-icon.png",
+      "category": "Utility",
       "target": [
         "AppImage"
       ]
@@ -76,7 +78,7 @@
     "concurrently": "^9.2.1",
     "daisyui": "^5.5.19",
     "electron": "40.6.0",
-    "electron-builder": "^26.8.1",
+    "electron-builder": "^26.8.2",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.2.0",
     "typescript": "^5.9.3",
