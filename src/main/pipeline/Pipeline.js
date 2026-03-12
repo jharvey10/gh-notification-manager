@@ -1,5 +1,6 @@
 import { autoDoneProcessor } from './processors/autoDoneProcessor.js'
 import { notifyProcessor } from './processors/notifyProcessor.js'
+import { activityLabelProcessor } from './processors/activityLabelProcessor.js'
 import { junkTagProcessor } from './processors/junkTagProcessor.js'
 import { reasonTagProcessor } from './processors/reasonTagProcessor.js'
 import { reviewTypeTagProcessor } from './processors/reviewTypeTagProcessor.js'
@@ -9,6 +10,7 @@ const DEFAULT_PROCESSORS = Object.freeze([
   subjectTagProcessor,
   reviewTypeTagProcessor,
   reasonTagProcessor,
+  activityLabelProcessor,
   junkTagProcessor,
   notifyProcessor,
   autoDoneProcessor

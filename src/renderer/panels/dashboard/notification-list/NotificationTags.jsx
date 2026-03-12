@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Badge } from '../../../components/Badge.jsx'
 import clsx from 'clsx'
 
-export function NotificationMetadata({ repo, tags, isUnread }) {
+export function NotificationTags({ repo, tags, isUnread }) {
   return (
     <div className="flex flex-wrap items-center justify-start gap-2">
       <Badge className={clsx('badge-sm badge-primary', !isUnread && 'text-primary/70')}>
@@ -19,7 +19,7 @@ export function NotificationMetadata({ repo, tags, isUnread }) {
   )
 }
 
-NotificationMetadata.propTypes = {
+NotificationTags.propTypes = {
   repo: PropTypes.string.isRequired,
   tags: PropTypes.arrayOf(PropTypes.string).isRequired,
   isUnread: PropTypes.bool.isRequired

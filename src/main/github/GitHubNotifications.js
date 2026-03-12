@@ -8,22 +8,37 @@ import { NOTIFICATION_QUERY } from './queries/fetchNotifications.js'
 const MAX_NOTIFICATIONS = 1000
 const FULL_REFRESH_INTERVAL_MS = 10 * 60 * 1000
 
-function extractDirectEventTimestamps(node) {
+const EVENT_EXTRACTORS = [
+  { key: 'latestComment', type: 'comment', actor: n => n.author?.login, time: n => n.createdAt },
+  { key: 'latestReview', type: 'review', actor: n => n.author?.login, time: n => n.submittedAt, detail: n => n.state },
+  { key: 'latestMention', type: 'mention', actor: n => n.actor?.login, time: n => n.createdAt },
+  { key: 'latestAssignment', type: 'assign', actor: n => n.assignee?.login, time: n => n.createdAt },
+  { key: 'latestReviewRequest', type: 'review_requested', actor: n => n.requestedReviewer?.login, time: n => n.createdAt },
+  { key: 'latestClosedEvent', type: 'closed', actor: n => n.actor?.login, time: n => n.createdAt, detail: n => n.stateReason },
+  { key: 'latestReopenedEvent', type: 'reopened', actor: n => n.actor?.login, time: n => n.createdAt, detail: n => n.stateReason },
+  { key: 'latestMergedEvent', type: 'merged', actor: n => n.actor?.login, time: n => n.createdAt },
+  { key: 'latestReadyForReviewEvent', type: 'ready_for_review', actor: n => n.actor?.login, time: n => n.createdAt },
+  { key: 'latestReviewDismissedEvent', type: 'review_dismissed', actor: n => n.actor?.login, time: n => n.createdAt, detail: n => n.previousReviewState },
+]
+
+function extractLatestEvents(node) {
   const subject = node.optionalSubject
-  if (!subject) return { lastMentionedAt: null, lastAssignedAt: null, lastReviewRequestedAt: null }
+  if (!subject) return []
 
-  const mentionNode = subject.latestMention?.nodes?.[0]
-  const assignNode = subject.latestAssignment?.nodes?.[0]
-  const reviewNode = subject.latestReviewRequest?.nodes?.[0]
-
-  return {
-    lastMentionedAt: mentionNode?.createdAt ?? null,
-    lastAssignedAt: assignNode?.createdAt ?? null,
-    lastReviewRequestedAt: reviewNode?.createdAt ?? null,
-    mentionedLogin: mentionNode?.actor?.login ?? null,
-    assignedLogin: assignNode?.assignee?.login ?? null,
-    reviewRequestedLogin: reviewNode?.requestedReviewer?.login ?? null
+  const events = []
+  for (const { key, type, actor, time, detail } of EVENT_EXTRACTORS) {
+    const eventNode = subject[key]?.nodes?.[0]
+    if (!eventNode) continue
+    const timestamp = time(eventNode)
+    if (!timestamp) continue
+    events.push({
+      type,
+      actor: actor(eventNode) ?? null,
+      timestamp,
+      detail: detail ? (detail(eventNode) ?? null) : null
+    })
   }
+  return events
 }
 
 /**
@@ -36,21 +51,18 @@ function extractDirectEventTimestamps(node) {
  * first page of results. Every 10 minutes we do a full paginated fetch to
  * catch threads that fell off the first page or were removed entirely.
  *
- * Alongside each hash we also cache the timestamps of the latest
- * MentionedEvent, AssignedEvent, and ReviewRequestedEvent from the
- * thread's timeline. When a thread comes back as changed, we attach both
- * the previous and current timestamps (as `_directEvents`) so downstream
- * processors can tell whether a particular direct event (mention,
- * assignment, review request) is genuinely new vs. already seen. This is
- * what powers the per-rule OS notification logic. The silent first poll seeds
- * the cache, and subsequent polls compare against it.
+ * Each notification's timeline events (comment, review, mention, assign,
+ * state change, etc.) are extracted into a uniform list of
+ * `{ type, actor, timestamp, detail }` objects. When a thread changes,
+ * we attach both the previous and current event lists (as `_latestEvents`)
+ * so downstream processors can determine what's new by comparing the two.
  *
  * `invalidate(ids)` lets the rest of the app force a re-fetch for
  * specific threads (e.g. after marking something as done or read).
  */
 class GitHubNotifications {
   #cache = new Map()
-  #seenTimestamps = new LRUCache({ max: MAX_NOTIFICATIONS })
+  #previousEvents = new LRUCache({ max: MAX_NOTIFICATIONS })
   #lastFullRefreshAt = 0
 
   #hash(notification) {
@@ -90,36 +102,21 @@ class GitHubNotifications {
     return data.viewer.notificationThreads.nodes
   }
 
-  #enrichWithTimestamps(node, prevEntry) {
-    const curr = extractDirectEventTimestamps(node)
-    const saved = prevEntry ?? this.#seenTimestamps.get(node.id)
-    const prev = saved
-      ? {
-          lastMentionedAt: saved.lastMentionedAt,
-          lastAssignedAt: saved.lastAssignedAt,
-          lastReviewRequestedAt: saved.lastReviewRequestedAt
-        }
-      : { lastMentionedAt: null, lastAssignedAt: null, lastReviewRequestedAt: null }
+  #enrichWithEvents(node, prevEntry) {
+    const curr = extractLatestEvents(node)
+    const saved = prevEntry ?? this.#previousEvents.get(node.id)
+    const prev = saved?.events ?? []
 
-    return { ...node, _directEvents: { prev, curr } }
+    return {
+      ...node,
+      _latestEvents: { prev, curr }
+    }
   }
 
   #buildCacheEntry(node) {
-    const timestamps = extractDirectEventTimestamps(node)
-    this.#seenTimestamps.set(node.id, {
-      lastMentionedAt: timestamps.lastMentionedAt,
-      lastAssignedAt: timestamps.lastAssignedAt,
-      lastReviewRequestedAt: timestamps.lastReviewRequestedAt
-    })
-    return {
-      hash: this.#hash(node),
-      lastMentionedAt: timestamps.lastMentionedAt,
-      lastAssignedAt: timestamps.lastAssignedAt,
-      lastReviewRequestedAt: timestamps.lastReviewRequestedAt,
-      mentionedLogin: timestamps.mentionedLogin,
-      assignedLogin: timestamps.assignedLogin,
-      reviewRequestedLogin: timestamps.reviewRequestedLogin
-    }
+    const events = extractLatestEvents(node)
+    this.#previousEvents.set(node.id, { events })
+    return { hash: this.#hash(node), events }
   }
 
   #reconcileFull(fetched) {
@@ -130,13 +127,13 @@ class GitHubNotifications {
       if (!node) {
         updates.set(id, null)
       } else if (this.#hash(node) !== oldEntry.hash) {
-        updates.set(id, this.#enrichWithTimestamps(node, oldEntry))
+        updates.set(id, this.#enrichWithEvents(node, oldEntry))
       }
     }
 
     for (const [id, node] of fetched) {
       if (!this.#cache.has(id)) {
-        updates.set(id, this.#enrichWithTimestamps(node, null))
+        updates.set(id, this.#enrichWithEvents(node, null))
       }
     }
 
@@ -169,7 +166,7 @@ class GitHubNotifications {
       const cached = this.#cache.get(node.id)
 
       if (cached?.hash !== hash) {
-        updates.set(node.id, this.#enrichWithTimestamps(node, cached ?? null))
+        updates.set(node.id, this.#enrichWithEvents(node, cached ?? null))
         this.#cache.set(node.id, this.#buildCacheEntry(node))
       }
     }

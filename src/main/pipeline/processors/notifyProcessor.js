@@ -1,31 +1,17 @@
 import { Notification } from 'electron'
 import { getDisplayableTypeName } from '../../../shared/getDisplayableTypeName.js'
 
-function hasNewDirectEvent(type, directEvents, viewerLogin) {
-  const { prev, curr } = directEvents
-
-  switch (type) {
-    case 'mention':
-      return (
-        curr.lastMentionedAt !== null &&
-        curr.lastMentionedAt !== prev.lastMentionedAt &&
-        curr.mentionedLogin === viewerLogin
-      )
-    case 'assignment':
-      return (
-        curr.lastAssignedAt !== null &&
-        curr.lastAssignedAt !== prev.lastAssignedAt &&
-        curr.assignedLogin === viewerLogin
-      )
-    case 'reviewRequest':
-      return (
-        curr.lastReviewRequestedAt !== null &&
-        curr.lastReviewRequestedAt !== prev.lastReviewRequestedAt &&
-        curr.reviewRequestedLogin === viewerLogin
-      )
-    default:
-      return false
+function hasNewEvent(type, latestEvents, viewerLogin) {
+  const { prev, curr } = latestEvents
+  const currEvent = curr.find((e) => e.type === type)
+  if (!currEvent) {
+    return false
   }
+  if (viewerLogin && currEvent.actor !== viewerLogin) {
+    return false
+  }
+  const prevEvent = prev.find((e) => e.type === type)
+  return currEvent.timestamp !== prevEvent?.timestamp
 }
 
 const DIRECT_EVENT_LABELS = {
@@ -48,22 +34,19 @@ const GITHUB_REASON_LABELS = {
 
 function classifyNotificationReason(notification, { userPreferences, viewerLogin }) {
   const prefs = userPreferences
-  const directEvents = notification._directEvents
+  const latestEvents = notification._latestEvents
 
-  if (directEvents) {
-    if (prefs.osNotifyOnDirectMention && hasNewDirectEvent('mention', directEvents, viewerLogin)) {
+  if (latestEvents) {
+    if (prefs.osNotifyOnDirectMention && hasNewEvent('mention', latestEvents, viewerLogin)) {
       return { source: 'direct', key: 'mention' }
     }
     if (
       prefs.osNotifyOnDirectReviewRequest &&
-      hasNewDirectEvent('reviewRequest', directEvents, viewerLogin)
+      hasNewEvent('review_requested', latestEvents, viewerLogin)
     ) {
       return { source: 'direct', key: 'reviewRequest' }
     }
-    if (
-      prefs.osNotifyOnDirectAssignment &&
-      hasNewDirectEvent('assignment', directEvents, viewerLogin)
-    ) {
+    if (prefs.osNotifyOnDirectAssignment && hasNewEvent('assign', latestEvents, viewerLogin)) {
       return { source: 'direct', key: 'assignment' }
     }
   }
@@ -81,7 +64,9 @@ function classifyNotificationReason(notification, { userPreferences, viewerLogin
 
 function subjectSuffix(subject) {
   const typeName = getDisplayableTypeName(subject?.__typename)
-  if (!typeName) return ''
+  if (!typeName) {
+    return ''
+  }
   const num = subject.number
   return num ? `${typeName} #${num}` : typeName
 }

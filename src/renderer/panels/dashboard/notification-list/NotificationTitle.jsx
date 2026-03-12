@@ -3,25 +3,30 @@ import PropTypes from 'prop-types'
 import { clsx } from 'clsx'
 import BookmarkIcon from '../../../assets/icons/bookmark.svg?react'
 
-export function NotificationTitle({ title, url, isUnread, isSaved, onOpen }) {
+export function NotificationTitle({ title, url, isUnread, isSaved, onOpen, subjectRef }) {
   return (
     <div className="flex min-w-0 flex-1 items-center gap-1.5">
       {isSaved && <BookmarkIcon className="fill-primary size-4 shrink-0" />}
 
-      {url && (
-        <button
-          className={clsx(
-            'btn btn-link inline h-auto w-full p-0 m-0 text-left no-underline hover:underline',
-            isUnread ? 'text-base-content' : 'text-base-content/50'
-          )}
-          type="button"
-          onClick={onOpen}
-        >
-          {title}
-        </button>
-      )}
+      <div>
+        {url && (
+          <a
+            className={clsx(
+              'no-underline hover:underline text-sm',
+              !isUnread && 'text-base-content/50'
+            )}
+            type="button"
+            href={url}
+            onClick={onOpen}
+          >
+            {title}
+          </a>
+        )}
 
-      {!url && <span className="font-medium text-base-content/70">{title}</span>}
+        {!url && <span className={clsx('font-medium', titleClassName)}>{title}</span>}
+
+        {subjectRef && <span className="ml-2 text-base-content/50 text-sm">{subjectRef}</span>}
+      </div>
     </div>
   )
 }
@@ -31,5 +36,6 @@ NotificationTitle.propTypes = {
   url: PropTypes.string,
   isUnread: PropTypes.bool.isRequired,
   isSaved: PropTypes.bool,
-  onOpen: PropTypes.func.isRequired
+  onOpen: PropTypes.func.isRequired,
+  subjectRef: PropTypes.string
 }

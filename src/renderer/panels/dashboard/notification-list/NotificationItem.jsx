@@ -5,7 +5,7 @@ import { ActionsMenu } from '../actions-menu/ActionsMenu.jsx'
 import { UnreadMarker } from './UnreadMarker.jsx'
 import { NotificationDetailsDialog } from './NotificationDetailsDialog.jsx'
 import { NotificationTitle } from './NotificationTitle.jsx'
-import { NotificationMetadata } from './NotificationMetadata.jsx'
+import { NotificationTags } from './NotificationTags.jsx'
 import { Button } from '../../../components/Button.jsx'
 import CheckmarkIcon from '../../../assets/icons/checkmark.svg?react'
 import EmailIcon from '../../../assets/icons/email.svg?react'
@@ -16,24 +16,37 @@ import BookmarkFilledIcon from '../../../assets/icons/bookmark-filled.svg?react'
 import InformationSquareIcon from '../../../assets/icons/information-square.svg?react'
 import { findSubscribableId } from '../../../../shared/findSubscribableId.js'
 import { formatTimeAgo } from '../../../../shared/formatTimeAgo.js'
+import { formatNotificationReference } from '../../../../shared/formatNotificationReference.js'
+import { NotificationEventDetails } from './NotificationEventDetails.jsx'
 
 function buildMenuId(id) {
   return id.replaceAll(/[^a-zA-Z0-9_-]/g, '-')
 }
 
 export function NotificationItem({ notification, isSelected, onToggle }) {
-  const { id, title, url, tags, lastUpdatedAt, isUnread, isSaved, optionalList, optionalSubject } =
+  const { id, title, url, tags, activityLabel, lastUpdatedAt, isUnread, isSaved, optionalList } =
     notification
   const repo = optionalList?.nameWithOwner ?? 'unknown'
   const { label: timeLabel, tooltip: timeTooltip } = formatTimeAgo(lastUpdatedAt)
   const menuId = buildMenuId(id)
   const detailsDialogRef = React.useRef(null)
-  const openerLogin = optionalSubject?.author?.login
+  const events = notification._latestEvents?.curr ?? []
+  const mostRecentEvent =
+    events.length > 0 ? events.reduce((a, b) => (a.timestamp >= b.timestamp ? a : b)) : null
+  const eventActor =
+    mostRecentEvent?.type === 'mention'
+      ? events.find((e) => e.type === 'comment')?.actor
+      : (mostRecentEvent?.actor ?? null)
   const canUnsubscribe = findSubscribableId(notification) !== null
+  const subjectRef = formatNotificationReference(notification)
 
-  const handleOpen = () => {
+  const handleOpen = (e) => {
+    e.preventDefault()
+
     globalThis.api.openExternal(url)
-    if (isUnread) globalThis.api.markAsRead([id])
+    if (isUnread) {
+      globalThis.api.markAsRead([id])
+    }
   }
 
   const handleMarkRead = () => globalThis.api.markAsRead([id])
@@ -65,16 +78,18 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
             isUnread={isUnread}
             isSaved={isSaved}
             onOpen={handleOpen}
+            subjectRef={subjectRef}
           />
-          <NotificationMetadata repo={repo} tags={tags} isUnread={isUnread} />
+          <NotificationTags repo={repo} tags={tags} isUnread={isUnread} />
         </div>
 
-        <div className="flex shrink-0 items-center gap-4">
-          {openerLogin && (
-            <div className="badge badge-info badge-sm badge-soft whitespace-nowrap">
-              author: @{openerLogin}
-            </div>
-          )}
+        <div className="flex flex-wrap items-center gap-4">
+          <NotificationEventDetails
+            subjectRef={subjectRef}
+            activityLabel={activityLabel}
+            eventActor={eventActor}
+          />
+
           <div
             className="tooltip tooltip-bottom whitespace-nowrap text-xs text-base-content/60"
             data-tip={timeTooltip}
@@ -141,15 +156,24 @@ NotificationItem.propTypes = {
     title: PropTypes.string.isRequired,
     url: PropTypes.string,
     tags: PropTypes.arrayOf(PropTypes.string).isRequired,
+    activityLabel: PropTypes.string,
     lastUpdatedAt: PropTypes.string.isRequired,
     isUnread: PropTypes.bool.isRequired,
     isSaved: PropTypes.bool,
+    _latestEvents: PropTypes.shape({
+      curr: PropTypes.arrayOf(
+        PropTypes.shape({
+          type: PropTypes.string.isRequired,
+          actor: PropTypes.string,
+          timestamp: PropTypes.string.isRequired
+        })
+      )
+    }),
     optionalSubject: PropTypes.shape({
       id: PropTypes.string,
-      author: PropTypes.shape({
-        login: PropTypes.string
-      }),
+      number: PropTypes.number,
       commit: PropTypes.shape({ id: PropTypes.string }),
+      tagName: PropTypes.string,
       tagCommit: PropTypes.shape({ id: PropTypes.string })
     }),
     optionalList: PropTypes.shape({

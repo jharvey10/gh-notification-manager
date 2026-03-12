@@ -10,9 +10,9 @@ const REASON_TAGS = Object.freeze({
 
 /**
  * Tags notifications based on GitHub's reported reason AND the actual
- * direct-event timeline data. GitHub only surfaces a single "most
- * important" reason per notification, so we cross-check _directEvents
- * to pick up mentions and assignments the reason field may hide.
+ * timeline event data. GitHub only surfaces a single "most important"
+ * reason per notification, so we cross-check _latestEvents to pick up
+ * mentions and assignments the reason field may hide.
  */
 export async function reasonTagProcessor(notification, context) {
   const reason = notification.reason?.toLowerCase()
@@ -28,12 +28,14 @@ export async function reasonTagProcessor(notification, context) {
     }
   }
 
-  const curr = notification._directEvents?.curr
-  if (curr && context.viewerLogin) {
-    if (curr.lastMentionedAt && curr.mentionedLogin === context.viewerLogin) {
+  const events = notification._latestEvents?.curr ?? []
+  if (context.viewerLogin) {
+    const mention = events.find((e) => e.type === 'mention')
+    if (mention && mention.actor === context.viewerLogin) {
       tags.push('direct_mention')
     }
-    if (curr.lastAssignedAt && curr.assignedLogin === context.viewerLogin) {
+    const assign = events.find((e) => e.type === 'assign')
+    if (assign && assign.actor === context.viewerLogin) {
       tags.push('assigned')
     }
   }

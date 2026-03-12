@@ -8,9 +8,24 @@
  * @typedef {{ actor: { login: string }, createdAt: string }} GitHubMentionedEvent
  * @typedef {{ assignee: { login: string }, createdAt: string }} GitHubAssignedEvent
  * @typedef {{ requestedReviewer: { login: string }, createdAt: string }} GitHubReviewRequestedEvent
+ * @typedef {{ actor: { login: string }, createdAt: string, stateReason: string | null }} GitHubClosedEvent
+ * @typedef {{ actor: { login: string }, createdAt: string, stateReason: string | null }} GitHubReopenedEvent
+ * @typedef {{ actor: { login: string }, createdAt: string }} GitHubMergedEvent
+ * @typedef {{ actor: { login: string }, createdAt: string }} GitHubReadyForReviewEvent
+ * @typedef {{ actor: { login: string }, createdAt: string, previousReviewState: string }} GitHubReviewDismissedEvent
+ * @typedef {{ author: GitHubActor | null, createdAt: string }} GitHubComment
+ * @typedef {{ nodes: GitHubComment[] }} GitHubCommentConnection
+ * @typedef {{ author: GitHubActor | null, state: string, submittedAt: string | null }} GitHubPullRequestReview
+ * @typedef {{ nodes: GitHubPullRequestReview[] }} GitHubPullRequestReviewConnection
  * @typedef {{ nodes: GitHubMentionedEvent[] }} GitHubMentionedEventConnection
  * @typedef {{ nodes: GitHubAssignedEvent[] }} GitHubAssignedEventConnection
  * @typedef {{ nodes: GitHubReviewRequestedEvent[] }} GitHubReviewRequestedEventConnection
+ * @typedef {{ nodes: GitHubClosedEvent[] }} GitHubClosedEventConnection
+ * @typedef {{ nodes: GitHubReopenedEvent[] }} GitHubReopenedEventConnection
+ * @typedef {{ nodes: GitHubMergedEvent[] }} GitHubMergedEventConnection
+ * @typedef {{ nodes: GitHubReadyForReviewEvent[] }} GitHubReadyForReviewEventConnection
+ * @typedef {{ nodes: GitHubReviewDismissedEvent[] }} GitHubReviewDismissedEventConnection
+ * @typedef {{ type: string, actor: string | null, timestamp: string, detail: string | null }} LatestEvent
  * @typedef {{
  *   __typename: 'PullRequest',
  *   id: string,
@@ -22,9 +37,16 @@
  *   author: GitHubActor | null,
  *   labels: GitHubLabelConnection | null,
  *   reviewRequests: GitHubReviewRequestConnection | null,
+ *   latestComment: GitHubCommentConnection | null,
+ *   latestReview: GitHubPullRequestReviewConnection | null,
  *   latestMention: GitHubMentionedEventConnection | null,
  *   latestAssignment: GitHubAssignedEventConnection | null,
- *   latestReviewRequest: GitHubReviewRequestedEventConnection | null
+ *   latestReviewRequest: GitHubReviewRequestedEventConnection | null,
+ *   latestClosedEvent: GitHubClosedEventConnection | null,
+ *   latestReopenedEvent: GitHubReopenedEventConnection | null,
+ *   latestMergedEvent: GitHubMergedEventConnection | null,
+ *   latestReadyForReviewEvent: GitHubReadyForReviewEventConnection | null,
+ *   latestReviewDismissedEvent: GitHubReviewDismissedEventConnection | null
  * }} GitHubPullRequestSubject
  * @typedef {{
  *   __typename: 'Issue',
@@ -33,14 +55,17 @@
  *   state: string,
  *   stateReason: string | null,
  *   author: GitHubActor | null,
+ *   latestComment: GitHubCommentConnection | null,
  *   latestMention: GitHubMentionedEventConnection | null,
- *   latestAssignment: GitHubAssignedEventConnection | null
+ *   latestAssignment: GitHubAssignedEventConnection | null,
+ *   latestClosedEvent: GitHubClosedEventConnection | null,
+ *   latestReopenedEvent: GitHubReopenedEventConnection | null
  * }} GitHubIssueSubject
  * @typedef {{
  *   __typename: 'CheckSuite',
  *   status: string | null,
  *   conclusion: string | null,
- *   commit: { id: string } | null
+ *   commit: { id: string, oid: string } | null
  * }} GitHubCheckSuiteSubject
  * @typedef {{
  *   __typename: 'Release',
@@ -53,7 +78,8 @@
  *   id: string,
  *   number: number,
  *   isAnswered: boolean,
- *   stateReason: string | null
+ *   stateReason: string | null,
+ *   latestComment: GitHubCommentConnection | null
  * }} GitHubDiscussionSubject
  * @typedef {GitHubPullRequestSubject | GitHubIssueSubject | GitHubCheckSuiteSubject | GitHubReleaseSubject | GitHubDiscussionSubject} GitHubNotificationSubject
  * @typedef {{
@@ -73,16 +99,9 @@
  *   optionalSubject: GitHubNotificationSubject | null,
  *   optionalList: GitHubRepositoryList | null,
  *   tags?: string[],
- *   _directEvents?: { prev: DirectEventTimestamps, curr: DirectEventTimestamps }
+ *   activityLabel?: string | null,
+ *   _latestEvents?: { prev: LatestEvent[], curr: LatestEvent[] }
  * }} GitHubNotificationNode
- * @typedef {{
- *   lastMentionedAt: string | null,
- *   lastAssignedAt: string | null,
- *   lastReviewRequestedAt: string | null,
- *   mentionedLogin?: string | null,
- *   assignedLogin?: string | null,
- *   reviewRequestedLogin?: string | null
- * }} DirectEventTimestamps
  */
 
 const NOTIFICATION_QUERY = `
@@ -125,6 +144,12 @@ const NOTIFICATION_QUERY = `
                   }
                 }
               }
+              latestComment: comments(last: 1) {
+                nodes { author { login } createdAt }
+              }
+              latestReview: reviews(last: 1) {
+                nodes { author { login } state submittedAt }
+              }
               latestMention: timelineItems(itemTypes: [MENTIONED_EVENT], last: 1) {
                 nodes { ... on MentionedEvent { actor { login } createdAt } }
               }
@@ -134,6 +159,21 @@ const NOTIFICATION_QUERY = `
               latestReviewRequest: timelineItems(itemTypes: [REVIEW_REQUESTED_EVENT], last: 1) {
                 nodes { ... on ReviewRequestedEvent { requestedReviewer { ... on User { login } } createdAt } }
               }
+              latestClosedEvent: timelineItems(itemTypes: [CLOSED_EVENT], last: 1) {
+                nodes { ... on ClosedEvent { actor { login } createdAt stateReason } }
+              }
+              latestReopenedEvent: timelineItems(itemTypes: [REOPENED_EVENT], last: 1) {
+                nodes { ... on ReopenedEvent { actor { login } createdAt stateReason } }
+              }
+              latestMergedEvent: timelineItems(itemTypes: [MERGED_EVENT], last: 1) {
+                nodes { ... on MergedEvent { actor { login } createdAt } }
+              }
+              latestReadyForReviewEvent: timelineItems(itemTypes: [READY_FOR_REVIEW_EVENT], last: 1) {
+                nodes { ... on ReadyForReviewEvent { actor { login } createdAt } }
+              }
+              latestReviewDismissedEvent: timelineItems(itemTypes: [REVIEW_DISMISSED_EVENT], last: 1) {
+                nodes { ... on ReviewDismissedEvent { actor { login } createdAt previousReviewState } }
+              }
             }
             ... on Issue {
               id
@@ -141,17 +181,26 @@ const NOTIFICATION_QUERY = `
               state
               stateReason
               author { login }
+              latestComment: comments(last: 1) {
+                nodes { author { login } createdAt }
+              }
               latestMention: timelineItems(itemTypes: [MENTIONED_EVENT], last: 1) {
                 nodes { ... on MentionedEvent { actor { login } createdAt } }
               }
               latestAssignment: timelineItems(itemTypes: [ASSIGNED_EVENT], last: 1) {
                 nodes { ... on AssignedEvent { assignee { ... on User { login } } createdAt } }
               }
+              latestClosedEvent: timelineItems(itemTypes: [CLOSED_EVENT], last: 1) {
+                nodes { ... on ClosedEvent { actor { login } createdAt stateReason } }
+              }
+              latestReopenedEvent: timelineItems(itemTypes: [REOPENED_EVENT], last: 1) {
+                nodes { ... on ReopenedEvent { actor { login } createdAt stateReason } }
+              }
             }
             ... on CheckSuite {
               status
               conclusion
-              commit { id }
+              commit { id oid }
             }
             ... on Release {
               tagName
@@ -163,6 +212,9 @@ const NOTIFICATION_QUERY = `
               number
               isAnswered
               stateReason
+              latestComment: comments(last: 1) {
+                nodes { author { login } createdAt }
+              }
             }
           }
           optionalList {
@@ -183,7 +235,7 @@ export { NOTIFICATION_QUERY }
 /**
  * Re-export typedefs for use by other modules.
  * @exports GitHubNotificationNode
- * @exports DirectEventTimestamps
+ * @exports LatestEvent
  * @exports GitHubNotificationSubject
  * @exports GitHubRepositoryList
  */
