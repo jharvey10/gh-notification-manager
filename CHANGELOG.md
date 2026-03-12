@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.0.0...v1.1.0) (2026-03-12)
+
+
+### Features
+
+* improved timeline event awareness ([f06f085](https://github.com/jharvey10/gh-notification-manager/commit/f06f0858617542dcd6e58d8bfed091fcc72b7001))
+
 ## [1.0.0](https://github.com/jharvey10/gh-notification-manager/compare/gh-notification-manager-v0.1.0...gh-notification-manager-v1.0.0) (2026-03-11)
 
 
