@@ -3,6 +3,7 @@ import { MARK_DONE_MUTATION } from './queries/markDone.js'
 import { MARK_READ_MUTATION } from './queries/markRead.js'
 import { MARK_UNREAD_MUTATION } from './queries/markUnread.js'
 import { UNSUBSCRIBE_MUTATION } from './queries/unsubscribe.js'
+import { UNSUBSCRIBE_AND_MARK_DONE_MUTATION } from './queries/unsubscribeAndMarkDone.js'
 import { SAVE_THREAD_MUTATION } from './queries/saveThread.js'
 import { UNSAVE_THREAD_MUTATION } from './queries/unsaveThread.js'
 
@@ -16,7 +17,7 @@ async function mutateInBatches(ids, mutation, label, onBatchDone) {
     const result = await gql(mutation, { input: { ids: batch } })
     const payload = result[label]
     if (!payload?.success) {
-      console.error(`${label} returned success=false for batch ${i / BATCH_SIZE + 1}`)
+      throw new Error(`${label} failed (batch ${i / BATCH_SIZE + 1})`)
     }
     if (onBatchDone) {
       await onBatchDone(batch)
@@ -40,6 +41,30 @@ async function unsubscribeFromThreads(ids, onBatchDone) {
   await mutateInBatches(ids, UNSUBSCRIBE_MUTATION, 'unsubscribeFromNotifications', onBatchDone)
 }
 
+async function unsubscribeAndMarkDone(subscribableIds, threadIds, onBatchDone) {
+  const gql = getGraphql()
+
+  for (let i = 0; i < subscribableIds.length; i += BATCH_SIZE) {
+    const subBatch = subscribableIds.slice(i, i + BATCH_SIZE)
+    const threadBatch = threadIds.slice(i, i + BATCH_SIZE)
+    const result = await gql(UNSUBSCRIBE_AND_MARK_DONE_MUTATION, {
+      unsubscribeInput: { ids: subBatch },
+      markDoneInput: { ids: threadBatch }
+    })
+
+    const failures = []
+    if (!result.unsubscribeFromNotifications?.success) failures.push('unsubscribe')
+    if (!result.markNotificationsAsDone?.success) failures.push('markDone')
+    if (failures.length > 0) {
+      throw new Error(`unsubscribeAndMarkDone failed (batch ${i / BATCH_SIZE + 1}): ${failures.join(', ')}`)
+    }
+
+    if (onBatchDone) {
+      await onBatchDone(threadBatch)
+    }
+  }
+}
+
 async function saveThread(id) {
   const gql = getGraphql()
   const result = await gql(SAVE_THREAD_MUTATION, { input: { id } })
@@ -61,6 +86,7 @@ export {
   markThreadsAsRead,
   markThreadsAsUnread,
   unsubscribeFromThreads,
+  unsubscribeAndMarkDone,
   saveThread,
   unsaveThread
 }

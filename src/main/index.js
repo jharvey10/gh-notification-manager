@@ -56,7 +56,7 @@ async function main() {
     app.quit()
   })
 
-  void poller.start()
+  void poller.start({ shouldNotify: false })
 }
 
 // Needs to be un-awaited to allow electron to initialize properly in ESM mode

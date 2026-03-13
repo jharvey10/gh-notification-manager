@@ -75,13 +75,28 @@ class NotificationPoller {
     }, POLL_INTERVAL_MS)
   }
 
-  async start() {
+  async start({ shouldNotify = true } = {}) {
     console.log('starting notification poller')
-    if (this.#timeoutId || this.#stopped) {
+    if (this.#timeoutId) {
       return
     }
+    this.#stopped = false
 
-    await this.#poll({ shouldNotify: false })
+    await this.#poll({ shouldNotify })
+  }
+
+  async startDeferred({ shouldNotify = true } = {}) {
+    console.log('deferred starting notification poller')
+    if (this.#timeoutId) {
+      return
+    }
+    this.#stopped = false
+
+    this.#timeoutId = setTimeout(() => {
+      clearTimeout(this.#timeoutId)
+      this.#timeoutId = null
+      this.start({ shouldNotify })
+    }, POLL_INTERVAL_MS)
   }
 
   invalidateCacheEntries(ids) {
