@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.1.0...v1.2.0) (2026-03-13)
+
+
+### Features
+
+* improve subscription awareness logic ([97f6fd7](https://github.com/jharvey10/gh-notification-manager/commit/97f6fd77e2554eda377cf8768651635a3a79e51c))
+
+
+### Bug Fixes
+
+* add app version to settings page ([296413f](https://github.com/jharvey10/gh-notification-manager/commit/296413fa8b0bd2c4450706d4295d58ee198915c4))
+* race condition between mutations and polling ([c776756](https://github.com/jharvey10/gh-notification-manager/commit/c776756119c007eb1bb40c5c6fa00c928df8913b))
+
 ## [1.1.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.0.0...v1.1.0) (2026-03-12)
 
 
