@@ -14,7 +14,7 @@ import NotificationOffIcon from '../../../assets/icons/notification-off.svg?reac
 import BookmarkAddIcon from '../../../assets/icons/bookmark-add.svg?react'
 import BookmarkFilledIcon from '../../../assets/icons/bookmark-filled.svg?react'
 import InformationSquareIcon from '../../../assets/icons/information-square.svg?react'
-import { findSubscribableId } from '../../../../shared/findSubscribableId.js'
+import { canUnsubscribeNotification } from '../../../../shared/notificationSubscription.js'
 import { formatTimeAgo } from '../../../../shared/formatTimeAgo.js'
 import { formatNotificationReference } from '../../../../shared/formatNotificationReference.js'
 import { NotificationEventDetails } from './NotificationEventDetails.jsx'
@@ -37,7 +37,7 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
     mostRecentEvent?.type === 'mention'
       ? events.find((e) => e.type === 'comment')?.actor
       : (mostRecentEvent?.actor ?? null)
-  const canUnsubscribe = findSubscribableId(notification) !== null
+  const canUnsubscribe = canUnsubscribeNotification(notification)
   const subjectRef = formatNotificationReference(notification)
 
   const handleOpen = (e) => {
@@ -83,7 +83,7 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
           <NotificationTags repo={repo} tags={tags} isUnread={isUnread} />
         </div>
 
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2">
           <NotificationEventDetails
             subjectRef={subjectRef}
             activityLabel={activityLabel}
@@ -101,6 +101,15 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
             <CheckmarkIcon className="size-4 shrink-0 fill-current" />
           </Button>
 
+          <Button
+            onClick={handleUnsubscribe}
+            aria-label={`Unsubscribe from ${title}`}
+            tooltip="Unsubscribe"
+            disabled={!canUnsubscribe}
+          >
+            <NotificationOffIcon className="size-4 shrink-0 fill-current" />
+          </Button>
+
           <ActionsMenu
             popoverId={`notification-menu-${menuId}`}
             anchorName={`--notification-menu-anchor-${menuId}`}
@@ -114,12 +123,6 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
             {!isUnread && (
               <Action icon={EmailNewIcon} onSelect={handleMarkUnread}>
                 Mark unread
-              </Action>
-            )}
-
-            {canUnsubscribe && (
-              <Action icon={NotificationOffIcon} onSelect={handleUnsubscribe}>
-                Unsubscribe
               </Action>
             )}
 
@@ -171,10 +174,17 @@ NotificationItem.propTypes = {
     }),
     optionalSubject: PropTypes.shape({
       id: PropTypes.string,
+      viewerSubscription: PropTypes.string,
       number: PropTypes.number,
-      commit: PropTypes.shape({ id: PropTypes.string }),
+      commit: PropTypes.shape({
+        id: PropTypes.string,
+        viewerSubscription: PropTypes.string
+      }),
       tagName: PropTypes.string,
-      tagCommit: PropTypes.shape({ id: PropTypes.string })
+      tagCommit: PropTypes.shape({
+        id: PropTypes.string,
+        viewerSubscription: PropTypes.string
+      })
     }),
     optionalList: PropTypes.shape({
       nameWithOwner: PropTypes.string

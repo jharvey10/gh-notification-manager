@@ -12,7 +12,7 @@ export function Action({ icon: Icon, children, onSelect, onActionComplete, class
   return (
     <Button
       variant="primary"
-      className={clsx('w-full pr-8 justify-start', className)}
+      className={clsx('pr-8 justify-start whitespace-nowrap', className)}
       onClick={handleClick}
     >
       {Icon && <Icon className="fill-primary size-4 shrink-0" />}

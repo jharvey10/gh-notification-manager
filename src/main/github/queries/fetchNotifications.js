@@ -29,6 +29,7 @@
  * @typedef {{
  *   __typename: 'PullRequest',
  *   id: string,
+ *   viewerSubscription: string | null,
  *   number: number,
  *   state: string,
  *   isDraft: boolean,
@@ -51,6 +52,7 @@
  * @typedef {{
  *   __typename: 'Issue',
  *   id: string,
+ *   viewerSubscription: string | null,
  *   number: number,
  *   state: string,
  *   stateReason: string | null,
@@ -65,17 +67,18 @@
  *   __typename: 'CheckSuite',
  *   status: string | null,
  *   conclusion: string | null,
- *   commit: { id: string, oid: string } | null
+ *   commit: { id: string, oid: string, viewerSubscription: string | null } | null
  * }} GitHubCheckSuiteSubject
  * @typedef {{
  *   __typename: 'Release',
  *   tagName: string,
  *   isPrerelease: boolean,
- *   tagCommit: { id: string } | null
+ *   tagCommit: { id: string, viewerSubscription: string | null } | null
  * }} GitHubReleaseSubject
  * @typedef {{
  *   __typename: 'Discussion',
  *   id: string,
+ *   viewerSubscription: string | null,
  *   number: number,
  *   isAnswered: boolean,
  *   stateReason: string | null,
@@ -129,6 +132,7 @@ const NOTIFICATION_QUERY = `
             __typename
             ... on PullRequest {
               id
+              viewerSubscription
               number
               state
               isDraft
@@ -177,6 +181,7 @@ const NOTIFICATION_QUERY = `
             }
             ... on Issue {
               id
+              viewerSubscription
               number
               state
               stateReason
@@ -200,15 +205,16 @@ const NOTIFICATION_QUERY = `
             ... on CheckSuite {
               status
               conclusion
-              commit { id oid }
+              commit { id oid viewerSubscription }
             }
             ... on Release {
               tagName
               isPrerelease
-              tagCommit { id }
+              tagCommit { id viewerSubscription }
             }
             ... on Discussion {
               id
+              viewerSubscription
               number
               isAnswered
               stateReason

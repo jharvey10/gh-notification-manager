@@ -11,7 +11,7 @@ import {
 import { broadcastError } from './broadcastError.js'
 import { NotificationPoller } from './NotificationPoller.js'
 import { resetClients } from './github/client.js'
-import { findSubscribableId } from '../shared/findSubscribableId.js'
+import { getNotificationSubscribableTarget } from '../shared/notificationSubscription.js'
 
 function registerIpcHandlers({ store, preferencesStore, poller: initialPoller }) {
   let poller = initialPoller
@@ -98,9 +98,9 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
       const subscribableMap = new Map()
       for (const id of ids) {
         const n = store.get(id)
-        const subjectId = findSubscribableId(n)
-        if (subjectId) {
-          subscribableMap.set(subjectId, id)
+        const target = getNotificationSubscribableTarget(n)
+        if (target) {
+          subscribableMap.set(target.id, id)
         } else {
           console.warn(`Cannot unsubscribe from notification ${id}: no subscribable subject`)
         }
@@ -189,7 +189,7 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
     poller?.stop()
     resetClients()
     poller = new NotificationPoller({ store, preferencesStore })
-    void poller.start({ shouldNotify: false }) // Don't await. Let the UI refresh on token change.
+    poller.start({ shouldNotify: false }) // Don't await. Let the UI refresh on token change.
   })
 
   ipcMain.handle('auth:clearToken', () => {
