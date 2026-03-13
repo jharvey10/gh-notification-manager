@@ -34,6 +34,8 @@ contextBridge.exposeInMainWorld('api', {
 
   updateSettings: (settings) => ipcRenderer.invoke('settings:update', settings),
 
+  getVersion: () => ipcRenderer.invoke('app:getVersion'),
+
   setToken: (token) => ipcRenderer.invoke('auth:setToken', token),
 
   hasToken: () => ipcRenderer.invoke('auth:hasToken'),

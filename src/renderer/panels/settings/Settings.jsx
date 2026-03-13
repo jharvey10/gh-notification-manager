@@ -8,9 +8,11 @@ import { AutoDoneSection } from './settings-sections/AutoDoneSection'
 import { AuthTokenSection } from './settings-sections/AuthTokenSection'
 import { OlderSectionSettings } from './settings-sections/OlderSectionSettings'
 import { OsNotificationsSection } from './settings-sections/OsNotificationsSection'
+import { VersionSection } from './settings-sections/VersionSection'
 
 export function Settings({ setPanelState }) {
   const { settings, updateSettings } = useSettings()
+  const [appVersion, setAppVersion] = useState('')
   const [savingOsNotifications, setSavingOsNotifications] = useState(false)
   const [savingAutoMarkDone, setSavingAutoMarkDone] = useState(false)
   const [savingOlderWindow, setSavingOlderWindow] = useState(false)
@@ -26,6 +28,27 @@ export function Settings({ setPanelState }) {
     setAutoMarkDoneDays(String(settings.autoMarkDoneDays))
     setOlderThanDays(String(settings.olderThanDays))
   }, [settings])
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadVersion = async () => {
+      try {
+        const version = await globalThis.api.getVersion()
+        if (mounted) {
+          setAppVersion(version)
+        }
+      } catch (err) {
+        console.error('Failed to load app version:', err)
+      }
+    }
+
+    void loadVersion()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!toast) {
@@ -162,6 +185,8 @@ export function Settings({ setPanelState }) {
         />
 
         <AuthTokenSection onClearToken={handleClearToken} />
+
+        <VersionSection appVersion={appVersion} />
       </div>
     </>
   )

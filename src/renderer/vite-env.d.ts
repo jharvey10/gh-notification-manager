@@ -14,6 +14,7 @@ declare global {
     refreshNow: () => Promise<void>
     getSettings: () => Promise<Record<string, unknown>>
     updateSettings: (settings: Record<string, unknown>) => Promise<Record<string, unknown>>
+    getVersion: () => Promise<string>
     setToken: (token: string) => Promise<void>
     hasToken: () => Promise<boolean>
     clearToken: () => Promise<void>

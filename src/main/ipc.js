@@ -1,4 +1,4 @@
-import { ipcMain, shell, Notification } from 'electron'
+import { app, ipcMain, shell, Notification } from 'electron'
 import * as auth from './auth.js'
 import {
   markThreadsAsDone,
@@ -171,6 +171,11 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
   ipcMain.handle('settings:update', (_event, partialSettings) => {
     console.log('ipc: settings:update')
     return preferencesStore.update(partialSettings)
+  })
+
+  ipcMain.handle('app:getVersion', () => {
+    console.log('ipc: app:getVersion')
+    return app.getVersion()
   })
 
   ipcMain.handle('auth:hasToken', () => {
