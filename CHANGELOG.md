@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/jharvey10/gh-notification-manager/compare/v1.2.0...v1.2.1) (2026-03-17)
+
+
+### Bug Fixes
+
+* re-architect startup and refresh logic ([118705d](https://github.com/jharvey10/gh-notification-manager/commit/118705d946a4177f91b08ac5297540425cb4ac82))
+
 ## [1.2.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.1.0...v1.2.0) (2026-03-13)
 
 
