@@ -2,21 +2,23 @@ import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { PanelState } from '../../utils/PanelState'
 
-export const Loading = ({ setPanelState }) => {
+export const Loading = ({ setPanelState, notifications }) => {
   useEffect(() => {
-    const doLoad = async () => {
+    const checkReady = async () => {
       const hasToken = await globalThis.api.hasToken()
 
-      if (hasToken) {
-        await globalThis.api.refreshNow()
-        setPanelState(PanelState.DASHBOARD)
-      } else {
+      if (!hasToken) {
         setPanelState(PanelState.TOKEN_PROMPT)
+        return
+      }
+
+      if (notifications !== null) {
+        setPanelState(PanelState.DASHBOARD)
       }
     }
 
-    void doLoad()
-  }, [setPanelState])
+    void checkReady()
+  }, [setPanelState, notifications])
 
   return (
     <div className="flex h-screen flex-col items-center justify-center gap-4">
@@ -28,5 +30,6 @@ export const Loading = ({ setPanelState }) => {
 }
 
 Loading.propTypes = {
-  setPanelState: PropTypes.func.isRequired
+  setPanelState: PropTypes.func.isRequired,
+  notifications: PropTypes.array
 }

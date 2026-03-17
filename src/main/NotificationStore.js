@@ -1,5 +1,5 @@
 class NotificationStore {
-  #notifications = new Map()
+  #notifications = null
   #onChange
 
   constructor({ onChange }) {
@@ -11,6 +11,10 @@ class NotificationStore {
     console.log('upserting notifications')
     console.log('num deletes', entries.filter(([_, notification]) => notification === null).length)
     console.log('num upserts', entries.filter(([_, notification]) => notification !== null).length)
+
+    if (!this.#notifications) {
+      this.#notifications = new Map()
+    }
 
     for (const [id, notification] of entries) {
       if (notification === null) {
@@ -25,20 +29,23 @@ class NotificationStore {
   clear() {
     console.log('clearing notification store')
 
-    this.#notifications.clear()
+    this.#notifications = null
     this.#onChange()
   }
 
   getAll() {
+    if (!this.#notifications) {
+      return null
+    }
     return Array.from(this.#notifications.values())
   }
 
   get(id) {
-    return this.#notifications.get(id) ?? null
+    return this.#notifications?.get(id) ?? null
   }
 
   has(id) {
-    return this.#notifications.has(id)
+    return this.#notifications?.has(id) ?? false
   }
 }
 

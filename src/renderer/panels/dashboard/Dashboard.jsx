@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { useFilters } from '../../hooks/useFilters'
-import { useNotifications } from '../../hooks/useNotifications'
 import { useSettings } from '../../hooks/useSettings'
 import { useSelection } from '../../hooks/useSelection'
 import { PanelState } from '../../utils/PanelState'
@@ -9,10 +8,8 @@ import { BatchActionBar } from './BatchActionBar'
 import { TopBar } from './top-bar/TopBar'
 import { NotificationListContainer } from './notification-list/NotificationListContainer'
 
-export function Dashboard({ setPanelState }) {
-  const { notifications, loading } = useNotifications()
+export function Dashboard({ setPanelState, notifications, refresh }) {
   const { settings } = useSettings()
-  const hasData = notifications !== null
   const {
     filters,
     setTextFilter,
@@ -57,6 +54,7 @@ export function Dashboard({ setPanelState }) {
   }
 
   const handleRefresh = () => {
+    refresh()
     setPanelState(PanelState.LOADING)
   }
 
@@ -90,21 +88,19 @@ export function Dashboard({ setPanelState }) {
         />
       </div>
 
-      {(loading || !hasData) && <p>Loading...</p>}
-
-      {!loading && hasData && (
-        <NotificationListContainer
-          notifications={filtered}
-          olderThanDays={settings.olderThanDays}
-          selected={selected}
-          onToggle={toggle}
-          onSelectGroup={addToSelection}
-        />
-      )}
+      <NotificationListContainer
+        notifications={filtered}
+        olderThanDays={settings.olderThanDays}
+        selected={selected}
+        onToggle={toggle}
+        onSelectGroup={addToSelection}
+      />
     </div>
   )
 }
 
 Dashboard.propTypes = {
-  setPanelState: PropTypes.func.isRequired
+  setPanelState: PropTypes.func.isRequired,
+  notifications: PropTypes.array.isRequired,
+  refresh: PropTypes.func.isRequired
 }
