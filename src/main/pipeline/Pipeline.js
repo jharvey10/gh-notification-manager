@@ -21,11 +21,19 @@ const DEFAULT_PROCESSORS = Object.freeze([
  * @typedef {[string, PipelineNotification | null]} NotificationEntry
  * @typedef {Map<string, PipelineNotification | null> | NotificationEntry[]} NotificationUpdates
  * @typedef {{
+ *   userPreferences: Record<string, any>,
+ *   shouldNotify: boolean,
+ *   viewerLogin: string | null,
+ *   invalidateCacheEntries?: (ids: string[]) => void,
+ *   notifications: PipelineNotification[]
+ * }} PipelineContext
+ * @typedef {(notification: PipelineNotification, context: PipelineContext) => Promise<PipelineNotification | null> | PipelineNotification | null} PipelineProcessor
+ * @typedef {{
  *   userPreferences?: { autoMarkDoneEnabled?: boolean },
  *   shouldNotify?: boolean,
  *   viewerLogin?: string | null,
  *   invalidateCacheEntries?: (ids: string[]) => void,
- *   customProcessors?: Array<(notification: PipelineNotification, context: Record<string, any>) => Promise<PipelineNotification | null> | PipelineNotification | null>
+ *   customProcessors?: PipelineProcessor[]
  * }} PipelineOptions
  */
 

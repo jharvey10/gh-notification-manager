@@ -3,6 +3,7 @@ import { broadcastError } from '../../broadcastError.js'
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000
 
+/** @type {import('../Pipeline.js').PipelineProcessor} */
 export async function autoDoneProcessor(notification, { userPreferences, invalidateCacheEntries }) {
   if (!userPreferences.autoMarkDoneEnabled || notification.isSaved) {
     return notification

@@ -1,3 +1,4 @@
+/** @type {import('../Pipeline.js').PipelineProcessor} */
 export async function junkTagProcessor(notification) {
   const isJunk =
     notification.title?.toLowerCase().match(/attempt #\d+ succeeded/) ||

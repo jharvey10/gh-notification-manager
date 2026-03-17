@@ -3,6 +3,8 @@
  * team_review (one of your teams) based on the PR's current review
  * request list — regardless of what notification.reason reports,
  * since GitHub only surfaces the single most "important" reason.
+ *
+ * @type {import('../Pipeline.js').PipelineProcessor}
  */
 export async function reviewTypeTagProcessor(notification, context) {
   const nodes = notification.optionalSubject?.reviewRequests?.nodes

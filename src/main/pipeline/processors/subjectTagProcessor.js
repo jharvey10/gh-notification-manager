@@ -69,6 +69,7 @@ function getDiscussionTags(subject) {
   return ['discussion_open']
 }
 
+/** @type {import('../Pipeline.js').PipelineProcessor} */
 export async function subjectTagProcessor(notification) {
   const baseTag = getBaseTag(notification)
   if (!baseTag) {

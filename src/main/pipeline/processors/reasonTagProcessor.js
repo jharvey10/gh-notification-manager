@@ -13,6 +13,8 @@ const REASON_TAGS = Object.freeze({
  * timeline event data. GitHub only surfaces a single "most important"
  * reason per notification, so we cross-check _latestEvents to pick up
  * mentions and assignments the reason field may hide.
+ *
+ * @type {import('../Pipeline.js').PipelineProcessor}
  */
 export async function reasonTagProcessor(notification, context) {
   const reason = notification.reason?.toLowerCase()

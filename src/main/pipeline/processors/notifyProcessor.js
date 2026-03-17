@@ -79,8 +79,12 @@ function buildNotificationTitle(reason, notification) {
   return suffix ? `${prefix} · ${suffix}` : prefix
 }
 
+/** @type {import('../Pipeline.js').PipelineProcessor} */
 export async function notifyProcessor(notification, context) {
   if (!context.shouldNotify) {
+    return notification
+  }
+  if (!notification.isUnread) {
     return notification
   }
 
