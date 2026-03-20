@@ -3,7 +3,15 @@ import PropTypes from 'prop-types'
 import { clsx } from 'clsx'
 import { Button } from '../../../components/Button'
 
-export function Action({ icon: Icon, children, onSelect, onActionComplete, className }) {
+export function Action({
+  icon: Icon,
+  children,
+  onSelect,
+  onActionComplete,
+  className,
+  variant = 'primary',
+  disabled = false
+}) {
   const handleClick = () => {
     onSelect()
     onActionComplete?.()
@@ -11,11 +19,12 @@ export function Action({ icon: Icon, children, onSelect, onActionComplete, class
 
   return (
     <Button
-      variant="primary"
-      className={clsx('pr-8 justify-start whitespace-nowrap', className)}
+      variant={variant}
+      className={clsx('justify-start whitespace-nowrap pr-8', className)}
       onClick={handleClick}
+      disabled={disabled}
     >
-      {Icon && <Icon className="fill-primary size-4 shrink-0" />}
+      {Icon && <Icon className="fill-current size-4 shrink-0" />}
       {children}
     </Button>
   )
@@ -26,5 +35,15 @@ Action.propTypes = {
   children: PropTypes.node.isRequired,
   onSelect: PropTypes.func.isRequired,
   onActionComplete: PropTypes.func,
-  className: PropTypes.string
+  className: PropTypes.string,
+  variant: PropTypes.oneOf([
+    'primary',
+    'secondary',
+    'accent',
+    'info',
+    'success',
+    'warning',
+    'error'
+  ]),
+  disabled: PropTypes.bool
 }

@@ -35,11 +35,22 @@ export function BatchActionBar({
         Unselect all
       </Button>
 
-      <Button onClick={onMarkDone} disabled={selectedCount === 0} variant="accent">
-        <span className="flex items-center gap-2">
-          <CheckmarkIcon className="size-4 shrink-0 fill-current" />
-          Mark done
-        </span>
+      <Button
+        onClick={onMarkDone}
+        aria-label={`Mark all selected notifications as done`}
+        tooltip="Mark done"
+        disabled={selectedCount === 0}
+      >
+        <CheckmarkIcon className="size-4 shrink-0 fill-current" />
+      </Button>
+
+      <Button
+        onClick={onUnsubscribe}
+        aria-label={`Unsubscribe from all selected notifications`}
+        tooltip="Unsubscribe"
+        disabled={selectedCount === 0}
+      >
+        <NotificationOffIcon className="size-4 shrink-0 fill-current" />
       </Button>
 
       <ActionsMenu
@@ -56,9 +67,6 @@ export function BatchActionBar({
         </Action>
         <Action icon={EmailNewIcon} onSelect={onMarkUnread}>
           Mark unread
-        </Action>
-        <Action icon={NotificationOffIcon} onSelect={onUnsubscribe}>
-          Unsubscribe
         </Action>
       </ActionsMenu>
     </div>
