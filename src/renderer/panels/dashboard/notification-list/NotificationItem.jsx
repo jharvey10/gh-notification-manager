@@ -18,6 +18,7 @@ import { canUnsubscribeNotification } from '../../../../shared/notificationSubsc
 import { formatTimeAgo } from '../../../../shared/formatTimeAgo.js'
 import { formatNotificationReference } from '../../../../shared/formatNotificationReference.js'
 import { NotificationEventDetails } from './NotificationEventDetails.jsx'
+import { getEventActor } from '../../../utils/notifications.js'
 
 function buildMenuId(id) {
   return id.replaceAll(/[^a-zA-Z0-9_-]/g, '-')
@@ -30,13 +31,7 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
   const { label: timeLabel, tooltip: timeTooltip } = formatTimeAgo(lastUpdatedAt)
   const menuId = buildMenuId(id)
   const detailsDialogRef = React.useRef(null)
-  const events = notification._latestEvents?.curr ?? []
-  const mostRecentEvent =
-    events.length > 0 ? events.reduce((a, b) => (a.timestamp >= b.timestamp ? a : b)) : null
-  const eventActor =
-    mostRecentEvent?.type === 'mention'
-      ? events.find((e) => e.type === 'comment')?.actor
-      : (mostRecentEvent?.actor ?? null)
+  const eventActor = getEventActor(notification)
   const canUnsubscribe = canUnsubscribeNotification(notification)
   const subjectRef = formatNotificationReference(notification)
 

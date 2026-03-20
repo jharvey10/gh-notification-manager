@@ -2,7 +2,10 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Button } from '../../../../components/Button'
 
-export function FilterOptionRow({ item, isIncluded, isExcluded, onToggle }) {
+export function FilterOptionRow({ item, count, selectionState, onChange }) {
+  const isIncluded = selectionState === 'include'
+  const isExcluded = selectionState === 'exclude'
+
   return (
     <div className="join min-w-40">
       <Button
@@ -10,7 +13,7 @@ export function FilterOptionRow({ item, isIncluded, isExcluded, onToggle }) {
         outline={!isExcluded}
         aria-pressed={isExcluded}
         aria-label={`${isExcluded ? 'Remove' : 'Exclude'} ${item} filter`}
-        onClick={() => onToggle(item, 'exclude')}
+        onClick={() => onChange(item, isExcluded ? null : 'exclude')}
       >
         -
       </Button>
@@ -20,6 +23,7 @@ export function FilterOptionRow({ item, isIncluded, isExcluded, onToggle }) {
         title={item}
       >
         {item}
+        <span className="pl-1 opacity-60">({count})</span>
       </div>
 
       <Button
@@ -27,7 +31,7 @@ export function FilterOptionRow({ item, isIncluded, isExcluded, onToggle }) {
         outline={!isIncluded}
         aria-pressed={isIncluded}
         aria-label={`${isIncluded ? 'Remove' : 'Include'} ${item} filter`}
-        onClick={() => onToggle(item, 'include')}
+        onClick={() => onChange(item, isIncluded ? null : 'include')}
       >
         +
       </Button>
@@ -37,7 +41,7 @@ export function FilterOptionRow({ item, isIncluded, isExcluded, onToggle }) {
 
 FilterOptionRow.propTypes = {
   item: PropTypes.string.isRequired,
-  isIncluded: PropTypes.bool.isRequired,
-  isExcluded: PropTypes.bool.isRequired,
-  onToggle: PropTypes.func.isRequired
+  count: PropTypes.number.isRequired,
+  selectionState: PropTypes.oneOf(['include', 'exclude']),
+  onChange: PropTypes.func.isRequired
 }

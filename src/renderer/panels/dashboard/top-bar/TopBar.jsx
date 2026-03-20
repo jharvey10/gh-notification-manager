@@ -6,13 +6,12 @@ import { Filters } from './Filters'
 import { SettingsMenu } from './SettingsMenu'
 
 export const TopBar = ({
+  notifications,
   filters,
-  allTags,
-  allRepos,
   onTextChange,
-  onTagToggle,
-  onRepoToggle,
-  onUnreadToggle,
+  onBooleanChange,
+  onTagChange,
+  onRepoChange,
   onClearTags,
   onClearRepos,
   onRefresh,
@@ -21,13 +20,12 @@ export const TopBar = ({
   return (
     <div className="flex w-full flex-wrap items-start justify-between gap-3">
       <Filters
+        notifications={notifications}
         filters={filters}
-        allTags={allTags}
-        allRepos={allRepos}
         onTextChange={onTextChange}
-        onTagToggle={onTagToggle}
-        onRepoToggle={onRepoToggle}
-        onUnreadToggle={onUnreadToggle}
+        onBooleanChange={onBooleanChange}
+        onTagChange={onTagChange}
+        onRepoChange={onRepoChange}
         onClearTags={onClearTags}
         onClearRepos={onClearRepos}
       />
@@ -42,20 +40,12 @@ export const TopBar = ({
 }
 
 TopBar.propTypes = {
-  filters: PropTypes.shape({
-    text: PropTypes.string.isRequired,
-    unreadOnly: PropTypes.bool.isRequired,
-    includedTags: PropTypes.instanceOf(Set).isRequired,
-    excludedTags: PropTypes.instanceOf(Set).isRequired,
-    includedRepos: PropTypes.instanceOf(Set).isRequired,
-    excludedRepos: PropTypes.instanceOf(Set).isRequired
-  }).isRequired,
-  allTags: PropTypes.arrayOf(PropTypes.string).isRequired,
-  allRepos: PropTypes.arrayOf(PropTypes.string).isRequired,
+  notifications: PropTypes.array.isRequired,
+  filters: PropTypes.object.isRequired,
   onTextChange: PropTypes.func.isRequired,
-  onTagToggle: PropTypes.func.isRequired,
-  onRepoToggle: PropTypes.func.isRequired,
-  onUnreadToggle: PropTypes.func.isRequired,
+  onBooleanChange: PropTypes.func.isRequired,
+  onTagChange: PropTypes.func.isRequired,
+  onRepoChange: PropTypes.func.isRequired,
   onClearTags: PropTypes.func.isRequired,
   onClearRepos: PropTypes.func.isRequired,
   onRefresh: PropTypes.func.isRequired,

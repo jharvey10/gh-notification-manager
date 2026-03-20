@@ -2,43 +2,32 @@ import clsx from 'clsx'
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Button } from '../../../../components/Button'
+import { compareValues } from '../../../../utils/notifications'
 
-const compareValues = (left, right) => left.localeCompare(right)
+export function ActiveFilterList({ selections, onChange, onClear }) {
+  if (selections.length === 0) return null
 
-function toActiveItems(includedItems, excludedItems) {
-  const included = [...includedItems]
-    .sort(compareValues)
-    .map((item) => ({ key: `include:${item}`, label: `+${item}`, value: item, mode: 'include' }))
-  const excluded = [...excludedItems]
-    .sort(compareValues)
-    .map((item) => ({ key: `exclude:${item}`, label: `-${item}`, value: item, mode: 'exclude' }))
-
-  return [...included, ...excluded]
-}
-
-export function ActiveFilterList({ includedItems, excludedItems, onToggle, onClear }) {
-  const activeItems = toActiveItems(includedItems, excludedItems)
-
-  if (activeItems.length === 0) return null
+  const sorted = [...selections].sort((a, b) => compareValues(a.value, b.value))
 
   return (
     <div className="flex max-w-80 flex-wrap gap-2">
-      <span className="text-sm text-base-content/70">{activeItems.length} selected</span>
+      <span className="text-sm text-base-content/70">{selections.length} selected</span>
       <Button onClick={onClear} className="btn-xs">
         Clear all
       </Button>
 
-      {activeItems.map((item) => (
+      {sorted.map((s) => (
         <button
-          key={item.key}
+          key={`${s.state}:${s.value}`}
           type="button"
           className={clsx(
             'btn btn-xs btn-outline justify-start',
-            item.mode === 'include' ? 'btn-success' : 'btn-error'
+            s.state === 'include' ? 'btn-success' : 'btn-error'
           )}
-          onClick={() => onToggle(item.value, item.mode)}
+          onClick={() => onChange(s.value, null)}
         >
-          {item.label}
+          {s.state === 'include' ? '+' : '-'}
+          {s.value}
         </button>
       ))}
     </div>
@@ -46,8 +35,12 @@ export function ActiveFilterList({ includedItems, excludedItems, onToggle, onCle
 }
 
 ActiveFilterList.propTypes = {
-  includedItems: PropTypes.instanceOf(Set).isRequired,
-  excludedItems: PropTypes.instanceOf(Set).isRequired,
-  onToggle: PropTypes.func.isRequired,
+  selections: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.string.isRequired,
+      state: PropTypes.oneOf(['include', 'exclude']).isRequired
+    })
+  ).isRequired,
+  onChange: PropTypes.func.isRequired,
   onClear: PropTypes.func.isRequired
 }

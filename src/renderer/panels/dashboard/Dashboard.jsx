@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import PropTypes from 'prop-types'
-import { useFilters } from '../../hooks/useFilters'
+import { useFilterState } from '../../hooks/useFilterState'
+import { applyFilters } from '../../filters/pipeline'
 import { useSettings } from '../../hooks/useSettings'
 import { useSelection } from '../../hooks/useSelection'
 import { PanelState } from '../../utils/PanelState'
@@ -10,18 +11,23 @@ import { NotificationListContainer } from './notification-list/NotificationListC
 
 export function Dashboard({ setPanelState, notifications, refresh }) {
   const { settings } = useSettings()
+  const notificationList = useMemo(() => notifications ?? [], [notifications])
+
   const {
     filters,
     setTextFilter,
-    toggleTagFilter,
-    toggleRepoFilter,
-    toggleUnreadOnly,
-    clearTagFilters,
-    clearRepoFilters,
-    allTags,
-    allRepos,
-    filtered
-  } = useFilters(notifications)
+    setBooleanFilter,
+    setTagFilter,
+    setRepoFilter,
+    clearTagFilter,
+    clearRepoFilter
+  } = useFilterState()
+
+  const filtered = useMemo(
+    () => applyFilters(notificationList, filters),
+    [notificationList, filters]
+  )
+
   const { selected, toggle, selectAll, addToSelection, clearSelection } =
     useSelection(notifications)
 
@@ -63,15 +69,14 @@ export function Dashboard({ setPanelState, notifications, refresh }) {
       <div className="sticky top-0 z-20 flex flex-col gap-4 bg-base-300 p-4 shadow-sm">
         <header>
           <TopBar
+            notifications={notificationList}
             filters={filters}
-            allTags={allTags}
-            allRepos={allRepos}
             onTextChange={setTextFilter}
-            onTagToggle={toggleTagFilter}
-            onRepoToggle={toggleRepoFilter}
-            onUnreadToggle={toggleUnreadOnly}
-            onClearTags={clearTagFilters}
-            onClearRepos={clearRepoFilters}
+            onBooleanChange={setBooleanFilter}
+            onTagChange={setTagFilter}
+            onRepoChange={setRepoFilter}
+            onClearTags={clearTagFilter}
+            onClearRepos={clearRepoFilter}
             onRefresh={handleRefresh}
             onOpenSettings={handleOpenSettings}
           />

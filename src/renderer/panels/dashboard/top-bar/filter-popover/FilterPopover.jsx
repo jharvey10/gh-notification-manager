@@ -13,37 +13,30 @@ export function FilterPopover({
   title,
   description,
   items,
-  includedItems,
-  excludedItems,
-  onToggle,
+  itemCounts,
+  selections,
+  onChange,
   onClear
 }) {
-  const activeItemCount = includedItems.size + excludedItems.size
-
   return (
     <PopoverCard
       popoverId={popoverId}
       anchorName={anchorName}
       trigger={
-        <FilterPopoverTrigger triggerLabel={triggerLabel} activeItemCount={activeItemCount} />
+        <FilterPopoverTrigger triggerLabel={triggerLabel} activeItemCount={selections.length} />
       }
     >
       <div className="flex min-w-80 max-w-96 flex-col gap-3">
         <FilterPopoverHeader title={title} description={description} />
-        <ActiveFilterList
-          includedItems={includedItems}
-          excludedItems={excludedItems}
-          onToggle={onToggle}
-          onClear={onClear}
-        />
+        <ActiveFilterList selections={selections} onChange={onChange} onClear={onClear} />
         <div className="flex max-h-80 flex-col gap-2 overflow-y-auto">
           {items.map((item) => (
             <FilterOptionRow
               key={item}
               item={item}
-              isIncluded={includedItems.has(item)}
-              isExcluded={excludedItems.has(item)}
-              onToggle={onToggle}
+              count={itemCounts.get(item) ?? 0}
+              selectionState={selections.find((s) => s.value === item)?.state ?? null}
+              onChange={onChange}
             />
           ))}
         </div>
@@ -59,8 +52,13 @@ FilterPopover.propTypes = {
   title: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   items: PropTypes.arrayOf(PropTypes.string).isRequired,
-  includedItems: PropTypes.instanceOf(Set).isRequired,
-  excludedItems: PropTypes.instanceOf(Set).isRequired,
-  onToggle: PropTypes.func.isRequired,
+  itemCounts: PropTypes.instanceOf(Map).isRequired,
+  selections: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.string.isRequired,
+      state: PropTypes.oneOf(['include', 'exclude']).isRequired
+    })
+  ).isRequired,
+  onChange: PropTypes.func.isRequired,
   onClear: PropTypes.func.isRequired
 }

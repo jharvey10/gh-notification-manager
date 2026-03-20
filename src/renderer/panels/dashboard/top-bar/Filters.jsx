@@ -1,19 +1,20 @@
 import React, { useState, useDeferredValue, useEffect } from 'react'
 import PropTypes from 'prop-types'
+import { useTagOptions } from '../../../hooks/useTagOptions'
+import { useRepoOptions } from '../../../hooks/useRepoOptions'
 import { FilterPopover } from './filter-popover/FilterPopover'
 
 export function Filters({
+  notifications,
   filters,
-  allTags,
-  allRepos,
   onTextChange,
-  onTagToggle,
-  onRepoToggle,
-  onUnreadToggle,
+  onBooleanChange,
+  onTagChange,
+  onRepoChange,
   onClearTags,
   onClearRepos
 }) {
-  const [text, setText] = useState(filters.text)
+  const [text, setText] = useState(filters.text.data)
   const deferredText = useDeferredValue(text)
 
   useEffect(() => {
@@ -21,8 +22,11 @@ export function Filters({
   }, [deferredText, onTextChange])
 
   useEffect(() => {
-    setText(filters.text)
-  }, [filters.text])
+    setText(filters.text.data)
+  }, [filters.text.data])
+
+  const tags = useTagOptions(notifications, filters.tag.data)
+  const repos = useRepoOptions(notifications, filters.repo.data)
 
   return (
     <div className="flex min-w-0 flex-1 flex-wrap items-center gap-4">
@@ -38,38 +42,38 @@ export function Filters({
         <input
           type="checkbox"
           className="toggle toggle-primary"
-          checked={filters.unreadOnly}
-          onChange={onUnreadToggle}
+          checked={filters.unreadOnly.data}
+          onChange={(e) => onBooleanChange(e.target.checked)}
         />
         <span className="label-text">Unread only</span>
       </label>
 
-      {allTags.length > 0 && (
+      {tags.items.length > 0 && (
         <FilterPopover
           popoverId="tag-filter-popover"
           anchorName="--tag-filter-popover-anchor"
           triggerLabel="Tags"
           title="Tag filters"
           description="Use + to include or - to exclude a tag."
-          items={allTags}
-          includedItems={filters.includedTags}
-          excludedItems={filters.excludedTags}
-          onToggle={onTagToggle}
+          items={tags.items}
+          itemCounts={tags.counts}
+          selections={filters.tag.data}
+          onChange={onTagChange}
           onClear={onClearTags}
         />
       )}
 
-      {allRepos.length > 0 && (
+      {repos.items.length > 0 && (
         <FilterPopover
           popoverId="repo-filter-popover"
           anchorName="--repo-filter-popover-anchor"
           triggerLabel="Repositories"
           title="Repository filters"
           description="Use + to include or - to exclude a repository."
-          items={allRepos}
-          includedItems={filters.includedRepos}
-          excludedItems={filters.excludedRepos}
-          onToggle={onRepoToggle}
+          items={repos.items}
+          itemCounts={repos.counts}
+          selections={filters.repo.data}
+          onChange={onRepoChange}
           onClear={onClearRepos}
         />
       )}
@@ -78,20 +82,12 @@ export function Filters({
 }
 
 Filters.propTypes = {
-  filters: PropTypes.shape({
-    text: PropTypes.string.isRequired,
-    includedTags: PropTypes.instanceOf(Set).isRequired,
-    excludedTags: PropTypes.instanceOf(Set).isRequired,
-    includedRepos: PropTypes.instanceOf(Set).isRequired,
-    excludedRepos: PropTypes.instanceOf(Set).isRequired,
-    unreadOnly: PropTypes.bool.isRequired
-  }).isRequired,
-  allTags: PropTypes.arrayOf(PropTypes.string).isRequired,
-  allRepos: PropTypes.arrayOf(PropTypes.string).isRequired,
+  notifications: PropTypes.array.isRequired,
+  filters: PropTypes.object.isRequired,
   onTextChange: PropTypes.func.isRequired,
-  onTagToggle: PropTypes.func.isRequired,
-  onRepoToggle: PropTypes.func.isRequired,
-  onUnreadToggle: PropTypes.func.isRequired,
+  onBooleanChange: PropTypes.func.isRequired,
+  onTagChange: PropTypes.func.isRequired,
+  onRepoChange: PropTypes.func.isRequired,
   onClearTags: PropTypes.func.isRequired,
   onClearRepos: PropTypes.func.isRequired
 }
