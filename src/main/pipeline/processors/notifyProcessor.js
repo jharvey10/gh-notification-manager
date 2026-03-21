@@ -14,49 +14,53 @@ function hasNewEvent(type, latestEvents, viewerLogin) {
   return currEvent.timestamp !== prevEvent?.timestamp
 }
 
-const DIRECT_EVENT_LABELS = {
-  mention: 'Mention',
-  reviewRequest: 'Review Request',
-  assignment: 'Assigned'
+function getMostRecentEvent(events) {
+  if (!events || events.length === 0) {
+    return null
+  }
+  return events.reduce((a, b) => (a.timestamp >= b.timestamp ? a : b))
 }
 
-const GITHUB_REASON_LABELS = {
-  mention: 'Mention',
-  team_mention: 'Team Mention',
-  assign: 'Assigned',
-  author: 'Author Activity',
-  ci_activity: 'CI Activity',
-  comment: 'Comment',
-  state_change: 'State Change',
-  review_requested: 'Review Request',
-  security_alert: 'Security Alert'
-}
+function findDirectEventType(latestEvents, { userPreferences, viewerLogin }) {
+  if (!latestEvents) {
+    return null
+  }
 
-function classifyNotificationReason(notification, { userPreferences, viewerLogin }) {
   const prefs = userPreferences
-  const latestEvents = notification._latestEvents
 
-  if (latestEvents) {
-    if (prefs.osNotifyOnDirectMention && hasNewEvent('mention', latestEvents, viewerLogin)) {
-      return { source: 'direct', key: 'mention' }
-    }
-    if (
-      prefs.osNotifyOnDirectReviewRequest &&
-      hasNewEvent('review_requested', latestEvents, viewerLogin)
-    ) {
-      return { source: 'direct', key: 'reviewRequest' }
-    }
-    if (prefs.osNotifyOnDirectAssignment && hasNewEvent('assign', latestEvents, viewerLogin)) {
-      return { source: 'direct', key: 'assignment' }
-    }
+  if (prefs.osNotifyOnDirectMention && hasNewEvent('mention', latestEvents, viewerLogin)) {
+    return 'mention'
+  }
+  if (
+    prefs.osNotifyOnDirectReviewRequest &&
+    hasNewEvent('review_requested', latestEvents, viewerLogin)
+  ) {
+    return 'review_requested'
+  }
+  if (prefs.osNotifyOnDirectAssignment && hasNewEvent('assign', latestEvents, viewerLogin)) {
+    return 'assign'
+  }
+  return null
+}
+
+function findRelevantEventType(notification, context) {
+  const events = notification._latestEvents?.curr ?? []
+  const relevant = events.filter((e) => e.type !== 'mention' || e.actor === context.viewerLogin)
+  return getMostRecentEvent(relevant)?.type ?? null
+}
+
+function findNotificationTriggerType(notification, context) {
+  if (context.userPreferences.osNotifyOnAllNew) {
+    return findRelevantEventType(notification, context) ?? 'activity'
   }
 
-  if (prefs.osNotifyOnSavedThreadActivity && notification.isSaved) {
-    return { source: 'github', key: notification.reason?.toLowerCase() }
+  if (context.userPreferences.osNotifyOnSavedThreadActivity && notification.isSaved) {
+    return findRelevantEventType(notification, context) ?? 'saved'
   }
 
-  if (prefs.osNotifyOnAllNew) {
-    return { source: 'github', key: notification.reason?.toLowerCase() }
+  const directEventType = findDirectEventType(notification._latestEvents, context)
+  if (directEventType) {
+    return directEventType
   }
 
   return null
@@ -72,11 +76,8 @@ function subjectSuffix(subject) {
 }
 
 function buildNotificationTitle(reason, notification) {
-  const label =
-    reason.source === 'direct' ? DIRECT_EVENT_LABELS[reason.key] : GITHUB_REASON_LABELS[reason.key]
   const suffix = subjectSuffix(notification.optionalSubject)
-  const prefix = label ?? 'Activity'
-  return suffix ? `${prefix} · ${suffix}` : prefix
+  return suffix ? `${reason} · ${suffix}` : reason
 }
 
 /** @type {import('../Pipeline.js').PipelineProcessor} */
@@ -88,7 +89,7 @@ export async function notifyProcessor(notification, context) {
     return notification
   }
 
-  const reason = classifyNotificationReason(notification, context)
+  const reason = findNotificationTriggerType(notification, context)
   if (!reason) {
     return notification
   }

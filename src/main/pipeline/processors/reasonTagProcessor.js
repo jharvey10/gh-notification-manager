@@ -33,11 +33,11 @@ export async function reasonTagProcessor(notification, context) {
   const events = notification._latestEvents?.curr ?? []
   if (context.viewerLogin) {
     const mention = events.find((e) => e.type === 'mention')
-    if (mention && mention.actor === context.viewerLogin) {
+    if (mention?.actor === context.viewerLogin) {
       tags.push('direct_mention')
     }
     const assign = events.find((e) => e.type === 'assign')
-    if (assign && assign.actor === context.viewerLogin) {
+    if (assign?.actor === context.viewerLogin) {
       tags.push('assigned')
     }
   }

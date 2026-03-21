@@ -50,8 +50,6 @@ function getMostRecentEvent(events) {
 //       always get 'unknown'. May want a fallback using subject type + status/conclusion.
 // TODO: Discussions only have 'comment' events — state changes like "answered"
 //       won't surface as a label.
-// TODO: The 'mention' event actor is who mentioned, not who was mentioned.
-//       Label says 'mentioned_you' but we don't verify the viewer was the target.
 // TODO: On first poll there's no prev to diff against, so the most recent event
 //       may be very old. Consider whether to suppress labels for stale events.
 /** @type {import('../Pipeline.js').PipelineProcessor} */
