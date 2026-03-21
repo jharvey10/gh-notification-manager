@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.2.1...v1.3.0) (2026-03-21)
+
+
+### Features
+
+* revamp filtering pipeline and architecture ([06731b7](https://github.com/jharvey10/gh-notification-manager/commit/06731b73b4c405da2c56fdecdfeb1f0d3a0fad4f))
+
+
+### Bug Fixes
+
+* broken unsub logic ([ee23ae0](https://github.com/jharvey10/gh-notification-manager/commit/ee23ae014367c7a84876e92077ea12649229789e))
+* filter out non-unsubbable when doing a bulk action ([5c06300](https://github.com/jharvey10/gh-notification-manager/commit/5c063007407704b8acd5ded8ffacc9eb5340184a))
+* improve push notification logic ([a7c6c6d](https://github.com/jharvey10/gh-notification-manager/commit/a7c6c6da7bb540dcb9d51b03c665a8c6164b21ec))
+
 ## [1.2.1](https://github.com/jharvey10/gh-notification-manager/compare/v1.2.0...v1.2.1) (2026-03-17)
 
 
