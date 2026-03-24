@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/jharvey10/gh-notification-manager/compare/v1.3.0...v1.3.1) (2026-03-24)
+
+
+### Bug Fixes
+
+* batch unsub not marking non-subscribables as done ([008e69f](https://github.com/jharvey10/gh-notification-manager/commit/008e69f42d2832c66079f53b1e92fa44e05653a6))
+
 ## [1.3.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.2.1...v1.3.0) (2026-03-21)
 
 
