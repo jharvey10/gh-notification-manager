@@ -95,26 +95,33 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
     console.log('ipc: notifications:unsubscribe')
     poller?.stop()
     try {
-      const subscribableMap = new Map()
+      const subscribableIds = []
+      const subscribableThreadIds = []
+      const nonSubscribableThreadIds = []
+
       for (const id of ids) {
         const n = store.get(id)
         const target = getNotificationSubscribableTarget(n)
         if (target) {
-          subscribableMap.set(target.id, id)
+          subscribableIds.push(target.id)
+          subscribableThreadIds.push(id)
         } else {
-          console.warn(`Cannot unsubscribe from notification ${id}: no subscribable subject`)
+          nonSubscribableThreadIds.push(id)
         }
       }
-      const subscribableIds = [...subscribableMap.keys()]
-      if (subscribableIds.length === 0) {
-        return
-      }
 
-      const threadIds = [...subscribableMap.values()]
-      await unsubscribeAndMarkDone(subscribableIds, threadIds, (batch) => {
+      const onBatchDone = (batch) => {
         store.upsert(batch.map((id) => [id, null]))
         poller?.invalidateCacheEntries(batch)
-      })
+      }
+
+      if (subscribableIds.length > 0) {
+        await unsubscribeAndMarkDone(subscribableIds, subscribableThreadIds, onBatchDone)
+      }
+
+      if (nonSubscribableThreadIds.length > 0) {
+        await markThreadsAsDone(nonSubscribableThreadIds, onBatchDone)
+      }
     } catch (err) {
       broadcastError('unsubscribe', err.message)
       throw err
