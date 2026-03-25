@@ -5,6 +5,7 @@ declare global {
   var api: {
     getNotifications: () => Promise<unknown[]>
     onNotificationsUpdated: (callback: (data: unknown[]) => void) => () => void
+    onBatchProgress: (callback: (data: { completed: number; total: number } | null) => void) => () => void
     markAsDone: (threadIds: string[]) => Promise<void>
     markAsRead: (threadIds: string[]) => Promise<void>
     markAsUnread: (threadIds: string[]) => Promise<void>

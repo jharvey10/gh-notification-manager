@@ -9,9 +9,28 @@ import {
   unsaveThread
 } from './github/mutations.js'
 import { broadcastError } from './broadcastError.js'
+import { broadcastBatchProgress } from './broadcastBatchProgress.js'
 import { NotificationPoller } from './NotificationPoller.js'
 import { resetClients } from './github/client.js'
 import { getNotificationSubscribableTarget } from '../shared/notificationSubscription.js'
+
+function createProgressTracker(total) {
+  if (total <= 1) {
+    return { report() {}, done() {} }
+  }
+
+  let completed = 0
+  broadcastBatchProgress({ completed, total })
+  return {
+    report(count) {
+      completed += count
+      broadcastBatchProgress({ completed, total })
+    },
+    done() {
+      broadcastBatchProgress(null)
+    }
+  }
+}
 
 function registerIpcHandlers({ store, preferencesStore, poller: initialPoller }) {
   let poller = initialPoller
@@ -32,15 +51,18 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
   ipcMain.handle('notifications:markDone', async (_event, ids) => {
     console.log('ipc: notifications:markDone')
     poller?.stop()
+    const progress = createProgressTracker(ids.length)
     try {
       await markThreadsAsDone(ids, (batch) => {
         store.upsert(batch.map((id) => [id, null]))
         poller?.invalidateCacheEntries(batch)
+        progress.report(batch.length)
       })
     } catch (err) {
       broadcastError('markDone', err.message)
       throw err
     } finally {
+      progress.done()
       poller?.startDeferred()
     }
   })
@@ -48,6 +70,7 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
   ipcMain.handle('notifications:markRead', async (_event, ids) => {
     console.log('ipc: notifications:markRead')
     poller?.stop()
+    const progress = createProgressTracker(ids.length)
     try {
       await markThreadsAsRead(ids, (batch) => {
         store.upsert(
@@ -59,11 +82,13 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
             .filter(Boolean)
         )
         poller?.invalidateCacheEntries(batch)
+        progress.report(batch.length)
       })
     } catch (err) {
       broadcastError('markRead', err.message)
       throw err
     } finally {
+      progress.done()
       poller?.startDeferred()
     }
   })
@@ -71,6 +96,7 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
   ipcMain.handle('notifications:markUnread', async (_event, ids) => {
     console.log('ipc: notifications:markUnread')
     poller?.stop()
+    const progress = createProgressTracker(ids.length)
     try {
       await markThreadsAsUnread(ids, (batch) => {
         store.upsert(
@@ -82,11 +108,13 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
             .filter(Boolean)
         )
         poller?.invalidateCacheEntries(batch)
+        progress.report(batch.length)
       })
     } catch (err) {
       broadcastError('markUnread', err.message)
       throw err
     } finally {
+      progress.done()
       poller?.startDeferred()
     }
   })
@@ -94,6 +122,7 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
   ipcMain.handle('notifications:unsubscribe', async (_event, ids) => {
     console.log('ipc: notifications:unsubscribe')
     poller?.stop()
+    const progress = createProgressTracker(ids.length)
     try {
       const subscribableIds = []
       const subscribableThreadIds = []
@@ -113,6 +142,7 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
       const onBatchDone = (batch) => {
         store.upsert(batch.map((id) => [id, null]))
         poller?.invalidateCacheEntries(batch)
+        progress.report(batch.length)
       }
 
       if (subscribableIds.length > 0) {
@@ -126,6 +156,7 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
       broadcastError('unsubscribe', err.message)
       throw err
     } finally {
+      progress.done()
       poller?.startDeferred()
     }
   })

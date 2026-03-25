@@ -4,6 +4,8 @@ import { clsx } from 'clsx'
 import { Button } from '../../components/Button.jsx'
 import { Action } from './actions-menu/Action.jsx'
 import { ActionsMenu } from './actions-menu/ActionsMenu.jsx'
+import { BatchProgressBar } from './BatchProgressBar.jsx'
+import { useBatchProgress } from '../../hooks/useBatchProgress.js'
 import CheckmarkIcon from '../../assets/icons/checkmark.svg?react'
 import EmailIcon from '../../assets/icons/email.svg?react'
 import EmailNewIcon from '../../assets/icons/email-new.svg?react'
@@ -18,8 +20,12 @@ export function BatchActionBar({
   onUnsubscribe,
   onMarkDone
 }) {
+  const batchProgress = useBatchProgress()
+  const isBatchBusy = batchProgress !== null
+  const actionsDisabled = isBatchBusy || selectedCount === 0
+
   return (
-    <div className="flex w-full flex-wrap gap-2">
+    <div className="flex w-full flex-wrap items-center gap-2">
       <div
         className={clsx(
           'flex items-center whitespace-nowrap text-sm',
@@ -29,9 +35,11 @@ export function BatchActionBar({
         {selectedCount} selected
       </div>
 
-      <Button onClick={onSelectAll}>Select all</Button>
+      <Button onClick={onSelectAll} disabled={isBatchBusy}>
+        Select all
+      </Button>
 
-      <Button onClick={onClearSelection} disabled={selectedCount === 0} variant="secondary">
+      <Button onClick={onClearSelection} disabled={actionsDisabled} variant="secondary">
         Unselect all
       </Button>
 
@@ -39,7 +47,7 @@ export function BatchActionBar({
         onClick={onMarkDone}
         aria-label={`Mark all selected notifications as done`}
         tooltip="Mark done"
-        disabled={selectedCount === 0}
+        disabled={actionsDisabled}
       >
         <CheckmarkIcon className="size-4 shrink-0 fill-current" />
       </Button>
@@ -48,7 +56,7 @@ export function BatchActionBar({
         onClick={onUnsubscribe}
         aria-label={`Unsubscribe from all selected notifications`}
         tooltip="Unsubscribe"
-        disabled={selectedCount === 0}
+        disabled={actionsDisabled}
       >
         <NotificationOffIcon className="size-4 shrink-0 fill-current" />
       </Button>
@@ -57,7 +65,7 @@ export function BatchActionBar({
         popoverId="batch-actions-menu"
         anchorName="--batch-actions-menu-anchor"
         trigger={
-          <Button disabled={selectedCount === 0} tooltip="Actions">
+          <Button disabled={actionsDisabled} tooltip="Actions">
             ⋯
           </Button>
         }
@@ -69,6 +77,8 @@ export function BatchActionBar({
           Mark unread
         </Action>
       </ActionsMenu>
+
+      <BatchProgressBar batchProgress={batchProgress} />
     </div>
   )
 }

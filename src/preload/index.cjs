@@ -16,6 +16,12 @@ contextBridge.exposeInMainWorld('api', {
     return () => ipcRenderer.removeListener('main:error', handler)
   },
 
+  onBatchProgress: (callback) => {
+    const handler = (_event, data) => callback(data)
+    ipcRenderer.on('batch:progress', handler)
+    return () => ipcRenderer.removeListener('batch:progress', handler)
+  },
+
   markAsDone: (threadIds) => ipcRenderer.invoke('notifications:markDone', threadIds),
 
   markAsRead: (threadIds) => ipcRenderer.invoke('notifications:markRead', threadIds),

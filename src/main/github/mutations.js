@@ -7,7 +7,7 @@ import { UNSAVE_THREAD_MUTATION } from './mutations/unsaveThread.js'
 import { buildUnsubscribeMutation } from './mutations/unsubscribe.js'
 import { buildUnsubscribeAndMarkDoneMutation } from './mutations/unsubscribeAndMarkDone.js'
 
-const BATCH_SIZE = 50
+const BATCH_SIZE = 20
 
 async function mutateInBatches(ids, mutation, label, onBatchDone) {
   const gql = getGraphql()
