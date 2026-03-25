@@ -7,7 +7,7 @@ export function FilterOptionRow({ item, count, selectionState, onChange }) {
   const isExcluded = selectionState === 'exclude'
 
   return (
-    <div className="join min-w-40">
+    <div className="join min-w-40 px-3">
       <Button
         className="join-item"
         outline={!isExcluded}

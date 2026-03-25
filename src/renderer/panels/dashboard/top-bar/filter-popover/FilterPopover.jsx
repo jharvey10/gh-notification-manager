@@ -29,7 +29,7 @@ export function FilterPopover({
       <div className="flex min-w-80 max-w-96 flex-col gap-3">
         <FilterPopoverHeader title={title} description={description} />
         <ActiveFilterList selections={selections} onChange={onChange} onClear={onClear} />
-        <div className="flex max-h-80 flex-col gap-2 overflow-y-auto">
+        <div className="flex max-h-80 flex-col gap-2 overflow-y-auto -mx-3">
           {items.map((item) => (
             <FilterOptionRow
               key={item}

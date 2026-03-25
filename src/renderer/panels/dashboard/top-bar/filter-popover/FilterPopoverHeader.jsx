@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 export function FilterPopoverHeader({ title, description }) {
   return (
@@ -9,4 +10,9 @@ export function FilterPopoverHeader({ title, description }) {
       </div>
     </div>
   )
+}
+
+FilterPopoverHeader.propTypes = {
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired
 }
