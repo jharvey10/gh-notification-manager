@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/jharvey10/gh-notification-manager/compare/v1.3.1...v1.3.2) (2026-03-25)
+
+
+### Bug Fixes
+
+* improve filter popover scrollbar position ([bf6cad9](https://github.com/jharvey10/gh-notification-manager/commit/bf6cad93f2001c6c168445d02ce5afee0c7dbdf3))
+
 ## [1.3.1](https://github.com/jharvey10/gh-notification-manager/compare/v1.3.0...v1.3.1) (2026-03-24)
 
 
