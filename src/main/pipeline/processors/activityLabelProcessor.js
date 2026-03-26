@@ -11,7 +11,7 @@ const CLOSED_DETAIL_LABELS = {
   NOT_PLANNED: 'not_planned'
 }
 
-function labelForEvent(event) {
+function labelForEvent(event, context) {
   if (!event) {
     return ''
   }
@@ -21,7 +21,7 @@ function labelForEvent(event) {
     case 'review':
       return REVIEW_STATE_LABELS[event.detail] ?? 'review_updated'
     case 'mention':
-      return 'mentioned'
+      return context.viewerLogin && event.actor === context.viewerLogin ? 'mentioned' : 'new_comment'
     case 'assign':
       return 'assigned'
     case 'review_requested':
@@ -53,8 +53,8 @@ function getMostRecentEvent(events) {
 // TODO: On first poll there's no prev to diff against, so the most recent event
 //       may be very old. Consider whether to suppress labels for stale events.
 /** @type {import('../Pipeline.js').PipelineProcessor} */
-export async function activityLabelProcessor(notification) {
+export async function activityLabelProcessor(notification, context) {
   const events = notification._latestEvents?.curr ?? []
-  notification.activityLabel = labelForEvent(getMostRecentEvent(events))
+  notification.activityLabel = labelForEvent(getMostRecentEvent(events), context)
   return notification
 }
