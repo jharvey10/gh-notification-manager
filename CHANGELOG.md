@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/jharvey10/gh-notification-manager/compare/v1.4.0...v1.4.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* don't show "mentioned" if the mentioned user isn't you ([f39e50e](https://github.com/jharvey10/gh-notification-manager/commit/f39e50e99a3d44d5c0ba7294eb6d9e3eecb2597b))
+
 ## [1.4.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.3.2...v1.4.0) (2026-03-26)
 
 
