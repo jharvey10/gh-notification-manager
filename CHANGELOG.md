@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.3.2...v1.4.0) (2026-03-26)
+
+
+### Features
+
+* Add batch action progress bar ([1694a70](https://github.com/jharvey10/gh-notification-manager/commit/1694a70bffc8501d88cf31e49c8e253aedac6282))
+
+
+### Bug Fixes
+
+* **deps:** bump picomatch from 4.0.3 to 4.0.4 ([bc70c9a](https://github.com/jharvey10/gh-notification-manager/commit/bc70c9ac69be6cc527bebcb0a3204cd37cc061e8))
+
 ## [1.3.2](https://github.com/jharvey10/gh-notification-manager/compare/v1.3.1...v1.3.2) (2026-03-25)
 
 
