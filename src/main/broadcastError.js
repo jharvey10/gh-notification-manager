@@ -1,11 +1,15 @@
-import { getMainWindow } from './index.js'
+import { getMainWindow, waitForRenderer } from './index.js'
 
-function broadcastError(source, message) {
+async function broadcastError(source, message) {
+  await waitForRenderer()
+
   const win = getMainWindow()
   if (!win || win.isDestroyed()) {
+    console.error(`error: [main/${source}] ${message} (window unavailable, dropped)`)
     return
   }
 
+  console.error(`error: [main/${source}] ${message}`)
   win.webContents.send('main:error', { source, message })
 }
 

@@ -8,6 +8,34 @@ import { broadcastNotificationsUpdated } from './notificationsBroadcaster.js'
 
 const DEV_SERVER_URL = 'http://localhost:5173'
 let mainWindow = null
+let resolveReady
+let waitForRendererPromise
+
+function ensureWaitForRendererPromise() {
+  if (!waitForRendererPromise) {
+    waitForRendererPromise = new Promise((resolve) => {
+      resolveReady = resolve
+    })
+  }
+}
+
+/**
+ * Global signal to all parts of the app that the renderer is ready to go.
+ */
+const waitForRenderer = async () => {
+  ensureWaitForRendererPromise()
+
+  await waitForRendererPromise
+}
+
+/**
+ * Used by the UI to tell the app it is ready to go.
+ */
+function markRendererAsReady() {
+  ensureWaitForRendererPromise()
+
+  resolveReady()
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -64,4 +92,4 @@ main().catch((err) => {
   console.error('Failed to start app:', err)
 })
 
-export { getMainWindow }
+export { getMainWindow, waitForRenderer, markRendererAsReady }

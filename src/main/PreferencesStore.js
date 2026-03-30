@@ -19,7 +19,6 @@ class PreferencesStore {
       return sanitizeSettings(JSON.parse(raw))
     } catch (err) {
       if (err.code !== 'ENOENT') {
-        console.error('Failed to load settings:', err)
         broadcastError('settings', `Failed to load: ${err.message}`)
       }
       return { ...DEFAULT_SETTINGS }
@@ -31,7 +30,6 @@ class PreferencesStore {
       fs.mkdirSync(path.dirname(this.#filePath), { recursive: true })
       fs.writeFileSync(this.#filePath, JSON.stringify(this.#settings, null, 2))
     } catch (err) {
-      console.error('Failed to save settings:', err)
       broadcastError('settings', `Failed to save: ${err.message}`)
       throw err
     }
@@ -42,10 +40,13 @@ class PreferencesStore {
   }
 
   update(partialSettings) {
-    this.#settings = sanitizeSettings({
-      ...this.#settings,
-      ...partialSettings
-    }, this.#settings)
+    this.#settings = sanitizeSettings(
+      {
+        ...this.#settings,
+        ...partialSettings
+      },
+      this.#settings
+    )
     this.#save()
     return this.get()
   }

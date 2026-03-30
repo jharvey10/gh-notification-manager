@@ -21,7 +21,6 @@ export async function autoDoneProcessor(notification, { userPreferences, invalid
     invalidateCacheEntries?.([notification.id])
     return null
   } catch (err) {
-    console.error('Auto mark-done failed:', err.message)
     broadcastError('autoDone', err.message)
     return notification
   }

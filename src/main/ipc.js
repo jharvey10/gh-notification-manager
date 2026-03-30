@@ -9,6 +9,7 @@ import {
   unsaveThread
 } from './github/mutations.js'
 import { broadcastError } from './broadcastError.js'
+import { markRendererAsReady } from './index.js'
 import { broadcastBatchProgress } from './broadcastBatchProgress.js'
 import { NotificationPoller } from './NotificationPoller.js'
 import { resetClients } from './github/client.js'
@@ -34,6 +35,11 @@ function createProgressTracker(total) {
 
 function registerIpcHandlers({ store, preferencesStore, poller: initialPoller }) {
   let poller = initialPoller
+
+  ipcMain.on('renderer:ready', () => {
+    console.log('ipc: renderer:ready')
+    markRendererAsReady()
+  })
 
   ipcMain.handle('shell:openExternal', (_event, url) => {
     console.log('ipc: shell:openExternal')

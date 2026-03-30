@@ -62,7 +62,6 @@ class NotificationPoller {
         console.log('no upserts needed after polling')
       }
     } catch (err) {
-      console.error('Poll failed:', err.message)
       broadcastError('poller', err.message)
     }
 

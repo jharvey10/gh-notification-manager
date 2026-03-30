@@ -50,5 +50,7 @@ contextBridge.exposeInMainWorld('api', {
 
   openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
 
-  testOsNotification: () => ipcRenderer.invoke('osnotification:test')
+  testOsNotification: () => ipcRenderer.invoke('osnotification:test'),
+
+  signalReady: () => ipcRenderer.send('renderer:ready')
 })
