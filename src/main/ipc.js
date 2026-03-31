@@ -220,7 +220,7 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
 
   ipcMain.handle('app:getVersion', () => {
     console.log('ipc: app:getVersion')
-    return app.getVersion()
+    return globalThis.__payloadVersion || app.getVersion()
   })
 
   ipcMain.handle('auth:hasValidToken', async () => {

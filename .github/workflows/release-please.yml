@@ -51,6 +51,14 @@ jobs:
       - name: Build ${{ matrix.target }} package
         run: npm run dist:${{ matrix.target }}
 
+      - name: Create payload archive
+        if: matrix.target == 'linux'
+        shell: bash
+        run: |
+          mkdir -p release
+          cd dist
+          zip -r ../release/payload-$(node -p "require('../package.json').version").zip .
+
       - name: Upload release assets
         shell: bash
         env:
@@ -63,13 +71,13 @@ jobs:
           files=()
           case "$BUILD_TARGET" in
             mac)
-              files=(release/*.dmg release/*.zip release/*.yml release/*.blockmap)
+              files=(release/*.dmg)
               ;;
             win)
-              files=(release/*.exe release/*.yml release/*.blockmap)
+              files=(release/*.exe)
               ;;
             linux)
-              files=(release/*.AppImage release/*.yml)
+              files=(release/*.AppImage release/payload-*.zip)
               ;;
           esac
 

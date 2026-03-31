@@ -19,7 +19,6 @@ export function VersionSection({ appVersion }) {
     return cleanup
   }, [])
 
-  const handleCheck = useCallback(() => globalThis.api.checkForUpdates(), [])
   const handleDownload = useCallback(() => globalThis.api.downloadUpdate(), [])
   const handleInstall = useCallback(() => globalThis.api.installUpdate(), [])
 
@@ -27,7 +26,6 @@ export function VersionSection({ appVersion }) {
     <SettingsSection title="Version" description={appVersion || 'Loading...'}>
       <UpdateStatus
         status={status}
-        onCheck={handleCheck}
         onDownload={handleDownload}
         onInstall={handleInstall}
       />
