@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.5.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.4.1...v1.5.0) (2026-03-31)
+
+
+### Features
+
+* Show errors in dismissable alerts at bottom of screen ([61311e6](https://github.com/jharvey10/gh-notification-manager/commit/61311e652f634ab76bbd4da651c1c711d4e11bcf))
+
+
+### Bug Fixes
+
+* add missing reason tags ([c9924a7](https://github.com/jharvey10/gh-notification-manager/commit/c9924a7e85f7e7f892ed8fe0736ed0e362337667))
+* improve onboarding logic and token validation ([d5b75dc](https://github.com/jharvey10/gh-notification-manager/commit/d5b75dcc7f55aef78074044a1cb23f7560b23a4e))
+
 ## [1.4.1](https://github.com/jharvey10/gh-notification-manager/compare/v1.4.0...v1.4.1) (2026-03-26)
 
 
