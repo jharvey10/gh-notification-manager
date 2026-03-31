@@ -48,7 +48,7 @@ function createWindow() {
   })
 
   if (app.isPackaged) {
-    mainWindow.loadFile(path.join(import.meta.dirname, '../../dist/renderer/index.html'))
+    mainWindow.loadFile(path.join(import.meta.dirname, '../renderer/index.html'))
   } else {
     mainWindow.loadURL(DEV_SERVER_URL)
   }
