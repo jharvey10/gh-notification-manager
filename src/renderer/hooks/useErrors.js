@@ -10,27 +10,23 @@ export function useErrors() {
       const msg = `[main/${source}] ${message}`
       console.error(msg)
 
-      const newErrors = [...errors]
-      if (newErrors.includes(msg)) {
-        return
-      }
+      setErrors((prev) => {
+        if (prev.includes(msg)) {
+          return prev
+        }
+        const next = [msg, ...prev]
+        while (next.length > MAX_VISIBLE_ERRORS) {
+          next.pop()
+        }
 
-      newErrors.push(msg)
-
-      if (newErrors.length > MAX_VISIBLE_ERRORS) {
-        newErrors.shift()
-      }
-
-      setErrors(newErrors)
+        return next
+      })
     })
   }, [])
 
-  const dismissError = useCallback(
-    (message) => {
-      setErrors(errors.filter((e) => e !== message))
-    },
-    [errors]
-  )
+  const dismissError = useCallback((message) => {
+    setErrors((prev) => prev.filter((e) => e !== message))
+  }, [])
 
   return { errors, dismissError }
 }

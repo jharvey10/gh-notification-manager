@@ -5,9 +5,9 @@ import { PanelState } from '../../utils/PanelState'
 export const Loading = ({ setPanelState, notifications }) => {
   useEffect(() => {
     const checkReady = async () => {
-      const hasToken = await globalThis.api.hasToken()
+      const hasValidToken = await globalThis.api.hasValidToken()
 
-      if (!hasToken) {
+      if (!hasValidToken) {
         setPanelState(PanelState.TOKEN_PROMPT)
         return
       }

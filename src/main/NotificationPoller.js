@@ -56,11 +56,7 @@ class NotificationPoller {
         return
       }
 
-      if (results.length > 0) {
-        this.#store.upsert(results)
-      } else {
-        console.log('no upserts needed after polling')
-      }
+      this.#store.upsert(results)
     } catch (err) {
       broadcastError('poller', err.message)
     }

@@ -12,7 +12,7 @@ import { broadcastError } from './broadcastError.js'
 import { markRendererAsReady } from './index.js'
 import { broadcastBatchProgress } from './broadcastBatchProgress.js'
 import { NotificationPoller } from './NotificationPoller.js'
-import { resetClients } from './github/client.js'
+import { getGraphql, resetClients } from './github/client.js'
 import { getNotificationSubscribableTarget } from '../shared/notificationSubscription.js'
 
 function createProgressTracker(total) {
@@ -222,9 +222,17 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
     return app.getVersion()
   })
 
-  ipcMain.handle('auth:hasToken', () => {
-    console.log('ipc: auth:hasToken')
-    return auth.hasToken()
+  ipcMain.handle('auth:hasValidToken', async () => {
+    console.log('ipc: auth:hasValidToken')
+    const result = await auth.validateToken(getGraphql())
+    if (result.valid) {
+      return true
+    }
+
+    if (result.message) {
+      broadcastError('auth', result.message)
+    }
+    return false
   })
 
   ipcMain.handle('auth:setToken', async (_event, token) => {

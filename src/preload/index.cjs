@@ -44,7 +44,7 @@ contextBridge.exposeInMainWorld('api', {
 
   setToken: (token) => ipcRenderer.invoke('auth:setToken', token),
 
-  hasToken: () => ipcRenderer.invoke('auth:hasToken'),
+  hasValidToken: () => ipcRenderer.invoke('auth:hasValidToken'),
 
   clearToken: () => ipcRenderer.invoke('auth:clearToken'),
 
