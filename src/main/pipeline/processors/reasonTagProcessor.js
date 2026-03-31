@@ -5,7 +5,11 @@ const REASON_TAGS = Object.freeze({
   author: 'author',
   ci_activity: 'ci',
   comment: 'comment',
-  state_change: 'state_change'
+  state_change: 'state_change',
+  security_alert: 'security_alert',
+  subscribed: 'subscribed',
+  manual: 'manual',
+  invitation: 'invitation'
 })
 
 /**
