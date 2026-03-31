@@ -29,6 +29,7 @@
   "build": {
     "appId": "com.jharvey10.gh-notification-manager",
     "productName": "GitHub Notification Manager",
+    "artifactName": "${name}-${version}-${arch}-${os}.${ext}",
     "publish": {
       "provider": "github",
       "owner": "jharvey10",
