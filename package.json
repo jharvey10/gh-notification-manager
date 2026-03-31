@@ -13,7 +13,7 @@
     "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
     "dev:renderer": "vite",
     "dev:electron": "wait-on tcp:5173 && electron .",
-    "build": "vite build && node scripts/bundle-main.mjs",
+    "build": "vite build && node scripts/bundle-main.mjs && node scripts/create-payload-zip.mjs",
     "dist:mac": "npm run build && electron-builder --mac --publish never",
     "dist:win": "npm run build && electron-builder --win --publish never",
     "dist:linux": "npm run build && electron-builder --linux --publish never",

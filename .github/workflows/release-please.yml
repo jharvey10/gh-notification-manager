@@ -51,14 +51,6 @@ jobs:
       - name: Build ${{ matrix.target }} package
         run: npm run dist:${{ matrix.target }}
 
-      - name: Create payload archive
-        if: matrix.target == 'linux'
-        shell: bash
-        run: |
-          mkdir -p release
-          cd dist
-          zip -r ../release/payload-$(node -p "require('../package.json').version").zip .
-
       - name: Upload release assets
         shell: bash
         env:
