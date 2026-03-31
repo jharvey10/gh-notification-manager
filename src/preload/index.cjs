@@ -52,5 +52,19 @@ contextBridge.exposeInMainWorld('api', {
 
   testOsNotification: () => ipcRenderer.invoke('osnotification:test'),
 
-  signalReady: () => ipcRenderer.send('renderer:ready')
+  signalReady: () => ipcRenderer.send('renderer:ready'),
+
+  onUpdaterStatus: (callback) => {
+    const handler = (_event, data) => callback(data)
+    ipcRenderer.on('updater:status', handler)
+    return () => ipcRenderer.removeListener('updater:status', handler)
+  },
+
+  getUpdaterStatus: () => ipcRenderer.invoke('updater:getStatus'),
+
+  checkForUpdates: () => ipcRenderer.invoke('updater:check'),
+
+  downloadUpdate: () => ipcRenderer.invoke('updater:download'),
+
+  installUpdate: () => ipcRenderer.invoke('updater:install')
 })

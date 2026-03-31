@@ -14,6 +14,7 @@ import { broadcastBatchProgress } from './broadcastBatchProgress.js'
 import { NotificationPoller } from './NotificationPoller.js'
 import { getGraphql, resetClients } from './github/client.js'
 import { getNotificationSubscribableTarget } from '../shared/notificationSubscription.js'
+import { getStatus as getUpdaterStatus, checkForUpdates, downloadUpdate, quitAndInstall } from './updater.js'
 
 function createProgressTracker(total) {
   if (total <= 1) {
@@ -259,6 +260,22 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
       title: 'GH Notification Manager',
       body: 'This is a test notification from gh-notification-manager.'
     }).show()
+  })
+
+  ipcMain.handle('updater:getStatus', () => {
+    return getUpdaterStatus()
+  })
+
+  ipcMain.handle('updater:check', () => {
+    checkForUpdates()
+  })
+
+  ipcMain.handle('updater:download', () => {
+    downloadUpdate()
+  })
+
+  ipcMain.handle('updater:install', () => {
+    quitAndInstall()
   })
 }
 

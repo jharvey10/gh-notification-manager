@@ -63,13 +63,13 @@ jobs:
           files=()
           case "$BUILD_TARGET" in
             mac)
-              files=(release/*.dmg)
+              files=(release/*.dmg release/*.zip release/*.yml release/*.blockmap)
               ;;
             win)
-              files=(release/*.exe)
+              files=(release/*.exe release/*.yml release/*.blockmap)
               ;;
             linux)
-              files=(release/*.AppImage)
+              files=(release/*.AppImage release/*.yml)
               ;;
           esac
 

@@ -8,7 +8,7 @@ import { AutoDoneSection } from './settings-sections/AutoDoneSection'
 import { AuthTokenSection } from './settings-sections/AuthTokenSection'
 import { OlderSectionSettings } from './settings-sections/OlderSectionSettings'
 import { OsNotificationsSection } from './settings-sections/OsNotificationsSection'
-import { VersionSection } from './settings-sections/VersionSection'
+import { VersionSection } from './settings-sections/version-section/VersionSection'
 
 export function Settings({ setPanelState }) {
   const { settings, updateSettings } = useSettings()
