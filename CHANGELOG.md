@@ -11,6 +11,22 @@
 
 * self-updater ([8e3d1ab](https://github.com/jharvey10/gh-notification-manager/commit/8e3d1ab755c2f370b1fddbaf46e84dc910e54bf5))
 
+
+### Bug Fixes
+
+* fix incorrect artifact names ([81a1788](https://github.com/jharvey10/gh-notification-manager/commit/81a178889e46459ea41cef4357d8dae478569017))
+
+## [2.0.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.5.0...v2.0.0) (2026-03-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* This fundamentally changes the way the app updates and is experimental
+
+### Features
+
+* self-updater ([8e3d1ab](https://github.com/jharvey10/gh-notification-manager/commit/8e3d1ab755c2f370b1fddbaf46e84dc910e54bf5))
+
 ## [1.5.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.4.1...v1.5.0) (2026-03-31)
 
 
