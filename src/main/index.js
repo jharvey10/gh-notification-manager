@@ -38,17 +38,21 @@ function markRendererAsReady() {
 }
 
 function createWindow() {
+  const bundleRoot = globalThis.__bundleRoot
+
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
-    icon: path.join(import.meta.dirname, 'assets/app-icon.png'),
+    icon: bundleRoot && path.join(bundleRoot, 'main', 'assets', 'app-icon.png'),
     webPreferences: {
-      preload: path.join(import.meta.dirname, '../preload/index.cjs')
+      preload: bundleRoot
+        ? path.join(bundleRoot, 'preload', 'index.cjs')
+        : path.join(import.meta.dirname, '../preload/index.cjs')
     }
   })
 
-  if (app.isPackaged) {
-    mainWindow.loadFile(path.join(import.meta.dirname, '../renderer/index.html'))
+  if (bundleRoot) {
+    mainWindow.loadFile(path.join(bundleRoot, 'renderer', 'index.html'))
   } else {
     mainWindow.loadURL(DEV_SERVER_URL)
   }

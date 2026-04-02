@@ -18,7 +18,8 @@
     "dist:win": "npm run build && electron-builder --win --publish never",
     "dist:linux": "npm run build && electron-builder --linux --publish never",
     "start": "electron .",
-    "typecheck": "tsc --project tsconfig.json"
+    "typecheck": "tsc --project tsconfig.json",
+    "clean": "rm -rf dist release"
   },
   "keywords": [],
   "author": {
@@ -59,6 +60,7 @@
   },
   "dependencies": {
     "@octokit/graphql": "^9.0.3",
+    "@octokit/rest": "^22.0.1",
     "adm-zip": "^0.5.16",
     "clsx": "^2.1.1",
     "lru-cache": "^11.2.6",
