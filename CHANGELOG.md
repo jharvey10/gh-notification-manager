@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.0.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.5.0...v2.0.0) (2026-04-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* The app now tracks read, unread, and saved as local state that is not reflected on github. This means there is not congruency between notification state in the app and notification state on github.com until there are sufficient public APIs available to have that.
+* This fundamentally changes the way the app updates and is experimental
+
+### Features
+
+* get self-update actually working ([1e91f93](https://github.com/jharvey10/gh-notification-manager/commit/1e91f933d01ffc5bfb4dfe45d638fe23de580547))
+* implement bootstrap-based app bundle running ([deed46e](https://github.com/jharvey10/gh-notification-manager/commit/deed46e03339804c4ea529aa7d9023077fb7397e))
+* remove usages of graphql notifications-based queries ([dc65935](https://github.com/jharvey10/gh-notification-manager/commit/dc65935cd435f73f337647d24c9c755763b85609))
+* self-updater ([8e3d1ab](https://github.com/jharvey10/gh-notification-manager/commit/8e3d1ab755c2f370b1fddbaf46e84dc910e54bf5))
+
+
+### Bug Fixes
+
+* adjust build process ([e4e084e](https://github.com/jharvey10/gh-notification-manager/commit/e4e084ec490a70c500885d22f9c42c086d80d389))
+* **deps:** update dependency minor versions ([50a78f0](https://github.com/jharvey10/gh-notification-manager/commit/50a78f0a432ffd17959ffcc31c8bd48906594108))
+* fix broken import path for index.html when loaded from bundle ([0f39442](https://github.com/jharvey10/gh-notification-manager/commit/0f39442d09f39f289ff33b46563e86e429efd28f))
+* fix incorrect artifact names ([81a1788](https://github.com/jharvey10/gh-notification-manager/commit/81a178889e46459ea41cef4357d8dae478569017))
+
 ## [1.5.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.4.1...v1.5.0) (2026-03-31)
 
 ### Features
