@@ -1,5 +1,6 @@
-import js from '@eslint/js';
-import globals from 'globals';
+import js from '@eslint/js'
+import react from 'eslint-plugin-react'
+import globals from 'globals'
 
 export default [
   js.configs.recommended,
@@ -8,16 +9,20 @@ export default [
 
   {
     files: ['**/*.{js,jsx,mjs}'],
+    plugins: { react },
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
         ...globals.browser,
-        ...globals.node,
+        ...globals.node
       },
       parserOptions: {
-        ecmaFeatures: { jsx: true },
-      },
+        ecmaFeatures: { jsx: true }
+      }
+    },
+    settings: {
+      react: { version: 'detect' }
     },
     rules: {
       curly: 'error',
@@ -35,6 +40,12 @@ export default [
       'no-unmodified-loop-condition': 'warn',
       'no-unreachable-loop': 'warn',
       'no-use-before-define': ['error', { functions: false }],
-    },
-  },
-];
+      'react/jsx-uses-vars': 'error',
+      'react/jsx-uses-react': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-key': 'error',
+      'react/jsx-no-target-blank': 'error',
+      'react/no-danger': 'warn'
+    }
+  }
+]

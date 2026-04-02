@@ -21,7 +21,9 @@ function labelForEvent(event, context) {
     case 'review':
       return REVIEW_STATE_LABELS[event.detail] ?? 'review_updated'
     case 'mention':
-      return context.viewerLogin && event.actor === context.viewerLogin ? 'mentioned' : 'new_comment'
+      return context.viewerLogin && event.actor === context.viewerLogin
+        ? 'mentioned'
+        : 'new_comment'
     case 'assign':
       return 'assigned'
     case 'review_requested':
@@ -42,7 +44,9 @@ function labelForEvent(event, context) {
 }
 
 function getMostRecentEvent(events) {
-  if (!events || events.length === 0) return null
+  if (!events || events.length === 0) {
+    return null
+  }
   return events.reduce((a, b) => (a.timestamp >= b.timestamp ? a : b))
 }
 

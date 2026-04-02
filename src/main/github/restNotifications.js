@@ -26,20 +26,22 @@ const PER_PAGE = 50
 
 let lastModified = null
 
-function parseSubjectRef(subject, repoFullName) {
+function parseSubjectRef(subject) {
   const type = subject.type
   const apiUrl = subject.url || null
   let number = null
 
   if (apiUrl && (type === 'PullRequest' || type === 'Issue' || type === 'Discussion')) {
     const match = apiUrl.match(/\/(\d+)$/)
-    if (match) number = Number.parseInt(match[1], 10)
+    if (match) {
+      number = Number.parseInt(match[1], 10)
+    }
   }
 
   return { type, apiUrl, number }
 }
 
-function buildWebUrl(repoFullName, subjectType, subjectNumber, title) {
+function buildWebUrl(repoFullName, subjectType, subjectNumber) {
   const base = `https://github.com/${repoFullName}`
   switch (subjectType) {
     case 'PullRequest':
@@ -60,7 +62,7 @@ function buildWebUrl(repoFullName, subjectType, subjectNumber, title) {
 function mapThread(raw) {
   const repoFullName = raw.repository.full_name
   const [owner, repo] = repoFullName.split('/')
-  const { type, apiUrl, number } = parseSubjectRef(raw.subject, repoFullName)
+  const { type, apiUrl, number } = parseSubjectRef(raw.subject)
 
   return {
     threadId: String(raw.id),
@@ -72,7 +74,7 @@ function mapThread(raw) {
     title: raw.subject.title,
     reason: raw.reason,
     updatedAt: raw.updated_at,
-    webUrl: buildWebUrl(repoFullName, type, number, raw.subject.title)
+    webUrl: buildWebUrl(repoFullName, type, number)
   }
 }
 
@@ -144,7 +146,9 @@ async function fetchSubjectNodeIds(threads) {
     (t) => t.subjectUrl && (t.subjectType === 'Release' || t.subjectType === 'CheckSuite')
   )
 
-  if (needsNodeId.length === 0) return new Map()
+  if (needsNodeId.length === 0) {
+    return new Map()
+  }
 
   const octokit = getRest()
   const results = new Map()
@@ -172,13 +176,17 @@ function parsePollInterval(headers) {
   const raw = headers?.['x-poll-interval']
   if (raw) {
     const val = Number.parseInt(raw, 10)
-    if (Number.isFinite(val) && val > 0) return val * 1000
+    if (Number.isFinite(val) && val > 0) {
+      return val * 1000
+    }
   }
   return 60_000
 }
 
 function parseLinkNext(linkHeader) {
-  if (!linkHeader) return null
+  if (!linkHeader) {
+    return null
+  }
   const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/)
   return match ? match[1] : null
 }

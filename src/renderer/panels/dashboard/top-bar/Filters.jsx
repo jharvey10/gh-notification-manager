@@ -1,4 +1,4 @@
-import React, { useState, useDeferredValue, useEffect } from 'react'
+import { useState, useDeferredValue, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { useTagOptions } from '../../../hooks/useTagOptions'
 import { useRepoOptions } from '../../../hooks/useRepoOptions'

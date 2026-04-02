@@ -30,7 +30,9 @@ class NotificationStore {
     try {
       const raw = fs.readFileSync(this.#filePath, 'utf8')
       const data = JSON.parse(raw)
-      if (data.version !== STORE_VERSION) return
+      if (data.version !== STORE_VERSION) {
+        return
+      }
 
       if (data.notifications && typeof data.notifications === 'object') {
         this.#notifications = new Map(Object.entries(data.notifications))
@@ -43,7 +45,9 @@ class NotificationStore {
   }
 
   #scheduleSave() {
-    if (this.#saveTimer) return
+    if (this.#saveTimer) {
+      return
+    }
     this.#saveTimer = setTimeout(() => {
       this.#saveTimer = null
       this.#saveToDisk()
@@ -52,9 +56,7 @@ class NotificationStore {
 
   #saveToDisk() {
     try {
-      const notifications = this.#notifications
-        ? Object.fromEntries(this.#notifications)
-        : {}
+      const notifications = this.#notifications ? Object.fromEntries(this.#notifications) : {}
       const payload = { version: STORE_VERSION, notifications }
       fs.mkdirSync(path.dirname(this.#filePath), { recursive: true })
       fs.writeFileSync(this.#filePath, JSON.stringify(payload))
@@ -93,16 +95,22 @@ class NotificationStore {
       } else {
         const existing = this.#notifications.get(id)
         if (existing) {
-          this.#notifications.set(id, /** @type {GitHubNotificationNode} */ ({
-            ...existing,
-            ...data,
-            _localData: { ...existing._localData, ...data._localData }
-          }))
+          this.#notifications.set(
+            id,
+            /** @type {GitHubNotificationNode} */ ({
+              ...existing,
+              ...data,
+              _localData: { ...existing._localData, ...data._localData }
+            })
+          )
         } else {
-          this.#notifications.set(id, /** @type {GitHubNotificationNode} */ ({
-            ...data,
-            _localData: this.#createLocalData()
-          }))
+          this.#notifications.set(
+            id,
+            /** @type {GitHubNotificationNode} */ ({
+              ...data,
+              _localData: this.#createLocalData()
+            })
+          )
         }
       }
     }

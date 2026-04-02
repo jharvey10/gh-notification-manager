@@ -14,13 +14,17 @@ class ProgressTracker {
 
   /** @param {number} count */
   report(count) {
-    if (this.#total <= 1) return
+    if (this.#total <= 1) {
+      return
+    }
     this.#completed += count
     broadcastBatchProgress({ completed: this.#completed, total: this.#total })
   }
 
   done() {
-    if (this.#total <= 1) return
+    if (this.#total <= 1) {
+      return
+    }
     broadcastBatchProgress(null)
   }
 }

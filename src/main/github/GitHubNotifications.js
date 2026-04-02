@@ -73,14 +73,20 @@ const EVENT_EXTRACTORS = [
 
 function extractLatestEvents(node) {
   const subject = node.optionalSubject
-  if (!subject) return []
+  if (!subject) {
+    return []
+  }
 
   const events = []
   for (const { key, type, actor, time, detail } of EVENT_EXTRACTORS) {
     const eventNode = subject[key]?.nodes?.[0]
-    if (!eventNode) continue
+    if (!eventNode) {
+      continue
+    }
     const timestamp = time(eventNode)
-    if (!timestamp) continue
+    if (!timestamp) {
+      continue
+    }
     events.push({
       type,
       actor: actor(eventNode) ?? null,
@@ -144,7 +150,9 @@ class GitHubNotifications {
       return cached !== t.updatedAt
     })
 
-    if (needsEnrichment.length === 0) return new Map()
+    if (needsEnrichment.length === 0) {
+      return new Map()
+    }
 
     const nodeIdTargets = needsEnrichment.filter(
       (t) => t.subjectType === 'Release' || t.subjectType === 'CheckSuite'
@@ -166,9 +174,15 @@ class GitHubNotifications {
         }
         return base
       })
-      .filter((t) => t.subjectNumber != null || t.nodeId)
+      .filter(
+        (t) =>
+          (t.subjectNumber !== null && t.subjectNumber !== undefined) ||
+          (t.nodeId !== null && t.nodeId !== undefined)
+      )
 
-    if (targets.length === 0) return new Map()
+    if (targets.length === 0) {
+      return new Map()
+    }
 
     const batches = buildEnrichmentQueries(targets)
     const gql = getGraphql()

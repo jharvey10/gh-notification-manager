@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 import RenewIcon from '../../../assets/icons/renew.svg?react'
 import { Button } from '../../../components/Button'

@@ -12,7 +12,9 @@ function shortSha(oid) {
  */
 export function formatNotificationReference(notification) {
   const subject = notification.optionalSubject
-  if (!subject?.__typename) return null
+  if (!subject?.__typename) {
+    return null
+  }
   const subjectType = subject.__typename
 
   switch (subjectType) {

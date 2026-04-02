@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 import { Button } from '../../../components/Button'
 import { NotificationList } from './NotificationList'
@@ -29,7 +28,9 @@ export function NotificationListContainer({
   onToggle,
   onSelectGroup
 }) {
-  if (notifications.length === 0) return <p>No notifications.</p>
+  if (notifications.length === 0) {
+    return <p>No notifications.</p>
+  }
 
   const sorted = [...notifications].sort(
     (a, b) => new Date(b.lastUpdatedAt) - new Date(a.lastUpdatedAt)

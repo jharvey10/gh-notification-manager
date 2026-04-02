@@ -20,10 +20,18 @@ export function formatTimeAgo(date, now = new Date()) {
   const dd = String(d.getDate()).padStart(2, '0')
   const dateOnly = `${yyyy}-${mm}-${dd}`
 
-  if (diffMinutes < 1) return { label: 'now', tooltip: fullDate }
-  if (diffMinutes < 60) return { label: `${diffMinutes}m ago`, tooltip: fullDate }
-  if (diffHours < 24) return { label: `${diffHours}h ago`, tooltip: fullDate }
-  if (diffDays <= 3) return { label: `${diffDays}d ago`, tooltip: fullDate }
+  if (diffMinutes < 1) {
+    return { label: 'now', tooltip: fullDate }
+  }
+  if (diffMinutes < 60) {
+    return { label: `${diffMinutes}m ago`, tooltip: fullDate }
+  }
+  if (diffHours < 24) {
+    return { label: `${diffHours}h ago`, tooltip: fullDate }
+  }
+  if (diffDays <= 3) {
+    return { label: `${diffDays}d ago`, tooltip: fullDate }
+  }
 
   return { label: dateOnly, tooltip: fullDate }
 }

@@ -3,7 +3,9 @@ export const getNotificationRepo = (notification) =>
 
 export function getEventActor(notification) {
   const events = notification._latestEvents?.curr ?? []
-  if (events.length === 0) return null
+  if (events.length === 0) {
+    return null
+  }
 
   const mostRecent = events.reduce((a, b) => (a.timestamp >= b.timestamp ? a : b))
   return mostRecent.type === 'mention'

@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 import { Button } from '../../../components/Button'
 import { OS_NOTIFICATION_RULES } from '../../../../shared/settings.js'
@@ -35,9 +34,14 @@ export function OsNotificationsSection({
         <span className="label-text font-medium">Enable OS notifications</span>
       </label>
 
-      <div className={`flex flex-col gap-2 pl-2 ${settings.osNotificationsEnabled ? '' : 'pointer-events-none opacity-40'}`}>
+      <div
+        className={`flex flex-col gap-2 pl-2 ${settings.osNotificationsEnabled ? '' : 'pointer-events-none opacity-40'}`}
+      >
         {OS_NOTIFICATION_RULES.map(({ key, label, description }) => (
-          <label key={key} className="label cursor-pointer justify-start gap-3 rounded-box border border-base-300 px-4 py-2">
+          <label
+            key={key}
+            className="label cursor-pointer justify-start gap-3 rounded-box border border-base-300 px-4 py-2"
+          >
             <input
               type="checkbox"
               className="checkbox checkbox-sm checkbox-primary"

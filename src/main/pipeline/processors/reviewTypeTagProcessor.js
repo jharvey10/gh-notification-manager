@@ -8,7 +8,9 @@
  */
 export async function reviewTypeTagProcessor(notification, context) {
   const nodes = notification.optionalSubject?.reviewRequests?.nodes
-  if (!Array.isArray(nodes)) return notification
+  if (!Array.isArray(nodes)) {
+    return notification
+  }
 
   const tags = []
 

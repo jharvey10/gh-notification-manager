@@ -1,7 +1,5 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 import { clsx } from 'clsx'
-import BookmarkIcon from '../../../assets/icons/bookmark.svg?react'
 
 export function NotificationTitle({ title, url, isUnread, isSaved, onOpen, subjectRef }) {
   return (
@@ -23,7 +21,9 @@ export function NotificationTitle({ title, url, isUnread, isSaved, onOpen, subje
           </a>
         )}
 
-        {!url && <span className={clsx('font-medium', titleClassName)}>{title}</span>}
+        {!url && (
+          <span className={clsx('font-medium', !isUnread && 'text-base-content/50')}>{title}</span>
+        )}
 
         {subjectRef && <span className="ml-2 text-base-content/50 text-sm">{subjectRef}</span>}
       </div>

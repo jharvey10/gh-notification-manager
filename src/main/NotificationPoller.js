@@ -68,7 +68,11 @@ class NotificationPoller {
         return
       }
 
-      this.#store.upsert(/** @type {[string, import('./github/queries/fetchNotifications.js').GitHubNotificationNode | null][]} */ (results))
+      this.#store.upsert(
+        /** @type {[string, import('./github/queries/fetchNotifications.js').GitHubNotificationNode | null][]} */ (
+          results
+        )
+      )
     } catch (err) {
       broadcastError('poller', err.message)
     }

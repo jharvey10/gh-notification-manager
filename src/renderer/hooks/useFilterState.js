@@ -10,8 +10,7 @@ const FILTER_STORAGE_KEY = 'gh-notification-manager.filters'
 const isValidSelectionsArray = (data) =>
   Array.isArray(data) &&
   data.every(
-    (s) =>
-      typeof s?.value === 'string' && (s.state === 'include' || s.state === 'exclude')
+    (s) => typeof s?.value === 'string' && (s.state === 'include' || s.state === 'exclude')
   )
 
 /** @returns {import('../filters/types').FilterSet} */
@@ -22,7 +21,9 @@ function readStoredFilters() {
 
   try {
     const stored = globalThis.localStorage.getItem(FILTER_STORAGE_KEY)
-    if (!stored) return createDefaultFilters()
+    if (!stored) {
+      return createDefaultFilters()
+    }
 
     const parsed = JSON.parse(stored)
     const defaults = createDefaultFilters()
@@ -38,9 +39,7 @@ function readStoredFilters() {
       },
       repo: {
         type: 'repo',
-        data: isValidSelectionsArray(parsed?.repo?.data)
-          ? parsed.repo.data
-          : defaults.repo.data
+        data: isValidSelectionsArray(parsed?.repo?.data) ? parsed.repo.data : defaults.repo.data
       },
       unreadOnly: {
         type: 'unreadOnly',
@@ -58,7 +57,9 @@ function readStoredFilters() {
 
 /** @param {import('../filters/types').FilterSet} filters */
 function writeStoredFilters(filters) {
-  if (typeof globalThis.localStorage?.setItem !== 'function') return
+  if (typeof globalThis.localStorage?.setItem !== 'function') {
+    return
+  }
 
   try {
     globalThis.localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filters))
@@ -80,8 +81,7 @@ export function useFilterState() {
 
   const setTextFilter = useCallback(
     /** @param {string} value */
-    (value) =>
-      setFilters((prev) => ({ ...prev, text: { ...prev.text, data: value } })),
+    (value) => setFilters((prev) => ({ ...prev, text: { ...prev.text, data: value } })),
     []
   )
 
@@ -124,14 +124,12 @@ export function useFilterState() {
   )
 
   const clearTagFilter = useCallback(
-    () =>
-      setFilters((prev) => ({ ...prev, tag: { ...prev.tag, data: [] } })),
+    () => setFilters((prev) => ({ ...prev, tag: { ...prev.tag, data: [] } })),
     []
   )
 
   const clearRepoFilter = useCallback(
-    () =>
-      setFilters((prev) => ({ ...prev, repo: { ...prev.repo, data: [] } })),
+    () => setFilters((prev) => ({ ...prev, repo: { ...prev.repo, data: [] } })),
     []
   )
 

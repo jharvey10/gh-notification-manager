@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { SettingsSection } from '../../SettingsSection'
 import { UpdateStatus } from './UpdateStatus'
@@ -24,11 +24,7 @@ export function VersionSection({ appVersion }) {
 
   return (
     <SettingsSection title="Version" description={appVersion || 'Loading...'}>
-      <UpdateStatus
-        status={status}
-        onDownload={handleDownload}
-        onInstall={handleInstall}
-      />
+      <UpdateStatus status={status} onDownload={handleDownload} onInstall={handleInstall} />
     </SettingsSection>
   )
 }

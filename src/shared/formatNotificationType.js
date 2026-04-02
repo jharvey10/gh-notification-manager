@@ -7,7 +7,9 @@ import { getDisplayableTypeName } from './getDisplayableTypeName.js'
  */
 function formatNotificationType(notification) {
   const subject = notification.optionalSubject
-  if (!subject?.__typename) return notification.threadType ?? 'Unknown'
+  if (!subject?.__typename) {
+    return notification.threadType ?? 'Unknown'
+  }
 
   const displayableTypeName = getDisplayableTypeName(subject.__typename)
   let detail = ''
@@ -36,25 +38,47 @@ function formatNotificationType(notification) {
 }
 
 function prDetail(pr) {
-  if (pr.isDraft) return 'Draft'
-  if (pr.merged) return 'Merged'
-  if (pr.state === 'CLOSED') return 'Closed'
-  if (pr.reviewDecision === 'APPROVED') return 'Approved'
-  if (pr.reviewDecision === 'CHANGES_REQUESTED') return 'Changes Requested'
-  if (pr.reviewDecision === 'REVIEW_REQUIRED') return 'Review Required'
+  if (pr.isDraft) {
+    return 'Draft'
+  }
+  if (pr.merged) {
+    return 'Merged'
+  }
+  if (pr.state === 'CLOSED') {
+    return 'Closed'
+  }
+  if (pr.reviewDecision === 'APPROVED') {
+    return 'Approved'
+  }
+  if (pr.reviewDecision === 'CHANGES_REQUESTED') {
+    return 'Changes Requested'
+  }
+  if (pr.reviewDecision === 'REVIEW_REQUIRED') {
+    return 'Review Required'
+  }
   return 'Open'
 }
 
 function issueDetail(issue) {
-  if (issue.state !== 'CLOSED') return 'Open'
-  if (issue.stateReason === 'COMPLETED') return 'Completed'
-  if (issue.stateReason === 'NOT_PLANNED') return 'Not Planned'
+  if (issue.state !== 'CLOSED') {
+    return 'Open'
+  }
+  if (issue.stateReason === 'COMPLETED') {
+    return 'Completed'
+  }
+  if (issue.stateReason === 'NOT_PLANNED') {
+    return 'Not Planned'
+  }
   return 'Closed'
 }
 
 function checkSuiteDetail(cs) {
-  if (cs.status === 'IN_PROGRESS') return 'In Progress'
-  if (cs.status === 'QUEUED') return 'Queued'
+  if (cs.status === 'IN_PROGRESS') {
+    return 'In Progress'
+  }
+  if (cs.status === 'QUEUED') {
+    return 'Queued'
+  }
   const conclusions = {
     SUCCESS: 'Success',
     FAILURE: 'Failure',

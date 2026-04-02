@@ -13,7 +13,9 @@ export function ActionsMenu({ popoverId, anchorName, trigger, children, classNam
       {({ close }) => (
         <div className="flex max-h-80 flex-col gap-2 overflow-y-auto">
           {React.Children.map(children, (child) => {
-            if (!React.isValidElement(child)) return child
+            if (!React.isValidElement(child)) {
+              return child
+            }
 
             return React.cloneElement(child, {
               onActionComplete: close

@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 import SettingsIcon from '../../../assets/icons/settings.svg?react'
 import { Button } from '../../../components/Button'

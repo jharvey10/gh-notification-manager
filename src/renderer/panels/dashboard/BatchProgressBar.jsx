@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { clsx } from 'clsx'
 
@@ -30,7 +30,9 @@ export function BatchProgressBar({ batchProgress }) {
 
   // Fake creep while visible
   useEffect(() => {
-    if (!visible) return
+    if (!visible) {
+      return
+    }
     const id = setInterval(() => {
       setPercent((prev) => (prev < 99 ? prev + 0.5 : prev))
     }, 250)

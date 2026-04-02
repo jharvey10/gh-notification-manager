@@ -150,7 +150,9 @@ const GQL_FIELD_MAP = {
  *   Each element has the query string and a mapping from GraphQL alias -> threadId
  */
 function buildEnrichmentQueries(targets) {
-  if (targets.length === 0) return []
+  if (targets.length === 0) {
+    return []
+  }
 
   const batches = []
   for (let i = 0; i < targets.length; i += ENRICH_BATCH_SIZE) {
@@ -173,11 +175,17 @@ function buildSingleBatchQuery(batch) {
     const gqlField = GQL_FIELD_MAP[target.subjectType]
     const spread = SPREAD_MAP[target.subjectType]
 
-    if (!spread) continue
+    if (!spread) {
+      continue
+    }
 
     usedTypes.add(target.subjectType)
 
-    if (gqlField && target.subjectNumber != null) {
+    if (
+      gqlField !== undefined &&
+      target.subjectNumber !== null &&
+      target.subjectNumber !== undefined
+    ) {
       const repoKey = `${target.owner}/${target.repo}`
       if (!repoGroups.has(repoKey)) {
         repoGroups.set(repoKey, { owner: target.owner, repo: target.repo, fields: [] })
@@ -190,7 +198,9 @@ function buildSingleBatchQuery(batch) {
       mapping.set(alias, target.threadId)
     } else if (target.nodeId) {
       const alias = `n${nodeIdx++}`
-      nodeQueries.push(`${alias}: node(id: "${target.nodeId}") { ... on ${target.subjectType} { ${spread} } }`)
+      nodeQueries.push(
+        `${alias}: node(id: "${target.nodeId}") { ... on ${target.subjectType} { ${spread} } }`
+      )
       mapping.set(alias, target.threadId)
     }
   }
@@ -205,7 +215,9 @@ function buildSingleBatchQuery(batch) {
   for (const [, group] of repoGroups) {
     const alias = `r${repoIdx++}`
     const inner = group.fields.map((f) => `    ${f.line}`).join('\n')
-    repoLines.push(`  ${alias}: repository(owner: "${group.owner}", name: "${group.repo}") {\n${inner}\n  }`)
+    repoLines.push(
+      `  ${alias}: repository(owner: "${group.owner}", name: "${group.repo}") {\n${inner}\n  }`
+    )
 
     for (const f of group.fields) {
       const oldAlias = f.alias

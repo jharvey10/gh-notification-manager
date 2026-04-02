@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { TokenPrompt } from './panels/token-prompt/TokenPrompt'
 import { Dashboard } from './panels/dashboard/Dashboard'
 import { Settings } from './panels/settings/Settings'

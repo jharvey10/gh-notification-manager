@@ -6,7 +6,9 @@ import { getEventActor } from '../utils/notifications.js'
  * @returns {import('../../types').Notification[]}
  */
 export function applyTextFilter(notifications, data) {
-  if (!data) return notifications
+  if (!data) {
+    return notifications
+  }
 
   const lower = data.toLowerCase()
 

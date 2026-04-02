@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { PanelState } from '../../utils/PanelState'
 
@@ -9,7 +9,9 @@ export function TokenPrompt({ setPanelState }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!token.trim()) return
+    if (!token.trim()) {
+      return
+    }
 
     setSaving(true)
     setError(null)

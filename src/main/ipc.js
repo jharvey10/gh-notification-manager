@@ -1,9 +1,6 @@
 import { app, ipcMain, shell, Notification } from 'electron'
 import * as auth from './auth.js'
-import {
-  archiveThreads,
-  unsubscribeAndArchive
-} from './github/mutations.js'
+import { archiveThreads, unsubscribeAndArchive } from './github/mutations.js'
 import { broadcastError } from './broadcastError.js'
 import { markRendererAsReady } from './index.js'
 import { ProgressTracker } from './ProgressTracker.js'
@@ -11,7 +8,12 @@ import { NotificationPoller } from './NotificationPoller.js'
 import { resetClients } from './github/client.js'
 import { resetLastModified } from './github/restNotifications.js'
 import { getNotificationSubscribableTarget } from '../shared/notificationSubscription.js'
-import { getStatus as getUpdaterStatus, checkForUpdates, downloadUpdate, quitAndInstall } from './updater.js'
+import {
+  getStatus as getUpdaterStatus,
+  checkForUpdates,
+  downloadUpdate,
+  quitAndInstall
+} from './updater.js'
 
 /**
  * @param {{

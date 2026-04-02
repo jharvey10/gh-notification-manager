@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import PropTypes from 'prop-types'
 import { useFilterState } from '../../hooks/useFilterState'
 import { applyFilters } from '../../filters/pipeline'
@@ -32,25 +32,33 @@ export function Dashboard({ setPanelState, notifications, refresh }) {
     useSelection(notifications)
 
   const handleMarkDone = async () => {
-    if (selected.size === 0) return
+    if (selected.size === 0) {
+      return
+    }
     await globalThis.api.markAsDone([...selected])
     clearSelection()
   }
 
   const handleMarkRead = async () => {
-    if (selected.size === 0) return
+    if (selected.size === 0) {
+      return
+    }
     await globalThis.api.markAsRead([...selected])
     clearSelection()
   }
 
   const handleMarkUnread = async () => {
-    if (selected.size === 0) return
+    if (selected.size === 0) {
+      return
+    }
     await globalThis.api.markAsUnread([...selected])
     clearSelection()
   }
 
   const handleUnsubscribe = async () => {
-    if (selected.size === 0) return
+    if (selected.size === 0) {
+      return
+    }
     await globalThis.api.unsubscribe([...selected])
     clearSelection()
   }

@@ -51,7 +51,9 @@ const SETTINGS_LIMITS = Object.freeze({
 
 function sanitizeDayCount(value, fallback) {
   const parsed = Number.parseInt(value, 10)
-  if (!Number.isFinite(parsed)) return fallback
+  if (!Number.isFinite(parsed)) {
+    return fallback
+  }
   return Math.min(SETTINGS_LIMITS.maxDays, Math.max(SETTINGS_LIMITS.minDays, parsed))
 }
 

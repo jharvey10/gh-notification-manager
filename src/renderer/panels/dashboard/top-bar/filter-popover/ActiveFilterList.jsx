@@ -1,11 +1,12 @@
 import clsx from 'clsx'
-import React from 'react'
 import PropTypes from 'prop-types'
 import { Button } from '../../../../components/Button'
 import { compareValues } from '../../../../utils/notifications'
 
 export function ActiveFilterList({ selections, onChange, onClear }) {
-  if (selections.length === 0) return null
+  if (selections.length === 0) {
+    return null
+  }
 
   const sorted = [...selections].sort((a, b) => compareValues(a.value, b.value))
 
