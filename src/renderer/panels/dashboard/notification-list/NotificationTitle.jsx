@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types'
 import { clsx } from 'clsx'
+import BookmarkIcon from '../../../assets/icons/bookmark.svg?react'
 
 export function NotificationTitle({ title, url, isUnread, isSaved, onOpen, subjectRef }) {
   return (
     <div className="flex min-w-0 flex-1 items-center gap-1.5">
-      {isSaved && <BookmarkIcon className="fill-primary size-4 shrink-0" />}
+      {isSaved && <BookmarkIcon className="fill-secondary size-4 relative top-px shrink-0" />}
 
       <div>
         {url && (

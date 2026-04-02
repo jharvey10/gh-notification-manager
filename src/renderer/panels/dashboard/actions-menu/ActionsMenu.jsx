@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { PopoverCard } from '../top-bar/PopoverCard.jsx'
 
-export function ActionsMenu({ popoverId, anchorName, trigger, children, className }) {
+export function ActionsMenu({ popoverId, anchorName, trigger, children, className = undefined }) {
   return (
     <PopoverCard
       popoverId={popoverId}

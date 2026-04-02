@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
-import { PanelState } from '../../utils/PanelState'
+import { PanelState } from '../../utils/PanelState.jsx'
 
 export function TokenPrompt({ setPanelState }) {
   const [token, setToken] = useState('')

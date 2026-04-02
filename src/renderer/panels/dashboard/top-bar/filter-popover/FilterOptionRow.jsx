@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { Button } from '../../../../components/Button'
+import { Button } from '../../../../components/Button.jsx'
 
 export function FilterOptionRow({ item, count, selectionState, onChange }) {
   const isIncluded = selectionState === 'include'

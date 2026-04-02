@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
 import PropTypes from 'prop-types'
-import { useFilterState } from '../../hooks/useFilterState'
-import { applyFilters } from '../../filters/pipeline'
-import { useSettings } from '../../hooks/useSettings'
-import { useSelection } from '../../hooks/useSelection'
-import { PanelState } from '../../utils/PanelState'
-import { BatchActionBar } from './BatchActionBar'
-import { TopBar } from './top-bar/TopBar'
-import { NotificationListContainer } from './notification-list/NotificationListContainer'
+import { useFilterState } from '../../hooks/useFilterState.js'
+import { applyFilters } from '../../filters/pipeline.js'
+import { useSettings } from '../../hooks/useSettings.js'
+import { useSelection } from '../../hooks/useSelection.js'
+import { PanelState } from '../../utils/PanelState.jsx'
+import { BatchActionBar } from './BatchActionBar.jsx'
+import { TopBar } from './top-bar/TopBar.jsx'
+import { NotificationListContainer } from './notification-list/NotificationListContainer.jsx'
 
 export function Dashboard({ setPanelState, notifications, refresh }) {
   const { settings } = useSettings()

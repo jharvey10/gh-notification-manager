@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
-import { Button } from '../../components/Button'
-import { useSettings } from '../../hooks/useSettings'
+import { Button } from '../../components/Button.jsx'
+import { useSettings } from '../../hooks/useSettings.js'
 import { pickOSSettings, OS_NOTIFICATION_KEYS } from '../../../shared/settings.js'
-import { PanelState } from '../../utils/PanelState'
-import { AutoDoneSection } from './settings-sections/AutoDoneSection'
-import { AuthTokenSection } from './settings-sections/AuthTokenSection'
-import { OlderSectionSettings } from './settings-sections/OlderSectionSettings'
-import { OsNotificationsSection } from './settings-sections/OsNotificationsSection'
-import { VersionSection } from './settings-sections/version-section/VersionSection'
+import { PanelState } from '../../utils/PanelState.jsx'
+import { AutoDoneSection } from './settings-sections/AutoDoneSection.jsx'
+import { AuthTokenSection } from './settings-sections/AuthTokenSection.jsx'
+import { OlderSectionSettings } from './settings-sections/OlderSectionSettings.jsx'
+import { OsNotificationsSection } from './settings-sections/OsNotificationsSection.jsx'
+import { VersionSection } from './settings-sections/version-section/VersionSection.jsx'
 
 export function Settings({ setPanelState }) {
   const { settings, updateSettings } = useSettings()

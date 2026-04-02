@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { Badge } from '../../../components/Badge'
+import { Badge } from '../../../components/Badge.jsx'
 
 export const NotificationEventDetails = ({ activityLabel, eventActor }) => {
   return (

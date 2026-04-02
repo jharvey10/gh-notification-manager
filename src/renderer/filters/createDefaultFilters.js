@@ -1,4 +1,4 @@
-/** @returns {import('./types').FilterSet} */
+/** @returns {import('./types.js').FilterSet} */
 export function createDefaultFilters() {
   return {
     text: { type: 'text', data: '' },

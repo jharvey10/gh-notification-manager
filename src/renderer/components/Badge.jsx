@@ -1,7 +1,7 @@
 import { clsx } from 'clsx'
 import PropTypes from 'prop-types'
 
-export function Badge({ children, onClick, className, ...props }) {
+export function Badge({ children, onClick = undefined, className = undefined, ...props }) {
   return (
     <button
       className={clsx('badge badge-soft', onClick && 'cursor-pointer', className)}

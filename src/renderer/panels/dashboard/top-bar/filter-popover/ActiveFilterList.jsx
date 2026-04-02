@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import PropTypes from 'prop-types'
-import { Button } from '../../../../components/Button'
-import { compareValues } from '../../../../utils/notifications'
+import { Button } from '../../../../components/Button.jsx'
+import { compareValues } from '../../../../utils/notifications.js'
 
 export function ActiveFilterList({ selections, onChange, onClear }) {
   if (selections.length === 0) {

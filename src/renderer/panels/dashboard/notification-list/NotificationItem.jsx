@@ -80,11 +80,7 @@ export function NotificationItem({ notification, isSelected, onToggle }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <NotificationEventDetails
-            subjectRef={subjectRef}
-            activityLabel={activityLabel}
-            eventActor={eventActor}
-          />
+          <NotificationEventDetails activityLabel={activityLabel} eventActor={eventActor} />
 
           <div
             className="tooltip tooltip-bottom whitespace-nowrap text-xs text-base-content/60"

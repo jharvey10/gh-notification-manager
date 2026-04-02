@@ -1,13 +1,13 @@
 import PropTypes from 'prop-types'
 import { clsx } from 'clsx'
-import { Button } from '../../../components/Button'
+import { Button } from '../../../components/Button.jsx'
 
 export function Action({
   icon: Icon,
   children,
   onSelect,
-  onActionComplete,
-  className,
+  onActionComplete = undefined,
+  className = undefined,
   variant = 'primary',
   disabled = false
 }) {

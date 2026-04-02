@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { getNotificationRepo, compareValues } from '../utils/notifications'
+import { getNotificationRepo, compareValues } from '../utils/notifications.js'
 
 export function useRepoOptions(notifications, selections) {
   return useMemo(() => {

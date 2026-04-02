@@ -14,12 +14,12 @@ const VARIANT_CLASSES = {
 
 export function Button({
   children,
-  className,
-  type = 'button',
+  className = undefined,
+  type = /** @type {'button' | 'submit' | 'reset'} */ ('button'),
   variant = 'primary',
   outline = true,
   disabled = false,
-  tooltip,
+  tooltip = undefined,
   ...buttonProps
 }) {
   const classes = clsx(

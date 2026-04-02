@@ -1,7 +1,7 @@
 /**
- * @param {import('../../types').Notification[]} notifications
- * @param {import('./types').FilterSelection[]} data
- * @returns {import('../../types').Notification[]}
+ * @param {object[]} notifications
+ * @param {import('./types.js').FilterSelection[]} data
+ * @returns {object[]}
  */
 export function applyTagFilter(notifications, data) {
   if (data.length === 0) {

@@ -74,7 +74,13 @@ async function main() {
     onChange: () => broadcastNotificationsUpdated(mainWindow, store)
   })
   const poller = new NotificationPoller({ store, preferencesStore })
-  registerIpcHandlers({ store, preferencesStore, poller })
+
+  let resolveFirstPoll
+  const firstPollComplete = new Promise((resolve) => {
+    resolveFirstPoll = resolve
+  })
+
+  registerIpcHandlers({ store, preferencesStore, poller, firstPollComplete })
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -88,7 +94,7 @@ async function main() {
     app.quit()
   })
 
-  void poller.start({ shouldNotify: false })
+  poller.start({ shouldNotify: false }).finally(resolveFirstPoll)
 }
 
 // Needs to be un-awaited to allow electron to initialize properly in ESM mode

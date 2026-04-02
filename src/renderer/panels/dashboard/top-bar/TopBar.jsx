@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types'
 import RenewIcon from '../../../assets/icons/renew.svg?react'
-import { Button } from '../../../components/Button'
-import { Filters } from './Filters'
-import { SettingsMenu } from './SettingsMenu'
+import { Button } from '../../../components/Button.jsx'
+import { Filters } from './Filters.jsx'
+import { SettingsMenu } from './SettingsMenu.jsx'
 
 export const TopBar = ({
   notifications,
@@ -30,7 +30,7 @@ export const TopBar = ({
       />
       <div className="flex items-center gap-2">
         <Button tooltip="Refresh" aria-label="Refresh" onClick={onRefresh}>
-          <RenewIcon className="fill-primary size-5" alt="Refresh" />
+          <RenewIcon className="fill-primary size-5" />
         </Button>
         <SettingsMenu onOpenSettings={onOpenSettings} />
       </div>

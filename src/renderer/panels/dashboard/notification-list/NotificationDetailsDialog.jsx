@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Button } from '../../../components/Button'
+import { Button } from '../../../components/Button.jsx'
 import CloseIcon from '../../../assets/icons/close.svg?react'
 
 export function NotificationDetailsDialog({ dialogRef, title, notification }) {

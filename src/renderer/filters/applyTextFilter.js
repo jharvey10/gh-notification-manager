@@ -1,9 +1,9 @@
 import { getEventActor } from '../utils/notifications.js'
 
 /**
- * @param {import('../../types').Notification[]} notifications
+ * @param {object[]} notifications
  * @param {string} data - search string
- * @returns {import('../../types').Notification[]}
+ * @returns {object[]}
  */
 export function applyTextFilter(notifications, data) {
   if (!data) {

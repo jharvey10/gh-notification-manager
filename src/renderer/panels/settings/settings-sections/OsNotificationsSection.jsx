@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
-import { Button } from '../../../components/Button'
+import { Button } from '../../../components/Button.jsx'
 import { OS_NOTIFICATION_RULES } from '../../../../shared/settings.js'
-import { SettingsSection } from '../SettingsSection'
+import { SettingsSection } from '../SettingsSection.jsx'
 
 export function OsNotificationsSection({
   settings,

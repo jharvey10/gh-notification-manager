@@ -1,12 +1,12 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
-import { TokenPrompt } from './panels/token-prompt/TokenPrompt'
-import { Dashboard } from './panels/dashboard/Dashboard'
-import { Settings } from './panels/settings/Settings'
-import { PanelState } from './utils/PanelState'
-import { Loading } from './panels/loading/Loading'
-import { useNotifications } from './hooks/useNotifications'
-import { useErrors } from './hooks/useErrors'
-import { ErrorAlerts } from './components/ErrorAlerts'
+import { TokenPrompt } from './panels/token-prompt/TokenPrompt.jsx'
+import { Dashboard } from './panels/dashboard/Dashboard.jsx'
+import { Settings } from './panels/settings/Settings.jsx'
+import { PanelState } from './utils/PanelState.jsx'
+import { Loading } from './panels/loading/Loading.jsx'
+import { useNotifications } from './hooks/useNotifications.js'
+import { useErrors } from './hooks/useErrors.js'
+import { ErrorAlerts } from './components/ErrorAlerts.jsx'
 
 export function App() {
   const { errors, dismissError } = useErrors()

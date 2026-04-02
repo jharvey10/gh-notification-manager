@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types'
-import { PopoverCard } from '../PopoverCard'
-import { ActiveFilterList } from './ActiveFilterList'
-import { FilterOptionRow } from './FilterOptionRow'
-import { FilterPopoverHeader } from './FilterPopoverHeader'
-import { FilterPopoverTrigger } from './FilterPopoverTrigger'
+import { PopoverCard } from '../PopoverCard.jsx'
+import { ActiveFilterList } from './ActiveFilterList.jsx'
+import { FilterOptionRow } from './FilterOptionRow.jsx'
+import { FilterPopoverHeader } from './FilterPopoverHeader.jsx'
+import { FilterPopoverTrigger } from './FilterPopoverTrigger.jsx'
 
 export function FilterPopover({
   popoverId,

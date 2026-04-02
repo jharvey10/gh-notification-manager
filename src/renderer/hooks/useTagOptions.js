@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { compareValues } from '../utils/notifications'
+import { compareValues } from '../utils/notifications.js'
 
 export function useTagOptions(notifications, selections) {
   return useMemo(() => {

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { NotificationItem } from './NotificationItem'
+import { NotificationItem } from './NotificationItem.jsx'
 
 export function NotificationList({ items, selected, onToggle }) {
   return (

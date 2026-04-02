@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect } from 'react'
-import { createDefaultFilters } from '../filters/createDefaultFilters'
+import { createDefaultFilters } from '../filters/createDefaultFilters.js'
 
 const FILTER_STORAGE_KEY = 'gh-notification-manager.filters'
 
 /**
- * @param {import('../filters/types').FilterSelection[]} data
+ * @param {import('../filters/types.js').FilterSelection[]} data
  * @returns {boolean}
  */
 const isValidSelectionsArray = (data) =>
@@ -13,7 +13,7 @@ const isValidSelectionsArray = (data) =>
     (s) => typeof s?.value === 'string' && (s.state === 'include' || s.state === 'exclude')
   )
 
-/** @returns {import('../filters/types').FilterSet} */
+/** @returns {import('../filters/types.js').FilterSet} */
 function readStoredFilters() {
   if (typeof globalThis.localStorage?.getItem !== 'function') {
     return createDefaultFilters()
@@ -55,7 +55,7 @@ function readStoredFilters() {
   }
 }
 
-/** @param {import('../filters/types').FilterSet} filters */
+/** @param {import('../filters/types.js').FilterSet} filters */
 function writeStoredFilters(filters) {
   if (typeof globalThis.localStorage?.setItem !== 'function') {
     return

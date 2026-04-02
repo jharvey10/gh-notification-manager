@@ -19,10 +19,16 @@ import {
  * @param {{
  *   store: import('./NotificationStore.js').NotificationStore,
  *   preferencesStore: import('./PreferencesStore.js').PreferencesStore,
- *   poller: import('./NotificationPoller.js').NotificationPoller
+ *   poller: import('./NotificationPoller.js').NotificationPoller,
+ *   firstPollComplete: Promise<void>
  * }} options
  */
-function registerIpcHandlers({ store, preferencesStore, poller: initialPoller }) {
+function registerIpcHandlers({
+  store,
+  preferencesStore,
+  poller: initialPoller,
+  firstPollComplete
+}) {
   /** @type {import('./NotificationPoller.js').NotificationPoller | null} */
   let poller = initialPoller
 
@@ -39,8 +45,9 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
     }
   })
 
-  ipcMain.handle('notifications:get', () => {
+  ipcMain.handle('notifications:get', async () => {
     console.log('ipc: notifications:get')
+    await firstPollComplete
     return store.getAll()
   })
 

@@ -1,7 +1,7 @@
 /**
- * @param {import('../../types').Notification[]} notifications
+ * @param {object[]} notifications
  * @param {boolean} data - whether unread-only mode is enabled
- * @returns {import('../../types').Notification[]}
+ * @returns {object[]}
  */
 export function applyUnreadFilter(notifications, data) {
   if (!data) {

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { PanelState } from '../../utils/PanelState'
+import { PanelState } from '../../utils/PanelState.jsx'
 
 export const Loading = ({ setPanelState, notifications }) => {
   useEffect(() => {

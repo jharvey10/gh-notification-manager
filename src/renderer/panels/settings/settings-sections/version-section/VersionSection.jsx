@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-import { SettingsSection } from '../../SettingsSection'
-import { UpdateStatus } from './UpdateStatus'
+import { SettingsSection } from '../../SettingsSection.jsx'
+import { UpdateStatus } from './UpdateStatus.jsx'
 
 export function VersionSection({ appVersion }) {
   const [status, setStatus] = useState({ state: 'idle' })

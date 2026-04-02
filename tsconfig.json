@@ -12,6 +12,12 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["src/main/**/*", "src/shared/**/*", "src/preload/**/*", "vite.config.mjs"],
+  "include": [
+    "src/main/**/*",
+    "src/shared/**/*",
+    "src/preload/**/*",
+    "src/renderer/**/*",
+    "vite.config.mjs"
+  ],
   "exclude": ["dist", "release", "node_modules"]
 }

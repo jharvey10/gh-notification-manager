@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import PropTypes from 'prop-types'
 import { clsx } from 'clsx'
 
-export function PopoverCard({ popoverId, anchorName, trigger, children, className }) {
+export function PopoverCard({ popoverId, anchorName, trigger, children, className = undefined }) {
   const popoverRef = useRef(null)
   const close = () => popoverRef.current?.hidePopover()
   const triggerStyle = trigger.props.style ?? undefined

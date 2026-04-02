@@ -1,7 +1,7 @@
-import { applyTextFilter } from './applyTextFilter'
-import { applyTagFilter } from './applyTagFilter'
-import { applyRepoFilter } from './applyRepoFilter'
-import { applyUnreadFilter } from './applyUnreadFilter'
+import { applyTextFilter } from './applyTextFilter.js'
+import { applyTagFilter } from './applyTagFilter.js'
+import { applyRepoFilter } from './applyRepoFilter.js'
+import { applyUnreadFilter } from './applyUnreadFilter.js'
 
 /** @type {Record<string, (notifications: any[], data: any) => any[]>} */
 const handlers = {
@@ -14,7 +14,7 @@ const handlers = {
 /**
  * Applies all filters in the set sequentially (AND logic).
  * @param {any[]} notifications
- * @param {import('./types').FilterSet} filters
+ * @param {import('./types.js').FilterSet} filters
  * @returns {any[]}
  */
 export function applyFilters(notifications, filters) {

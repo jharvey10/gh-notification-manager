@@ -1,9 +1,9 @@
-import { getNotificationRepo } from '../utils/notifications'
+import { getNotificationRepo } from '../utils/notifications.js'
 
 /**
- * @param {import('../../types').Notification[]} notifications
- * @param {import('./types').FilterSelection[]} data
- * @returns {import('../../types').Notification[]}
+ * @param {object[]} notifications
+ * @param {import('./types.js').FilterSelection[]} data
+ * @returns {object[]}
  */
 export function applyRepoFilter(notifications, data) {
   if (data.length === 0) {

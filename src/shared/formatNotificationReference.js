@@ -1,13 +1,11 @@
 import { getDisplayableTypeName } from './getDisplayableTypeName.js'
 
-/** @typedef {import('../main/github/queries/fetchNotifications.js').GitHubNotificationNode} GitHubNotificationNode */
-
 function shortSha(oid) {
   return typeof oid === 'string' && oid.length > 0 ? oid.slice(0, 7) : null
 }
 
 /**
- * @param {GitHubNotificationNode} notification
+ * @param {object} notification
  * @returns {string | null}
  */
 export function formatNotificationReference(notification) {

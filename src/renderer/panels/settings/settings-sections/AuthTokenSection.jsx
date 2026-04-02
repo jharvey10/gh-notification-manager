@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
-import { Button } from '../../../components/Button'
-import { SettingsSection } from '../SettingsSection'
+import { Button } from '../../../components/Button.jsx'
+import { SettingsSection } from '../SettingsSection.jsx'
 
 export function AuthTokenSection({ onClearToken }) {
   return (

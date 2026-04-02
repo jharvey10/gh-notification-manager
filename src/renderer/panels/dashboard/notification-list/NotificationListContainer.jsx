@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
-import { Button } from '../../../components/Button'
-import { NotificationList } from './NotificationList'
+import { Button } from '../../../components/Button.jsx'
+import { NotificationList } from './NotificationList.jsx'
 
 function splitByAge(notifications, olderThanDays) {
   const cutoff = new Date()
@@ -33,7 +33,7 @@ export function NotificationListContainer({
   }
 
   const sorted = [...notifications].sort(
-    (a, b) => new Date(b.lastUpdatedAt) - new Date(a.lastUpdatedAt)
+    (a, b) => new Date(b.lastUpdatedAt).getTime() - new Date(a.lastUpdatedAt).getTime()
   )
   const { current, older } = splitByAge(sorted, olderThanDays)
 

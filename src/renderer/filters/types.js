@@ -27,3 +27,5 @@
  * @property {RepoFilterDef} repo
  * @property {UnreadFilterDef} unreadOnly
  */
+
+export {}
