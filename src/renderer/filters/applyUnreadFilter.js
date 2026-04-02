@@ -5,5 +5,5 @@
  */
 export function applyUnreadFilter(notifications, data) {
   if (!data) return notifications
-  return notifications.filter((n) => n.isUnread)
+  return notifications.filter((n) => n._localData?.isUnread)
 }

@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto'
 import { LRUCache } from 'lru-cache'
 import { getGraphql } from './client.js'
-import { NOTIFICATION_QUERY } from './queries/fetchNotifications.js'
+import { fetchNotificationThreads, fetchSubjectNodeIds } from './restNotifications.js'
+import { buildEnrichmentQueries, extractEnrichmentResults } from './queries/enrichSubjects.js'
 
 /** @typedef {import('./queries/fetchNotifications.js').GitHubNotificationNode} GitHubNotificationNode */
 
@@ -9,16 +10,65 @@ const MAX_NOTIFICATIONS = 1000
 const FULL_REFRESH_INTERVAL_MS = 10 * 60 * 1000
 
 const EVENT_EXTRACTORS = [
-  { key: 'latestComment', type: 'comment', actor: n => n.author?.login, time: n => n.createdAt },
-  { key: 'latestReview', type: 'review', actor: n => n.author?.login, time: n => n.submittedAt, detail: n => n.state },
-  { key: 'latestMention', type: 'mention', actor: n => n.actor?.login, time: n => n.createdAt },
-  { key: 'latestAssignment', type: 'assign', actor: n => n.assignee?.login, time: n => n.createdAt },
-  { key: 'latestReviewRequest', type: 'review_requested', actor: n => n.requestedReviewer?.login, time: n => n.createdAt },
-  { key: 'latestClosedEvent', type: 'closed', actor: n => n.actor?.login, time: n => n.createdAt, detail: n => n.stateReason },
-  { key: 'latestReopenedEvent', type: 'reopened', actor: n => n.actor?.login, time: n => n.createdAt, detail: n => n.stateReason },
-  { key: 'latestMergedEvent', type: 'merged', actor: n => n.actor?.login, time: n => n.createdAt },
-  { key: 'latestReadyForReviewEvent', type: 'ready_for_review', actor: n => n.actor?.login, time: n => n.createdAt },
-  { key: 'latestReviewDismissedEvent', type: 'review_dismissed', actor: n => n.actor?.login, time: n => n.createdAt, detail: n => n.previousReviewState },
+  {
+    key: 'latestComment',
+    type: 'comment',
+    actor: (n) => n.author?.login,
+    time: (n) => n.createdAt
+  },
+  {
+    key: 'latestReview',
+    type: 'review',
+    actor: (n) => n.author?.login,
+    time: (n) => n.submittedAt,
+    detail: (n) => n.state
+  },
+  { key: 'latestMention', type: 'mention', actor: (n) => n.actor?.login, time: (n) => n.createdAt },
+  {
+    key: 'latestAssignment',
+    type: 'assign',
+    actor: (n) => n.assignee?.login,
+    time: (n) => n.createdAt
+  },
+  {
+    key: 'latestReviewRequest',
+    type: 'review_requested',
+    actor: (n) => n.requestedReviewer?.login,
+    time: (n) => n.createdAt
+  },
+  {
+    key: 'latestClosedEvent',
+    type: 'closed',
+    actor: (n) => n.actor?.login,
+    time: (n) => n.createdAt,
+    detail: (n) => n.stateReason
+  },
+  {
+    key: 'latestReopenedEvent',
+    type: 'reopened',
+    actor: (n) => n.actor?.login,
+    time: (n) => n.createdAt,
+    detail: (n) => n.stateReason
+  },
+  {
+    key: 'latestMergedEvent',
+    type: 'merged',
+    actor: (n) => n.actor?.login,
+    time: (n) => n.createdAt
+  },
+  {
+    key: 'latestReadyForReviewEvent',
+    type: 'ready_for_review',
+    actor: (n) => n.actor?.login,
+    time: (n) => n.createdAt
+  },
+  {
+    key: 'latestReviewDismissedEvent',
+    type: 'review_dismissed',
+    actor: (n) => n.actor?.login,
+    time: (n) => n.createdAt,
+    detail: (n) => n.previousReviewState
+  }
 ]
 
 function extractLatestEvents(node) {
@@ -42,64 +92,105 @@ function extractLatestEvents(node) {
 }
 
 /**
- * Fetches GitHub notification threads via GraphQL and figures out what's
- * actually changed since the last poll.
+ * Fetches GitHub notification threads via REST and enriches them via GraphQL.
  *
- * The core idea: we keep an in-memory cache of MD5 hashes per thread. On
- * each poll we compare hashes to find new, changed, and deleted threads,
- * then only emit those as updates. Most polls are "incremental" — just the
- * first page of results. Every 10 minutes we do a full paginated fetch to
- * catch threads that fell off the first page or were removed entirely.
+ * REST gives us the notification list efficiently (with 304 support and
+ * poll-interval headers). GraphQL gives us the rich subject data (PR state,
+ * reviews, timeline events, etc.) needed for classification.
  *
- * Each notification's timeline events (comment, review, mention, assign,
- * state change, etc.) are extracted into a uniform list of
- * `{ type, actor, timestamp, detail }` objects. When a thread changes,
- * we attach both the previous and current event lists (as `_latestEvents`)
- * so downstream processors can determine what's new by comparing the two.
- *
- * `invalidate(ids)` lets the rest of the app force a re-fetch for
- * specific threads (e.g. after marking something as done or read).
+ * We only enrich threads whose `updated_at` has changed since last poll,
+ * keeping GraphQL costs minimal. On REST 304 (nothing changed), we skip
+ * GraphQL entirely.
  */
 class GitHubNotifications {
   #cache = new Map()
+  #updatedAtCache = new Map()
   #previousEvents = new LRUCache({ max: MAX_NOTIFICATIONS })
   #lastFullRefreshAt = 0
+  #lastPollInterval = 60_000
+
+  get pollInterval() {
+    return this.#lastPollInterval
+  }
 
   #hash(notification) {
     return createHash('md5').update(JSON.stringify(notification)).digest('hex')
   }
 
-  /**
-   * @returns {Promise<Map<string, GitHubNotificationNode>>}
-   */
-  async #fetchAllPages() {
-    const gql = getGraphql()
-    /** @type {Map<string, GitHubNotificationNode>} */
-    const all = new Map()
-    let cursor = null
-
-    while (all.size < MAX_NOTIFICATIONS) {
-      const data = await gql(NOTIFICATION_QUERY, { cursor })
-      const { nodes, pageInfo } = data.viewer.notificationThreads
-
-      for (const node of nodes) {
-        all.set(node.id, node)
+  #mergeToNode(thread, subject) {
+    return {
+      id: thread.threadId,
+      title: thread.title,
+      threadType: thread.subjectType,
+      url: thread.webUrl,
+      reason: thread.reason,
+      lastUpdatedAt: thread.updatedAt,
+      optionalSubject: subject ?? null,
+      optionalList: {
+        nameWithOwner: `${thread.owner}/${thread.repo}`,
+        name: thread.repo,
+        owner: { login: thread.owner }
       }
-
-      if (!pageInfo.hasNextPage) break
-      cursor = pageInfo.endCursor
     }
-
-    return all
   }
 
   /**
-   * @returns {Promise<GitHubNotificationNode[]>}
+   * Enrich REST threads via GraphQL. Only threads whose updated_at differs
+   * from cache are enriched; the rest reuse cached subject data.
    */
-  async #fetchFirstPage() {
+  async #enrichThreads(threads) {
+    const needsEnrichment = threads.filter((t) => {
+      const cached = this.#updatedAtCache.get(t.threadId)
+      return cached !== t.updatedAt
+    })
+
+    if (needsEnrichment.length === 0) return new Map()
+
+    const nodeIdTargets = needsEnrichment.filter(
+      (t) => t.subjectType === 'Release' || t.subjectType === 'CheckSuite'
+    )
+    const nodeIds = nodeIdTargets.length > 0 ? await fetchSubjectNodeIds(nodeIdTargets) : new Map()
+
+    const targets = needsEnrichment
+      .map((t) => {
+        const base = {
+          threadId: t.threadId,
+          owner: t.owner,
+          repo: t.repo,
+          subjectType: t.subjectType,
+          subjectNumber: t.subjectNumber
+        }
+        if (t.subjectType === 'Release' || t.subjectType === 'CheckSuite') {
+          base.nodeId = nodeIds.get(t.threadId)
+          base.subjectNumber = null
+        }
+        return base
+      })
+      .filter((t) => t.subjectNumber != null || t.nodeId)
+
+    if (targets.length === 0) return new Map()
+
+    const batches = buildEnrichmentQueries(targets)
     const gql = getGraphql()
-    const data = await gql(NOTIFICATION_QUERY, { cursor: null })
-    return data.viewer.notificationThreads.nodes
+    const allResults = new Map()
+
+    const batchPromises = batches.map(async ({ query, mapping }) => {
+      try {
+        const data = await gql(query)
+        const results = extractEnrichmentResults(data, mapping)
+        for (const [threadId, subject] of results) {
+          allResults.set(threadId, subject)
+        }
+      } catch (err) {
+        console.error('Enrichment query failed:', err.message)
+        for (const threadId of mapping.values()) {
+          allResults.set(threadId, null)
+        }
+      }
+    })
+
+    await Promise.all(batchPromises)
+    return allResults
   }
 
   #enrichWithEvents(node, prevEntry) {
@@ -116,7 +207,11 @@ class GitHubNotifications {
   #buildCacheEntry(node) {
     const events = extractLatestEvents(node)
     this.#previousEvents.set(node.id, { events })
-    return { hash: this.#hash(node), events }
+    return { hash: this.#hash(node), events, subject: node.optionalSubject }
+  }
+
+  #getCachedSubject(threadId) {
+    return this.#cache.get(threadId)?.subject ?? null
   }
 
   #reconcileFull(fetched) {
@@ -138,8 +233,10 @@ class GitHubNotifications {
     }
 
     this.#cache.clear()
+    this.#updatedAtCache.clear()
     for (const [id, node] of fetched) {
       this.#cache.set(id, this.#buildCacheEntry(node))
+      this.#updatedAtCache.set(id, node.lastUpdatedAt)
     }
 
     this.#lastFullRefreshAt = Date.now()
@@ -149,30 +246,57 @@ class GitHubNotifications {
   invalidate(ids) {
     for (const id of ids) {
       this.#cache.delete(id)
+      this.#updatedAtCache.delete(id)
     }
   }
 
+  /**
+   * @returns {Promise<{ updates: Map<string, GitHubNotificationNode | null>, pollInterval: number }>}
+   */
   async fetchNotifications() {
-    if (Date.now() >= this.#lastFullRefreshAt + FULL_REFRESH_INTERVAL_MS) {
-      const fetched = await this.#fetchAllPages()
-      return this.#reconcileFull(fetched)
+    const isFullRefresh = Date.now() >= this.#lastFullRefreshAt + FULL_REFRESH_INTERVAL_MS
+
+    const { threads, pollInterval, notModified } = await fetchNotificationThreads({
+      allPages: isFullRefresh
+    })
+
+    this.#lastPollInterval = pollInterval
+
+    if (notModified) {
+      return { updates: new Map(), pollInterval }
     }
 
-    const nodes = await this.#fetchFirstPage()
-    const updates = new Map()
+    const enriched = await this.#enrichThreads(threads)
 
-    for (const node of nodes) {
+    const fetched = new Map()
+    for (const thread of threads) {
+      const subject = enriched.has(thread.threadId)
+        ? enriched.get(thread.threadId)
+        : this.#getCachedSubject(thread.threadId)
+
+      const node = this.#mergeToNode(thread, subject)
+      fetched.set(thread.threadId, node)
+    }
+
+    if (isFullRefresh) {
+      const result = this.#reconcileFull(fetched)
+      return { updates: result, pollInterval }
+    }
+
+    const updates = new Map()
+    for (const [id, node] of fetched) {
       const hash = this.#hash(node)
-      const cached = this.#cache.get(node.id)
+      const cached = this.#cache.get(id)
 
       if (cached?.hash !== hash) {
-        updates.set(node.id, this.#enrichWithEvents(node, cached ?? null))
-        this.#cache.set(node.id, this.#buildCacheEntry(node))
+        updates.set(id, this.#enrichWithEvents(node, cached ?? null))
+        this.#cache.set(id, this.#buildCacheEntry(node))
+        this.#updatedAtCache.set(id, node.lastUpdatedAt)
       }
     }
 
-    return updates
+    return { updates, pollInterval }
   }
 }
 
-export { GitHubNotifications }
+export { GitHubNotifications, extractLatestEvents }

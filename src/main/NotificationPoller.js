@@ -4,16 +4,25 @@ import { VIEWER_LOGIN_QUERY } from './github/queries/viewer.js'
 import { Pipeline } from './pipeline/Pipeline.js'
 import { broadcastError } from './broadcastError.js'
 
-const POLL_INTERVAL_MS = 60_000
+const DEFAULT_POLL_INTERVAL_MS = 60_000
+
+/** @typedef {import('./NotificationStore.js').NotificationStore} NotificationStore */
+/** @typedef {import('./PreferencesStore.js').PreferencesStore} PreferencesStore */
 
 class NotificationPoller {
+  /** @type {ReturnType<typeof setTimeout> | null} */
   #timeoutId = null
   #stopped = false
   #notifications = new GitHubNotifications()
+  /** @type {NotificationStore} */
   #store
+  /** @type {PreferencesStore} */
   #preferencesStore
+  /** @type {string | null} */
   #viewerLogin = null
+  #pollIntervalMs = DEFAULT_POLL_INTERVAL_MS
 
+  /** @param {{ store: NotificationStore, preferencesStore: PreferencesStore }} options */
   constructor({ store, preferencesStore }) {
     console.log('constructed new notification poller')
 
@@ -33,10 +42,13 @@ class NotificationPoller {
     console.log('polling notifications')
 
     try {
-      const [updates, viewerLogin] = await Promise.all([
+      const [{ updates, pollInterval }, viewerLogin] = await Promise.all([
         this.#notifications.fetchNotifications(),
         this.#resolveViewerLogin()
       ])
+
+      this.#pollIntervalMs = pollInterval
+
       const userPreferences = this.#preferencesStore.get()
       const shouldSendOsNotifications = shouldNotify && userPreferences.osNotificationsEnabled
 
@@ -56,7 +68,7 @@ class NotificationPoller {
         return
       }
 
-      this.#store.upsert(results)
+      this.#store.upsert(/** @type {[string, import('./github/queries/fetchNotifications.js').GitHubNotificationNode | null][]} */ (results))
     } catch (err) {
       broadcastError('poller', err.message)
     }
@@ -67,7 +79,7 @@ class NotificationPoller {
 
     this.#timeoutId = setTimeout(() => {
       this.#poll({ shouldNotify: true })
-    }, POLL_INTERVAL_MS)
+    }, this.#pollIntervalMs)
   }
 
   async start({ shouldNotify = true } = {}) {
@@ -91,9 +103,10 @@ class NotificationPoller {
       clearTimeout(this.#timeoutId)
       this.#timeoutId = null
       this.start({ shouldNotify })
-    }, POLL_INTERVAL_MS)
+    }, this.#pollIntervalMs)
   }
 
+  /** @param {string[]} ids */
   invalidateCacheEntries(ids) {
     this.#notifications.invalidate(ids)
   }

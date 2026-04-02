@@ -4,8 +4,11 @@ import { app } from 'electron'
 import { DEFAULT_SETTINGS, sanitizeSettings } from '../shared/settings.js'
 import { broadcastError } from './broadcastError.js'
 
+/** @typedef {import('../shared/settings.js').DEFAULT_SETTINGS} Settings */
+
 class PreferencesStore {
   #filePath
+  /** @type {Settings} */
   #settings
 
   constructor() {
@@ -35,10 +38,12 @@ class PreferencesStore {
     }
   }
 
+  /** @returns {Settings} */
   get() {
     return { ...this.#settings }
   }
 
+  /** @param {Partial<Settings>} partialSettings @returns {Settings} */
   update(partialSettings) {
     this.#settings = sanitizeSettings(
       {

@@ -54,7 +54,7 @@ function findNotificationTriggerType(notification, context) {
     return findRelevantEventType(notification, context) ?? 'activity'
   }
 
-  if (context.userPreferences.osNotifyOnSavedThreadActivity && notification.isSaved) {
+  if (context.userPreferences.osNotifyOnSavedThreadActivity && notification._localData?.isSaved) {
     return findRelevantEventType(notification, context) ?? 'saved'
   }
 
@@ -85,7 +85,7 @@ export async function notifyProcessor(notification, context) {
   if (!context.shouldNotify) {
     return notification
   }
-  if (!notification.isUnread) {
+  if (!notification._localData?.isUnread) {
     return notification
   }
 

@@ -1,11 +1,11 @@
-import { markThreadsAsDone } from '../../github/mutations.js'
+import { archiveThreads } from '../../github/mutations.js'
 import { broadcastError } from '../../broadcastError.js'
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000
 
 /** @type {import('../Pipeline.js').PipelineProcessor} */
 export async function autoDoneProcessor(notification, { userPreferences, invalidateCacheEntries }) {
-  if (!userPreferences.autoMarkDoneEnabled || notification.isSaved) {
+  if (!userPreferences.autoMarkDoneEnabled || notification._localData?.isSaved) {
     return notification
   }
 
@@ -16,8 +16,8 @@ export async function autoDoneProcessor(notification, { userPreferences, invalid
   }
 
   try {
-    console.log('Marking notification as done:', notification.id)
-    await markThreadsAsDone([notification.id])
+    console.log('Archiving notification:', notification.id)
+    await archiveThreads([notification.id])
     invalidateCacheEntries?.([notification.id])
     return null
   } catch (err) {

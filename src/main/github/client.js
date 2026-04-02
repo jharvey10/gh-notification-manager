@@ -1,7 +1,9 @@
 import { graphql } from '@octokit/graphql'
+import { Octokit } from '@octokit/rest'
 import { loadToken } from '../auth.js'
 
 let graphqlClient = null
+let restClient = null
 
 function getGraphql() {
   if (!graphqlClient) {
@@ -14,8 +16,20 @@ function getGraphql() {
   return graphqlClient
 }
 
-function resetClients() {
-  graphqlClient = null
+function getRest() {
+  if (!restClient) {
+    const token = loadToken()
+    if (!token) {
+      throw new Error('No GitHub token configured')
+    }
+    restClient = new Octokit({ auth: token })
+  }
+  return restClient
 }
 
-export { getGraphql, resetClients }
+function resetClients() {
+  graphqlClient = null
+  restClient = null
+}
+
+export { getGraphql, getRest, resetClients }

@@ -25,8 +25,9 @@ function buildMenuId(id) {
 }
 
 export function NotificationItem({ notification, isSelected, onToggle }) {
-  const { id, title, url, tags, activityLabel, lastUpdatedAt, isUnread, isSaved, optionalList } =
+  const { id, title, url, tags, activityLabel, lastUpdatedAt, _localData, optionalList } =
     notification
+  const { isUnread, isSaved } = _localData ?? {}
   const repo = optionalList?.nameWithOwner ?? 'unknown'
   const { label: timeLabel, tooltip: timeTooltip } = formatTimeAgo(lastUpdatedAt)
   const menuId = buildMenuId(id)
@@ -156,8 +157,10 @@ NotificationItem.propTypes = {
     tags: PropTypes.arrayOf(PropTypes.string).isRequired,
     activityLabel: PropTypes.string,
     lastUpdatedAt: PropTypes.string.isRequired,
-    isUnread: PropTypes.bool.isRequired,
-    isSaved: PropTypes.bool,
+    _localData: PropTypes.shape({
+      isUnread: PropTypes.bool.isRequired,
+      isSaved: PropTypes.bool
+    }).isRequired,
     _latestEvents: PropTypes.shape({
       curr: PropTypes.arrayOf(
         PropTypes.shape({

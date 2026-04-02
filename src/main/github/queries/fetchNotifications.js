@@ -90,156 +90,30 @@
  *   name: string,
  *   owner: GitHubActor | null
  * }} GitHubRepositoryList
+ * @typedef {{ isUnread: boolean, isSaved: boolean }} LocalNotificationData
+ * @typedef {Partial<LocalNotificationData>} LocalNotificationDataPatch
  * @typedef {{
  *   id: string,
  *   title: string,
  *   threadType: string,
  *   url: string,
  *   reason: string | null,
- *   isUnread: boolean,
- *   isSaved: boolean,
  *   lastUpdatedAt: string,
  *   optionalSubject: GitHubNotificationSubject | null,
  *   optionalList: GitHubRepositoryList | null,
+ *   _localData: LocalNotificationData,
  *   tags?: string[],
  *   activityLabel?: string | null,
  *   _latestEvents?: { prev: LatestEvent[], curr: LatestEvent[] }
  * }} GitHubNotificationNode
  */
 
-const NOTIFICATION_QUERY = `
-  query FetchNotifications($cursor: String) {
-    viewer {
-      notificationThreads(
-        first: 50,
-        after: $cursor,
-        filterBy: { statuses: [READ, UNREAD] }
-      ) {
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        nodes {
-          id
-          title
-          threadType
-          url
-          reason
-          isUnread
-          isSaved
-          lastUpdatedAt
-          optionalSubject {
-            __typename
-            ... on PullRequest {
-              id
-              viewerSubscription
-              number
-              state
-              isDraft
-              merged
-              reviewDecision
-              author { login }
-              labels(first: 20) { nodes { name } }
-              reviewRequests(first: 50) {
-                nodes {
-                  requestedReviewer {
-                    ... on User { __typename login }
-                    ... on Team { __typename slug organization { login } }
-                  }
-                }
-              }
-              latestComment: comments(last: 1) {
-                nodes { author { login } createdAt }
-              }
-              latestReview: reviews(last: 1) {
-                nodes { author { login } state submittedAt }
-              }
-              latestMention: timelineItems(itemTypes: [MENTIONED_EVENT], last: 1) {
-                nodes { ... on MentionedEvent { actor { login } createdAt } }
-              }
-              latestAssignment: timelineItems(itemTypes: [ASSIGNED_EVENT], last: 1) {
-                nodes { ... on AssignedEvent { assignee { ... on User { login } } createdAt } }
-              }
-              latestReviewRequest: timelineItems(itemTypes: [REVIEW_REQUESTED_EVENT], last: 1) {
-                nodes { ... on ReviewRequestedEvent { requestedReviewer { ... on User { login } } createdAt } }
-              }
-              latestClosedEvent: timelineItems(itemTypes: [CLOSED_EVENT], last: 1) {
-                nodes { ... on ClosedEvent { actor { login } createdAt stateReason } }
-              }
-              latestReopenedEvent: timelineItems(itemTypes: [REOPENED_EVENT], last: 1) {
-                nodes { ... on ReopenedEvent { actor { login } createdAt stateReason } }
-              }
-              latestMergedEvent: timelineItems(itemTypes: [MERGED_EVENT], last: 1) {
-                nodes { ... on MergedEvent { actor { login } createdAt } }
-              }
-              latestReadyForReviewEvent: timelineItems(itemTypes: [READY_FOR_REVIEW_EVENT], last: 1) {
-                nodes { ... on ReadyForReviewEvent { actor { login } createdAt } }
-              }
-              latestReviewDismissedEvent: timelineItems(itemTypes: [REVIEW_DISMISSED_EVENT], last: 1) {
-                nodes { ... on ReviewDismissedEvent { actor { login } createdAt previousReviewState } }
-              }
-            }
-            ... on Issue {
-              id
-              viewerSubscription
-              number
-              state
-              stateReason
-              author { login }
-              latestComment: comments(last: 1) {
-                nodes { author { login } createdAt }
-              }
-              latestMention: timelineItems(itemTypes: [MENTIONED_EVENT], last: 1) {
-                nodes { ... on MentionedEvent { actor { login } createdAt } }
-              }
-              latestAssignment: timelineItems(itemTypes: [ASSIGNED_EVENT], last: 1) {
-                nodes { ... on AssignedEvent { assignee { ... on User { login } } createdAt } }
-              }
-              latestClosedEvent: timelineItems(itemTypes: [CLOSED_EVENT], last: 1) {
-                nodes { ... on ClosedEvent { actor { login } createdAt stateReason } }
-              }
-              latestReopenedEvent: timelineItems(itemTypes: [REOPENED_EVENT], last: 1) {
-                nodes { ... on ReopenedEvent { actor { login } createdAt stateReason } }
-              }
-            }
-            ... on CheckSuite {
-              status
-              conclusion
-              commit { id oid viewerSubscription }
-            }
-            ... on Release {
-              tagName
-              isPrerelease
-              tagCommit { id viewerSubscription }
-            }
-            ... on Discussion {
-              id
-              viewerSubscription
-              number
-              isAnswered
-              stateReason
-              latestComment: comments(last: 1) {
-                nodes { author { login } createdAt }
-              }
-            }
-          }
-          optionalList {
-            ... on Repository {
-              nameWithOwner
-              name
-              owner { login }
-            }
-          }
-        }
-      }
-    }
-  }
-`
-
-export { NOTIFICATION_QUERY }
-
 /**
  * Re-export typedefs for use by other modules.
+ * The NOTIFICATION_QUERY has been replaced by REST+GraphQL hybrid fetching
+ * (see restNotifications.js and enrichSubjects.js). These typedefs remain
+ * as the canonical shape for notification data throughout the app.
+ *
  * @exports GitHubNotificationNode
  * @exports LatestEvent
  * @exports GitHubNotificationSubject

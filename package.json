@@ -18,6 +18,10 @@
     "dist:win": "npm run build && electron-builder --win --publish never",
     "dist:linux": "npm run build && electron-builder --linux --publish never",
     "start": "electron .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
     "typecheck": "tsc --project tsconfig.json",
     "clean": "rm -rf dist release"
   },
@@ -69,6 +73,7 @@
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@tailwindcss/vite": "^4.2.1",
     "@types/node": "^25.4.0",
     "@types/react": "^19.2.14",
@@ -79,6 +84,8 @@
     "electron": "40.6.0",
     "electron-builder": "^26.8.2",
     "esbuild": "^0.27.4",
+    "eslint": "^9.39.4",
+    "globals": "^17.4.0",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.2.0",
     "typescript": "^5.9.3",

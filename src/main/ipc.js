@@ -1,40 +1,27 @@
 import { app, ipcMain, shell, Notification } from 'electron'
 import * as auth from './auth.js'
 import {
-  markThreadsAsDone,
-  markThreadsAsRead,
-  markThreadsAsUnread,
-  unsubscribeAndMarkDone,
-  saveThread,
-  unsaveThread
+  archiveThreads,
+  unsubscribeAndArchive
 } from './github/mutations.js'
 import { broadcastError } from './broadcastError.js'
 import { markRendererAsReady } from './index.js'
-import { broadcastBatchProgress } from './broadcastBatchProgress.js'
+import { ProgressTracker } from './ProgressTracker.js'
 import { NotificationPoller } from './NotificationPoller.js'
-import { getGraphql, resetClients } from './github/client.js'
+import { resetClients } from './github/client.js'
+import { resetLastModified } from './github/restNotifications.js'
 import { getNotificationSubscribableTarget } from '../shared/notificationSubscription.js'
 import { getStatus as getUpdaterStatus, checkForUpdates, downloadUpdate, quitAndInstall } from './updater.js'
 
-function createProgressTracker(total) {
-  if (total <= 1) {
-    return { report() {}, done() {} }
-  }
-
-  let completed = 0
-  broadcastBatchProgress({ completed, total })
-  return {
-    report(count) {
-      completed += count
-      broadcastBatchProgress({ completed, total })
-    },
-    done() {
-      broadcastBatchProgress(null)
-    }
-  }
-}
-
+/**
+ * @param {{
+ *   store: import('./NotificationStore.js').NotificationStore,
+ *   preferencesStore: import('./PreferencesStore.js').PreferencesStore,
+ *   poller: import('./NotificationPoller.js').NotificationPoller
+ * }} options
+ */
 function registerIpcHandlers({ store, preferencesStore, poller: initialPoller }) {
+  /** @type {import('./NotificationPoller.js').NotificationPoller | null} */
   let poller = initialPoller
 
   ipcMain.on('renderer:ready', () => {
@@ -52,15 +39,15 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
 
   ipcMain.handle('notifications:get', () => {
     console.log('ipc: notifications:get')
-    return store.getAll() // array or null
+    return store.getAll()
   })
 
   ipcMain.handle('notifications:markDone', async (_event, ids) => {
     console.log('ipc: notifications:markDone')
     poller?.stop()
-    const progress = createProgressTracker(ids.length)
+    const progress = new ProgressTracker(ids.length)
     try {
-      await markThreadsAsDone(ids, (batch) => {
+      await archiveThreads(ids, (batch) => {
         store.upsert(batch.map((id) => [id, null]))
         poller?.invalidateCacheEntries(batch)
         progress.report(batch.length)
@@ -74,62 +61,20 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
     }
   })
 
-  ipcMain.handle('notifications:markRead', async (_event, ids) => {
+  ipcMain.handle('notifications:markRead', (_event, ids) => {
     console.log('ipc: notifications:markRead')
-    poller?.stop()
-    const progress = createProgressTracker(ids.length)
-    try {
-      await markThreadsAsRead(ids, (batch) => {
-        store.upsert(
-          batch
-            .map((id) => {
-              const n = store.get(id)
-              return n ? [id, { ...n, isUnread: false }] : null
-            })
-            .filter(Boolean)
-        )
-        poller?.invalidateCacheEntries(batch)
-        progress.report(batch.length)
-      })
-    } catch (err) {
-      broadcastError('markRead', err.message)
-      throw err
-    } finally {
-      progress.done()
-      poller?.startDeferred()
-    }
+    store.upsert(ids.map((id) => [id, { _localData: { isUnread: false } }]))
   })
 
-  ipcMain.handle('notifications:markUnread', async (_event, ids) => {
+  ipcMain.handle('notifications:markUnread', (_event, ids) => {
     console.log('ipc: notifications:markUnread')
-    poller?.stop()
-    const progress = createProgressTracker(ids.length)
-    try {
-      await markThreadsAsUnread(ids, (batch) => {
-        store.upsert(
-          batch
-            .map((id) => {
-              const n = store.get(id)
-              return n ? [id, { ...n, isUnread: true }] : null
-            })
-            .filter(Boolean)
-        )
-        poller?.invalidateCacheEntries(batch)
-        progress.report(batch.length)
-      })
-    } catch (err) {
-      broadcastError('markUnread', err.message)
-      throw err
-    } finally {
-      progress.done()
-      poller?.startDeferred()
-    }
+    store.upsert(ids.map((id) => [id, { _localData: { isUnread: true } }]))
   })
 
   ipcMain.handle('notifications:unsubscribe', async (_event, ids) => {
     console.log('ipc: notifications:unsubscribe')
     poller?.stop()
-    const progress = createProgressTracker(ids.length)
+    const progress = new ProgressTracker(ids.length)
     try {
       const subscribableIds = []
       const subscribableThreadIds = []
@@ -153,11 +98,11 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
       }
 
       if (subscribableIds.length > 0) {
-        await unsubscribeAndMarkDone(subscribableIds, subscribableThreadIds, onBatchDone)
+        await unsubscribeAndArchive(subscribableIds, subscribableThreadIds, onBatchDone)
       }
 
       if (nonSubscribableThreadIds.length > 0) {
-        await markThreadsAsDone(nonSubscribableThreadIds, onBatchDone)
+        await archiveThreads(nonSubscribableThreadIds, onBatchDone)
       }
     } catch (err) {
       broadcastError('unsubscribe', err.message)
@@ -168,42 +113,21 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
     }
   })
 
-  ipcMain.handle('notifications:save', async (_event, id) => {
+  ipcMain.handle('notifications:save', (_event, id) => {
     console.log('ipc: notifications:save')
-    poller?.stop()
-    try {
-      await saveThread(id)
-      const n = store.get(id)
-      if (n) store.upsert([[id, { ...n, isSaved: true }]])
-      poller?.invalidateCacheEntries([id])
-    } catch (err) {
-      broadcastError('save', err.message)
-      throw err
-    } finally {
-      poller?.startDeferred()
-    }
+    store.upsert([[id, { _localData: { isSaved: true } }]])
   })
 
-  ipcMain.handle('notifications:unsave', async (_event, id) => {
+  ipcMain.handle('notifications:unsave', (_event, id) => {
     console.log('ipc: notifications:unsave')
-    poller?.stop()
-    try {
-      await unsaveThread(id)
-      const n = store.get(id)
-      if (n) store.upsert([[id, { ...n, isSaved: false }]])
-      poller?.invalidateCacheEntries([id])
-    } catch (err) {
-      broadcastError('unsave', err.message)
-      throw err
-    } finally {
-      poller?.startDeferred()
-    }
+    store.upsert([[id, { _localData: { isSaved: false } }]])
   })
 
   ipcMain.handle('notifications:refresh', async () => {
     console.log('ipc: notifications:refresh')
     poller?.stop()
     store.clear()
+    resetLastModified()
     poller = new NotificationPoller({ store, preferencesStore })
     await poller.start({ shouldNotify: false })
   })
@@ -225,7 +149,7 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
 
   ipcMain.handle('auth:hasValidToken', async () => {
     console.log('ipc: auth:hasValidToken')
-    const result = await auth.validateToken(getGraphql())
+    const result = await auth.validateToken()
     if (result.valid) {
       return true
     }
@@ -241,8 +165,9 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
     auth.saveToken(token)
     poller?.stop()
     resetClients()
+    resetLastModified()
     poller = new NotificationPoller({ store, preferencesStore })
-    poller.start({ shouldNotify: false }) // Don't await. Let the UI refresh on token change.
+    poller.start({ shouldNotify: false })
   })
 
   ipcMain.handle('auth:clearToken', () => {
@@ -252,6 +177,7 @@ function registerIpcHandlers({ store, preferencesStore, poller: initialPoller })
     poller = null
     store.clear()
     resetClients()
+    resetLastModified()
   })
 
   ipcMain.handle('osnotification:test', () => {

@@ -1,7 +1,7 @@
 import { safeStorage, app } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
-import { VALIDATE_TOKEN_QUERY } from './github/queries/validateToken.js'
+import { getRest } from './github/client.js'
 
 function tokenPath() {
   return path.join(app.getPath('userData'), 'gh-token.enc')
@@ -36,13 +36,13 @@ function clearToken() {
   }
 }
 
-async function validateToken(gql) {
+async function validateToken() {
   if (!hasToken()) {
     return { valid: false }
   }
 
   try {
-    await gql(VALIDATE_TOKEN_QUERY)
+    await getRest().request('GET /notifications', { per_page: 1 })
     return { valid: true }
   } catch (err) {
     console.log(JSON.stringify(err, null, 2))
