@@ -51,6 +51,7 @@ async function checkForUpdates() {
   }
 
   try {
+    const t0 = performance.now()
     const response = await fetch(RELEASES_URL, {
       headers: { Accept: 'application/vnd.github+json' }
     })
@@ -60,6 +61,7 @@ async function checkForUpdates() {
     }
 
     const release = await response.json()
+    console.debug(`[timing] REST GET latest release: ${(performance.now() - t0).toFixed(0)}ms`)
     const remoteVersion = release.tag_name.replace(/^v/, '')
     const currentVersion = getCurrentVersion()
 
@@ -97,12 +99,14 @@ async function downloadUpdate() {
   try {
     sendStatusToWindow({ state: 'downloading' })
 
+    const t0 = performance.now()
     const response = await fetch(downloadUrl)
     if (!response.ok) {
       throw new Error(`Download failed with status ${response.status}`)
     }
 
     const buffer = Buffer.from(await response.arrayBuffer())
+    console.debug(`[timing] REST download update: ${(performance.now() - t0).toFixed(0)}ms`)
 
     const userDataPath = app.getPath('userData')
     const payloadDir = path.join(userDataPath, 'payload')

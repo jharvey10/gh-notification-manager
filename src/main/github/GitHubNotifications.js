@@ -188,9 +188,14 @@ class GitHubNotifications {
     const gql = getGraphql()
     const allResults = new Map()
 
-    const batchPromises = batches.map(async ({ query, mapping }) => {
+    const t0 = performance.now()
+    const batchPromises = batches.map(async ({ query, mapping }, idx) => {
       try {
+        const t1 = performance.now()
         const data = await gql(query)
+        console.debug(
+          `[timing] GQL enrichment batch ${idx + 1}/${batches.length} (${mapping.size} subjects): ${(performance.now() - t1).toFixed(0)}ms`
+        )
         const results = extractEnrichmentResults(data, mapping)
         for (const [threadId, subject] of results) {
           allResults.set(threadId, subject)
@@ -204,6 +209,9 @@ class GitHubNotifications {
     })
 
     await Promise.all(batchPromises)
+    console.debug(
+      `[timing] GQL enrichment total (${batches.length} batches, ${targets.length} targets): ${(performance.now() - t0).toFixed(0)}ms`
+    )
     return allResults
   }
 
@@ -270,9 +278,13 @@ class GitHubNotifications {
   async fetchNotifications() {
     const isFullRefresh = Date.now() >= this.#lastFullRefreshAt + FULL_REFRESH_INTERVAL_MS
 
+    const tRest = performance.now()
     const { threads, pollInterval, notModified } = await fetchNotificationThreads({
       allPages: isFullRefresh
     })
+    console.debug(
+      `[timing] fetchNotificationThreads (full=${isFullRefresh}): ${(performance.now() - tRest).toFixed(0)}ms — ${threads.length} threads, notModified=${notModified}`
+    )
 
     this.#lastPollInterval = pollInterval
 
@@ -280,7 +292,11 @@ class GitHubNotifications {
       return { updates: new Map(), pollInterval }
     }
 
+    const tEnrich = performance.now()
     const enriched = await this.#enrichThreads(threads)
+    console.debug(
+      `[timing] enrichThreads: ${(performance.now() - tEnrich).toFixed(0)}ms — ${enriched.size} enriched`
+    )
 
     const fetched = new Map()
     for (const thread of threads) {

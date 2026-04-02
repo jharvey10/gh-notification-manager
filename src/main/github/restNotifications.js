@@ -92,11 +92,13 @@ async function fetchNotificationThreads({ allPages = false } = {}) {
 
   let response
   try {
+    const t0 = performance.now()
     response = await octokit.request('GET /notifications', {
       all: false,
       per_page: PER_PAGE,
       headers
     })
+    console.debug(`[timing] REST GET /notifications: ${(performance.now() - t0).toFixed(0)}ms`)
   } catch (err) {
     if (err.status === 304) {
       return {
@@ -121,8 +123,13 @@ async function fetchNotificationThreads({ allPages = false } = {}) {
   }
 
   let nextUrl = parseLinkNext(response.headers.link)
+  let page = 2
   while (nextUrl && threads.length < MAX_NOTIFICATIONS) {
+    const tp = performance.now()
     const next = await octokit.request(nextUrl, { headers })
+    console.debug(
+      `[timing] REST GET /notifications (page ${page}): ${(performance.now() - tp).toFixed(0)}ms`
+    )
     for (const raw of next.data) {
       threads.push(mapThread(raw))
     }
@@ -130,6 +137,7 @@ async function fetchNotificationThreads({ allPages = false } = {}) {
       lastModified = next.headers['last-modified']
     }
     nextUrl = parseLinkNext(next.headers.link)
+    page++
   }
 
   return { threads, pollInterval, notModified: false }
@@ -153,9 +161,14 @@ async function fetchSubjectNodeIds(threads) {
   const octokit = getRest()
   const results = new Map()
 
+  const t0 = performance.now()
   const fetches = needsNodeId.map(async (thread) => {
     try {
+      const t1 = performance.now()
       const resp = await octokit.request(`GET ${new URL(thread.subjectUrl).pathname}`)
+      console.debug(
+        `[timing] REST GET node_id (thread ${thread.threadId}): ${(performance.now() - t1).toFixed(0)}ms`
+      )
       if (resp.data?.node_id) {
         results.set(thread.threadId, resp.data.node_id)
       }
@@ -165,6 +178,9 @@ async function fetchSubjectNodeIds(threads) {
   })
 
   await Promise.all(fetches)
+  console.debug(
+    `[timing] REST fetchSubjectNodeIds (${needsNodeId.length} threads): ${(performance.now() - t0).toFixed(0)}ms total`
+  )
   return results
 }
 

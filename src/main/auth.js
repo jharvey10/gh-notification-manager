@@ -42,7 +42,11 @@ async function validateToken() {
   }
 
   try {
+    const t0 = performance.now()
     await getRest().request('GET /notifications', { per_page: 1 })
+    console.debug(
+      `[timing] REST GET /notifications (token validation): ${(performance.now() - t0).toFixed(0)}ms`
+    )
     return { valid: true }
   } catch (err) {
     console.log(JSON.stringify(err, null, 2))

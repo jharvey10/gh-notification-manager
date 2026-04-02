@@ -32,7 +32,9 @@ class NotificationPoller {
 
   async #resolveViewerLogin() {
     if (!this.#viewerLogin) {
+      const t0 = performance.now()
       const data = await getGraphql()(VIEWER_LOGIN_QUERY)
+      console.debug(`[timing] GQL viewer login query: ${(performance.now() - t0).toFixed(0)}ms`)
       this.#viewerLogin = data.viewer.login
     }
     return this.#viewerLogin
