@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.1.0](https://github.com/jharvey10/gh-notification-manager/compare/v2.0.0...v2.1.0) (2026-04-03)
+
+
+### Features
+
+* add better tagging of checksuite notifications ([b698ae0](https://github.com/jharvey10/gh-notification-manager/commit/b698ae008e4fbbae4d465c306c34c3304205c854))
+
+
+### Bug Fixes
+
+* fix bug with full refresh removing almost all notifications ([151a1f2](https://github.com/jharvey10/gh-notification-manager/commit/151a1f2f8c99ff50d52bda3f061f84b51687b5d4))
+* include "closed" in state for junk tags in addition to "merged" ([4ee5891](https://github.com/jharvey10/gh-notification-manager/commit/4ee58917061934208a4b66df2926988106fbd7a3))
+* remove extraneous notifications update broadcast ([4ee5891](https://github.com/jharvey10/gh-notification-manager/commit/4ee58917061934208a4b66df2926988106fbd7a3))
+
 ## [2.0.0](https://github.com/jharvey10/gh-notification-manager/compare/v1.5.0...v2.0.0) (2026-04-02)
 
 
