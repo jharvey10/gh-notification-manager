@@ -3,7 +3,7 @@ export async function junkTagProcessor(notification) {
   const isJunk =
     notification.title?.toLowerCase().match(/attempt #\d+ succeeded/) ||
     notification.title?.toLowerCase().includes('workflow run cancelled') ||
-    notification.optionalSubject?.state === 'MERGED'
+    ['MERGED', 'CLOSED'].includes(notification.optionalSubject?.state)
 
   if (isJunk) {
     notification.tags = [...new Set([...(notification.tags ?? []), 'junk'])]

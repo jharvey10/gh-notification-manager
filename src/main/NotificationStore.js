@@ -85,6 +85,10 @@ class NotificationStore {
     console.log('num deletes', entries.filter(([_, notification]) => notification === null).length)
     console.log('num upserts', entries.filter(([_, notification]) => notification !== null).length)
 
+    if (entries.length === 0) {
+      return
+    }
+
     if (!this.#notifications) {
       this.#notifications = new Map()
     }
