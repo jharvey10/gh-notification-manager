@@ -193,7 +193,7 @@ class GitHubNotifications {
 
     const tRest = performance.now()
     const { threads, pollInterval, notModified } = await fetchNotificationThreads({
-      allPages: isFullRefresh
+      fullRefresh: isFullRefresh
     })
     console.debug(
       `[timing] fetchNotificationThreads (full=${isFullRefresh}): ${(performance.now() - tRest).toFixed(0)}ms — ${threads.length} threads, notModified=${notModified}`

@@ -80,13 +80,13 @@ function mapThread(raw) {
 
 /**
  * Fetch notification threads via REST with If-Modified-Since / 304 support.
- * @param {{ allPages?: boolean }} options
+ * @param {{ fullRefresh?: boolean }} options
  * @returns {Promise<FetchResult>}
  */
-async function fetchNotificationThreads({ allPages = false } = {}) {
+async function fetchNotificationThreads({ fullRefresh = false } = {}) {
   const octokit = getRest()
   const headers = {}
-  if (lastModified) {
+  if (lastModified && !fullRefresh) {
     headers['if-modified-since'] = lastModified
   }
 
@@ -118,7 +118,7 @@ async function fetchNotificationThreads({ allPages = false } = {}) {
 
   const threads = response.data.map(mapThread)
 
-  if (!allPages) {
+  if (!fullRefresh) {
     return { threads, pollInterval, notModified: false }
   }
 
@@ -126,7 +126,7 @@ async function fetchNotificationThreads({ allPages = false } = {}) {
   let page = 2
   while (nextUrl && threads.length < MAX_NOTIFICATIONS) {
     const tp = performance.now()
-    const next = await octokit.request(nextUrl, { headers })
+    const next = await octokit.request(nextUrl)
     console.debug(
       `[timing] REST GET /notifications (page ${page}): ${(performance.now() - tp).toFixed(0)}ms`
     )
