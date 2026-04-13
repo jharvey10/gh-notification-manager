@@ -1,11 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { PanelState } from '../../utils/PanelState.jsx'
+import { Button } from '../../components/Button.jsx'
 
 export function TokenPrompt({ setPanelState }) {
   const [token, setToken] = useState('')
   const [error, setError] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [hasExistingToken, setHasExistingToken] = useState(false)
+
+  useEffect(() => {
+    globalThis.api.hasToken().then(setHasExistingToken)
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -25,6 +31,10 @@ export function TokenPrompt({ setPanelState }) {
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleRetry = () => {
+    setPanelState(PanelState.LOADING)
   }
 
   return (
@@ -47,9 +57,15 @@ export function TokenPrompt({ setPanelState }) {
           type="submit"
           disabled={saving || !token.trim()}
         >
-          {saving ? 'Saving...' : 'Save Token'}
+          {saving ? 'Saving...' : 'Save token'}
         </button>
       </form>
+      <div className="flex flex-col gap-2">or</div>
+      {hasExistingToken && (
+        <Button variant="primary" onClick={handleRetry}>
+          Retry current token
+        </Button>
+      )}
       {error && <p className="text-error">{error}</p>}
     </div>
   )

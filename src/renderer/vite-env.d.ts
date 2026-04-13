@@ -34,6 +34,7 @@ declare global {
     getVersion: () => Promise<string>
 
     setToken: (token: string) => Promise<void>
+    hasToken: () => Promise<boolean>
     hasValidToken: () => Promise<boolean>
     clearToken: () => Promise<void>
 

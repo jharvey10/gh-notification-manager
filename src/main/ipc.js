@@ -156,6 +156,11 @@ function registerIpcHandlers({
     return globalThis.__payloadVersion || app.getVersion()
   })
 
+  ipcMain.handle('auth:hasToken', () => {
+    console.log('ipc: auth:hasToken')
+    return auth.hasToken()
+  })
+
   ipcMain.handle('auth:hasValidToken', async () => {
     console.log('ipc: auth:hasValidToken')
     const result = await auth.validateToken()
