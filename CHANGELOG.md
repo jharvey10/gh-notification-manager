@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.1](https://github.com/jharvey10/gh-notification-manager/compare/v2.1.0...v2.1.1) (2026-04-13)
+
+
+### Bug Fixes
+
+* allow retry of existing token on error ([3852053](https://github.com/jharvey10/gh-notification-manager/commit/3852053d00781708b0044d4e9d4eb8e3780c9435))
+* update minor deps ([0bee79a](https://github.com/jharvey10/gh-notification-manager/commit/0bee79a0b46b6374005a5445b7862064080a8391))
+
 ## [2.1.0](https://github.com/jharvey10/gh-notification-manager/compare/v2.0.0...v2.1.0) (2026-04-03)
 
 
