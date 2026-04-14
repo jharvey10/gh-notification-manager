@@ -92,3 +92,4 @@ typings/
 
 /dist
 /release
+/src/main/**/*.js
