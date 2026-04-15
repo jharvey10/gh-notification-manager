@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/jharvey10/gh-notification-manager/compare/v3.0.1...v3.1.0) (2026-04-15)
+
+
+### Features
+
+* add configurable pr size labels ([8e9d552](https://github.com/jharvey10/gh-notification-manager/commit/8e9d552c3869ed2987b62b7815f37cc354674388))
+
 ## [3.0.1](https://github.com/jharvey10/gh-notification-manager/compare/v3.0.0...v3.0.1) (2026-04-15)
 
 
