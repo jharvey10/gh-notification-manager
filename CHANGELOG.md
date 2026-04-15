@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/jharvey10/gh-notification-manager/compare/v2.1.1...v3.0.0) (2026-04-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* unread state, saved state, archived state, are all managed locally and separate from github.com. a best effort is made to mirror the state on github, but the app is considered the definitive source which does not transfer 1-to-1 to external views of the notifications.
+
+### Features
+
+* large refactor to accommodate github api removals ([40b11d9](https://github.com/jharvey10/gh-notification-manager/commit/40b11d969f0d23938dfc4b07d9348bc3bccc52bf))
+
 ## [2.1.1](https://github.com/jharvey10/gh-notification-manager/compare/v2.1.0...v2.1.1) (2026-04-13)
 
 
