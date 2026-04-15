@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/jharvey10/gh-notification-manager/compare/v3.0.0...v3.0.1) (2026-04-15)
+
+
+### Bug Fixes
+
+* re-add missing checksuite tags ([5ed934d](https://github.com/jharvey10/gh-notification-manager/commit/5ed934d01072364c3350982638a0cc03b664d356))
+
 ## [3.0.0](https://github.com/jharvey10/gh-notification-manager/compare/v2.1.1...v3.0.0) (2026-04-15)
 
 
