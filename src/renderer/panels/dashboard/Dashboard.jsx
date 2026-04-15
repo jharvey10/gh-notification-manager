@@ -9,7 +9,7 @@ import { BatchActionBar } from './BatchActionBar.jsx'
 import { TopBar } from './top-bar/TopBar.jsx'
 import { NotificationListContainer } from './notification-list/NotificationListContainer.jsx'
 
-export function Dashboard({ setPanelState, notifications, refresh }) {
+export function Dashboard({ setPanelState, notifications, batchProgress }) {
   const { settings } = useSettings()
   const notificationList = useMemo(() => notifications ?? [], [notifications])
 
@@ -67,13 +67,8 @@ export function Dashboard({ setPanelState, notifications, refresh }) {
     setPanelState(PanelState.SETTINGS)
   }
 
-  const handleRefresh = () => {
-    refresh()
-    setPanelState(PanelState.LOADING)
-  }
-
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
       <div className="sticky top-0 z-20 flex flex-col gap-4 bg-base-300 p-4 shadow-sm">
         <header>
           <TopBar
@@ -85,13 +80,13 @@ export function Dashboard({ setPanelState, notifications, refresh }) {
             onRepoChange={setRepoFilter}
             onClearTags={clearTagFilter}
             onClearRepos={clearRepoFilter}
-            onRefresh={handleRefresh}
             onOpenSettings={handleOpenSettings}
           />
         </header>
 
         <BatchActionBar
           selectedCount={selected.size}
+          batchProgress={batchProgress}
           onSelectAll={() => selectAll(filtered.map((n) => n.id))}
           onClearSelection={clearSelection}
           onMarkRead={handleMarkRead}
@@ -115,5 +110,5 @@ export function Dashboard({ setPanelState, notifications, refresh }) {
 Dashboard.propTypes = {
   setPanelState: PropTypes.func.isRequired,
   notifications: PropTypes.array.isRequired,
-  refresh: PropTypes.func.isRequired
+  batchProgress: PropTypes.object
 }

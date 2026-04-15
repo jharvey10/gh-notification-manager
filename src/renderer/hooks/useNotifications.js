@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState(null)
@@ -9,13 +9,10 @@ export function useNotifications() {
       .then(setNotifications)
       .catch((err) => console.error('Failed to load notifications:', err))
 
-    return globalThis.api.onNotificationsUpdated(setNotifications)
+    return globalThis.api.onNotificationsUpdated((n) => {
+      setNotifications(n)
+    })
   }, [])
 
-  const refresh = useCallback(() => {
-    setNotifications(null)
-    globalThis.api.refreshNow()
-  }, [])
-
-  return { notifications, refresh }
+  return { notifications }
 }

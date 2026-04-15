@@ -2,7 +2,7 @@ export const getNotificationRepo = (notification) =>
   notification.optionalList?.nameWithOwner ?? 'unknown'
 
 export function getEventActor(notification) {
-  const events = notification._latestEvents?.curr ?? []
+  const events = notification._latestEvents ?? []
   if (events.length === 0) {
     return null
   }

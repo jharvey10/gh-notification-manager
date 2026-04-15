@@ -5,11 +5,13 @@ import clsx from 'clsx'
 export function NotificationTags({ repo, tags, isUnread }) {
   return (
     <div className="flex flex-wrap items-center justify-start gap-2">
-      <Badge className={clsx('badge-sm badge-primary', !isUnread && 'text-primary/70')}>
-        {repo}
-      </Badge>
+      {repo && (
+        <Badge className={clsx('badge-sm badge-primary', !isUnread && 'text-primary/70')}>
+          {repo}
+        </Badge>
+      )}
 
-      {tags.map((tag) => (
+      {tags?.map((tag) => (
         <Badge key={tag} className={clsx('badge-sm badge-primary', !isUnread && 'text-primary/70')}>
           {tag}
         </Badge>
@@ -19,7 +21,7 @@ export function NotificationTags({ repo, tags, isUnread }) {
 }
 
 NotificationTags.propTypes = {
-  repo: PropTypes.string.isRequired,
-  tags: PropTypes.arrayOf(PropTypes.string).isRequired,
+  repo: PropTypes.string,
+  tags: PropTypes.arrayOf(PropTypes.string),
   isUnread: PropTypes.bool.isRequired
 }

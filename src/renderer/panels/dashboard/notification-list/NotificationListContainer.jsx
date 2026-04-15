@@ -29,7 +29,7 @@ export function NotificationListContainer({
   onSelectGroup
 }) {
   if (notifications.length === 0) {
-    return <p>No notifications.</p>
+    return <p className="p-4">No notifications.</p>
   }
 
   const sorted = [...notifications].sort(

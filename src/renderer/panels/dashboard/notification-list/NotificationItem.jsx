@@ -157,15 +157,13 @@ NotificationItem.propTypes = {
       isUnread: PropTypes.bool.isRequired,
       isSaved: PropTypes.bool
     }).isRequired,
-    _latestEvents: PropTypes.shape({
-      curr: PropTypes.arrayOf(
-        PropTypes.shape({
-          type: PropTypes.string.isRequired,
-          actor: PropTypes.string,
-          timestamp: PropTypes.string.isRequired
-        })
-      )
-    }),
+    _latestEvents: PropTypes.arrayOf(
+      PropTypes.shape({
+        type: PropTypes.string.isRequired,
+        actor: PropTypes.string,
+        timestamp: PropTypes.string.isRequired
+      })
+    ),
     optionalSubject: PropTypes.shape({
       id: PropTypes.string,
       viewerSubscription: PropTypes.string,

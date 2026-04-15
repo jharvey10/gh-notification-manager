@@ -8,6 +8,7 @@ import { AutoDoneSection } from './settings-sections/AutoDoneSection.jsx'
 import { AuthTokenSection } from './settings-sections/AuthTokenSection.jsx'
 import { OlderSectionSettings } from './settings-sections/OlderSectionSettings.jsx'
 import { OsNotificationsSection } from './settings-sections/OsNotificationsSection.jsx'
+import { ResetDataSection } from './settings-sections/ResetDataSection.jsx'
 import { VersionSection } from './settings-sections/version-section/VersionSection.jsx'
 
 export function Settings({ setPanelState }) {
@@ -16,6 +17,7 @@ export function Settings({ setPanelState }) {
   const [savingOsNotifications, setSavingOsNotifications] = useState(false)
   const [savingAutoMarkDone, setSavingAutoMarkDone] = useState(false)
   const [savingOlderWindow, setSavingOlderWindow] = useState(false)
+  const [resetting, setResetting] = useState(false)
   const [toast, setToast] = useState(null)
   const [osSettings, setOSSettings] = useState(() => pickOSSettings(settings))
   const [autoMarkDoneEnabled, setAutoMarkDoneEnabled] = useState(settings.autoMarkDoneEnabled)
@@ -138,6 +140,17 @@ export function Settings({ setPanelState }) {
     globalThis.api.testOsNotification()
   }
 
+  const handleReset = async () => {
+    setResetting(true)
+
+    try {
+      await globalThis.api.resetAllData()
+      setPanelState(PanelState.LOADING)
+    } finally {
+      setResetting(false)
+    }
+  }
+
   return (
     <>
       <div className="toast z-50">
@@ -185,6 +198,8 @@ export function Settings({ setPanelState }) {
         />
 
         <AuthTokenSection onClearToken={handleClearToken} />
+
+        <ResetDataSection resetting={resetting} onReset={handleReset} />
 
         <VersionSection appVersion={appVersion} />
       </div>

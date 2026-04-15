@@ -10,10 +10,10 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev": "tsc && node scripts/bundle-main.mjs && concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
     "dev:renderer": "vite",
     "dev:electron": "wait-on tcp:5173 && electron .",
-    "build": "vite build && node scripts/bundle-main.mjs && node scripts/create-payload-zip.mjs",
+    "build": "tsc && vite build && node scripts/bundle-main.mjs && node scripts/create-payload-zip.mjs",
     "dist:mac": "npm run build && electron-builder --mac --publish never",
     "dist:win": "npm run build && electron-builder --win --publish never",
     "dist:linux": "npm run build && electron-builder --linux --publish never",
@@ -22,7 +22,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "typecheck": "tsc --project tsconfig.json",
+    "typecheck": "tsc",
     "clean": "rm -rf dist release"
   },
   "keywords": [],
@@ -67,7 +67,6 @@
     "@octokit/rest": "^22.0.1",
     "adm-zip": "^0.5.17",
     "clsx": "^2.1.1",
-    "lru-cache": "^11.3.5",
     "prop-types": "^15.8.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"

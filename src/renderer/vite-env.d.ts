@@ -16,7 +16,7 @@ declare global {
     onMainError: (callback: (data: { source: string; message: string }) => void) => () => void
 
     onBatchProgress: (
-      callback: (data: { completed: number; total: number } | null) => void
+      callback: (data: { completed: number; total: number; reason: string } | null) => void
     ) => () => void
 
     markAsDone: (threadIds: string[]) => Promise<void>
@@ -26,7 +26,7 @@ declare global {
     saveThread: (threadId: string) => Promise<void>
     unsaveThread: (threadId: string) => Promise<void>
 
-    refreshNow: () => Promise<void>
+    resetAllData: () => Promise<void>
 
     getSettings: () => Promise<any>
     updateSettings: (settings: Record<string, unknown>) => Promise<any>

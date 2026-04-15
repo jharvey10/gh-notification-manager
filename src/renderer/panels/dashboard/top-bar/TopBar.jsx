@@ -1,6 +1,4 @@
 import PropTypes from 'prop-types'
-import RenewIcon from '../../../assets/icons/renew.svg?react'
-import { Button } from '../../../components/Button.jsx'
 import { Filters } from './Filters.jsx'
 import { SettingsMenu } from './SettingsMenu.jsx'
 
@@ -13,7 +11,6 @@ export const TopBar = ({
   onRepoChange,
   onClearTags,
   onClearRepos,
-  onRefresh,
   onOpenSettings
 }) => {
   return (
@@ -29,9 +26,6 @@ export const TopBar = ({
         onClearRepos={onClearRepos}
       />
       <div className="flex items-center gap-2">
-        <Button tooltip="Refresh" aria-label="Refresh" onClick={onRefresh}>
-          <RenewIcon className="fill-primary size-5" />
-        </Button>
         <SettingsMenu onOpenSettings={onOpenSettings} />
       </div>
     </div>
@@ -47,6 +41,5 @@ TopBar.propTypes = {
   onRepoChange: PropTypes.func.isRequired,
   onClearTags: PropTypes.func.isRequired,
   onClearRepos: PropTypes.func.isRequired,
-  onRefresh: PropTypes.func.isRequired,
   onOpenSettings: PropTypes.func.isRequired
 }

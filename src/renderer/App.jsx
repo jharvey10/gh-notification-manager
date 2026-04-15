@@ -5,13 +5,15 @@ import { Settings } from './panels/settings/Settings.jsx'
 import { PanelState } from './utils/PanelState.jsx'
 import { Loading } from './panels/loading/Loading.jsx'
 import { useNotifications } from './hooks/useNotifications.js'
+import { useBatchProgress } from './hooks/useBatchProgress.js'
 import { useErrors } from './hooks/useErrors.js'
 import { ErrorAlerts } from './components/ErrorAlerts.jsx'
 
 export function App() {
   const { errors, dismissError } = useErrors()
   const [panelState, setPanelState] = useState(PanelState.LOADING)
-  const { notifications, refresh } = useNotifications()
+  const { notifications } = useNotifications()
+  const batchProgress = useBatchProgress()
 
   useEffect(() => {
     globalThis.api.signalReady()
@@ -31,9 +33,7 @@ export function App() {
       panel = <TokenPrompt setPanelState={setPanelState} />
       break
     case PanelState.DASHBOARD:
-      panel = (
-        <Dashboard setPanelState={setPanelState} notifications={notifications} refresh={refresh} />
-      )
+      panel = <Dashboard setPanelState={setPanelState} notifications={notifications} batchProgress={batchProgress} />
       break
     case PanelState.SETTINGS:
       panel = <Settings setPanelState={setPanelState} />

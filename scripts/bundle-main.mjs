@@ -4,7 +4,7 @@ import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 const pkg = JSON.parse(readFileSync('package.json', 'utf-8'))
 
 await build({
-  entryPoints: ['src/main/index.js'],
+  entryPoints: ['src/main/index.ts'],
   bundle: true,
   platform: 'node',
   format: 'esm',

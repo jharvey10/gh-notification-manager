@@ -48,35 +48,31 @@ export function Filters({
         <span className="label-text">Unread only</span>
       </label>
 
-      {tags.items.length > 0 && (
-        <FilterPopover
-          popoverId="tag-filter-popover"
-          anchorName="--tag-filter-popover-anchor"
-          triggerLabel="Tags"
-          title="Tag filters"
-          description="Use + to include or - to exclude a tag."
-          items={tags.items}
-          itemCounts={tags.counts}
-          selections={filters.tag.data}
-          onChange={onTagChange}
-          onClear={onClearTags}
-        />
-      )}
+      <FilterPopover
+        popoverId="tag-filter-popover"
+        anchorName="--tag-filter-popover-anchor"
+        triggerLabel="Tags"
+        title="Tag filters"
+        description="Use + to include or - to exclude a tag."
+        items={tags.items}
+        itemCounts={tags.counts}
+        selections={filters.tag.data}
+        onChange={onTagChange}
+        onClear={onClearTags}
+      />
 
-      {repos.items.length > 0 && (
-        <FilterPopover
-          popoverId="repo-filter-popover"
-          anchorName="--repo-filter-popover-anchor"
-          triggerLabel="Repositories"
-          title="Repository filters"
-          description="Use + to include or - to exclude a repository."
-          items={repos.items}
-          itemCounts={repos.counts}
-          selections={filters.repo.data}
-          onChange={onRepoChange}
-          onClear={onClearRepos}
-        />
-      )}
+      <FilterPopover
+        popoverId="repo-filter-popover"
+        anchorName="--repo-filter-popover-anchor"
+        triggerLabel="Repositories"
+        title="Repository filters"
+        description="Use + to include or - to exclude a repository."
+        items={repos.items}
+        itemCounts={repos.counts}
+        selections={filters.repo.data}
+        onChange={onRepoChange}
+        onClear={onClearRepos}
+      />
     </div>
   )
 }

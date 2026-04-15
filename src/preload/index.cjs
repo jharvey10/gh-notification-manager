@@ -34,7 +34,7 @@ contextBridge.exposeInMainWorld('api', {
 
   unsaveThread: (threadId) => ipcRenderer.invoke('notifications:unsave', threadId),
 
-  refreshNow: () => ipcRenderer.invoke('notifications:refresh'),
+  resetAllData: () => ipcRenderer.invoke('notifications:resetAll'),
 
   getSettings: () => ipcRenderer.invoke('settings:get'),
 

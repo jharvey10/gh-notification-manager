@@ -4,7 +4,6 @@ import { Button } from '../../components/Button.jsx'
 import { Action } from './actions-menu/Action.jsx'
 import { ActionsMenu } from './actions-menu/ActionsMenu.jsx'
 import { BatchProgressBar } from './BatchProgressBar.jsx'
-import { useBatchProgress } from '../../hooks/useBatchProgress.js'
 import CheckmarkIcon from '../../assets/icons/checkmark.svg?react'
 import EmailIcon from '../../assets/icons/email.svg?react'
 import EmailNewIcon from '../../assets/icons/email-new.svg?react'
@@ -12,6 +11,7 @@ import NotificationOffIcon from '../../assets/icons/notification-off.svg?react'
 
 export function BatchActionBar({
   selectedCount,
+  batchProgress,
   onSelectAll,
   onClearSelection,
   onMarkRead,
@@ -19,7 +19,6 @@ export function BatchActionBar({
   onUnsubscribe,
   onMarkDone
 }) {
-  const batchProgress = useBatchProgress()
   const isBatchBusy = batchProgress !== null
   const actionsDisabled = isBatchBusy || selectedCount === 0
 
@@ -84,6 +83,7 @@ export function BatchActionBar({
 
 BatchActionBar.propTypes = {
   selectedCount: PropTypes.number.isRequired,
+  batchProgress: PropTypes.object,
   onSelectAll: PropTypes.func.isRequired,
   onClearSelection: PropTypes.func.isRequired,
   onMarkRead: PropTypes.func.isRequired,
