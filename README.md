@@ -3,9 +3,10 @@
 GitHub Notification Manager is an Electron desktop app for reviewing and managing GitHub
 notifications outside the browser.
 
-It uses GitHub's GraphQL API to poll notification threads, display them in a desktop UI, and support
-actions like marking items read, unread, done, saved, and unsubscribed. The app also includes
-settings for OS notifications, older-item filtering, and automatic cleanup of stale notifications.
+It polls GitHub's REST API for notification threads, enriches them with GraphQL subject and timeline
+data, and displays them in a desktop UI. Actions include marking items read, unread, done, saved,
+and unsubscribed. The app also includes settings for OS notifications, older-item filtering, and
+automatic cleanup of stale notifications.
 
 ## The Problem
 
@@ -22,9 +23,11 @@ just happened for me personally again."
 
 This project treats GitHub's reason field as a starting point, not the whole story.
 
-Instead of just mirroring the inbox, it pulls in richer subject and timeline context and then runs
-every changed notification through a processing pipeline. The goal is to build a local model of the
-inbox that is more specific, more filterable, and more useful for deciding what deserves attention.
+Instead of just mirroring the inbox, the poller fetches threads via the REST API and then runs every
+changed notification through a multi-stage processing pipeline. Enrichment stages resolve GraphQL
+node IDs, pull subject metadata (PR state, CI status, review requests), and extract timeline events
+(comments, reviews, mentions, assignments). Tagging stages then layer specific tags on top of the
+raw reason — things like `pr_merged`, `ci_failure`, `direct_review`, `direct_mention`, and more.
 
 That means the app can describe a thread with multiple overlapping pieces of meaning instead of a
 single coarse label.
@@ -48,10 +51,22 @@ distinguishes between a truly new direct mention, assignment, or personal review
 notify on general activity for threads you chose to save. And you can also enable the catch-all mode
 to get alerted for everything.
 
-Under the hood, the first poll seeds an in-memory cache. Later polls compare hashes to detect actual
-changes, and direct-event timestamps are compared against the previously seen state. That makes "you
-were mentioned at some point in this thread" different from "you were mentioned again just now,"
-which is the distinction the default GitHub inbox does not really expose.
+Under the hood, the first poll seeds a persistent local store without firing any OS notifications.
+Later polls compare `updatedAt` timestamps to detect actual changes, and direct-event timestamps
+from the timeline enrichment are compared against the last notification time. That makes "you were
+mentioned at some point in this thread" different from "you were mentioned again just now," which is
+the distinction the default GitHub inbox does not really expose.
+
+## A Fully Managed Inbox
+
+The app maintains its own local model of your GitHub notifications. Some actions sync back to GitHub
+(e.g. marking threads as done, unsubscribing from threads, etc.) but most of the state the app
+tracks only lives locally. Read/unread status, saved flags, tags, enrichment data, and activity
+labels are all managed in a persistent local store. That means the app is not a mirror of GitHub's
+inbox; it is its own thing, with its own view of what matters.
+
+> **Side note:** It wasn't always like this, but the undocumented notification thread GraphQL APIs
+> were silently removed, forcing the app to change its approach.
 
 ## Better Filtering
 
@@ -83,9 +98,11 @@ gh auth token
 Other useful scripts:
 
 - `npm run dev` starts the renderer and Electron app in development mode
-- `npm run build` builds the renderer bundle
+- `npm run build` compiles TypeScript, builds the renderer bundle, bundles the main process, and
+  creates the payload zip
 - `npm run start` launches the Electron app
 - `npm run typecheck` runs TypeScript type checking
+- `npm run lint` and `npm run format` check code style
 - `npm run dist:mac` builds a macOS release package
 - `npm run dist:win` builds a Windows release package
 - `npm run dist:linux` builds a Linux release package

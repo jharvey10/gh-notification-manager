@@ -51,7 +51,7 @@ class NotificationPoller {
     this.#pipeline = createDefaultPipeline()
   }
 
-  async #poll({ shouldNotify = false } = {}) {
+  async #poll({ shouldNotify = false, reEnrichAll = false } = {}) {
     console.log('polling notifications')
 
     let viewerLogin: string
@@ -69,12 +69,23 @@ class NotificationPoller {
     const relevant = this.#filterIrrelevant(restData.threads)
     console.log('Relevant notifications', relevant.length)
 
-    const progress = new ProgressTracker(relevant.length, 'Fetching notification data')
+    const unprocessedNotifications = this.#upsertPartials(relevant)
+
+    if (reEnrichAll) {
+      const freshIds = new Set(unprocessedNotifications.map((n) => n.id))
+      unprocessedNotifications.push(
+        ...(this.#store.getAll() ?? []).filter((n) => !freshIds.has(n.id))
+      )
+    }
+
+    const progress = new ProgressTracker(
+      unprocessedNotifications.length,
+      'Fetching notification data'
+    )
 
     try {
-      for (const chunk of this.#chunk(relevant, PER_PAGE)) {
-        const batch = this.#upsertPartials(chunk)
-        const results = await this.#runPipeline(batch, { viewerLogin, shouldNotify })
+      for (const chunk of this.#chunk(unprocessedNotifications, PER_PAGE)) {
+        const results = await this.#runPipeline(chunk, { viewerLogin, shouldNotify })
         this.#upsertResults(results)
 
         progress.report(chunk.length)
@@ -172,16 +183,16 @@ class NotificationPoller {
     return newest || FALLBACK_SINCE
   }
 
-  async start({ shouldNotify = true } = {}) {
+  async start({ shouldNotify = true, reEnrichAll = false } = {}) {
     console.log('starting notification poller')
     if (this.#timeoutId) {
       return
     }
     this.#stopped = false
-    await this.#poll({ shouldNotify })
+    await this.#poll({ shouldNotify, reEnrichAll })
   }
 
-  async startDeferred({ shouldNotify = true } = {}) {
+  async startDeferred({ shouldNotify = true, reEnrichAll = false } = {}) {
     console.log('deferred starting notification poller')
     if (this.#timeoutId) {
       return
@@ -190,7 +201,7 @@ class NotificationPoller {
 
     this.#timeoutId = setTimeout(() => {
       this.#timeoutId = null
-      this.start({ shouldNotify })
+      this.start({ shouldNotify, reEnrichAll })
     }, this.#pollIntervalMs)
   }
 
@@ -206,13 +217,13 @@ class NotificationPoller {
    * Tears down current services/pipeline and creates fresh ones.
    * Used after auth changes or store resets.
    */
-  restart({ shouldNotify = false } = {}) {
+  restart({ shouldNotify = false, reEnrichAll = true } = {}) {
     this.stop()
     this.#restService = new GitHubRESTService()
     this.#graphqlService = new GitHubGraphQLService()
     this.#pipeline = createDefaultPipeline()
     this.#pollIntervalMs = DEFAULT_POLL_INTERVAL_MS
-    this.start({ shouldNotify })
+    this.start({ shouldNotify, reEnrichAll })
   }
 
   /**

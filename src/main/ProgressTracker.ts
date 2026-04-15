@@ -2,8 +2,8 @@ import { broadcastBatchProgress } from './broadcastBatchProgress.js'
 
 class ProgressTracker {
   #completed: number = 0
-  #total: number
-  #reason: string
+  readonly #total: number
+  readonly #reason: string
 
   constructor(total: number, reason: string) {
     this.#total = total

@@ -8,8 +8,9 @@ const NON_ENRICHABLE_TYPES = new Set(['Commit', 'RepositoryVulnerabilityAlert'])
  * 1. Separates notifications that already have a nodeId (pass-through).
  * 2. Filters out non-enrichable types (Commit, RepositoryVulnerabilityAlert).
  * 3. Discovers nodeIds for the rest via GraphQL/REST.
- * 4. Drops any notification that still lacks a nodeId after discovery,
- *    so downstream stages can safely assume every notification has one.
+ *
+ * Notifications that still lack a nodeId after discovery are kept in the
+ * batch so downstream taggers (e.g. CiTagger) can apply fallback logic.
  */
 class NodeIdEnricher implements BatchProcessor {
   async process(batch: Notification[], context: PipelineContext): Promise<Notification[]> {
@@ -39,8 +40,7 @@ class NodeIdEnricher implements BatchProcessor {
       }
     }
 
-    const newlyResolved = enrichable.filter((n) => n._nodeId)
-    return [...alreadyResolved, ...newlyResolved]
+    return [...alreadyResolved, ...enrichable]
   }
 }
 

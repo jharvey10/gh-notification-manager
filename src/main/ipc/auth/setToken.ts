@@ -7,5 +7,5 @@ export async function setToken({ store }: IpcContext, token: string) {
   auth.saveToken(token)
   resetClients()
   store.hardReset()
-  NotificationPoller.getInstance().restart({ shouldNotify: false })
+  NotificationPoller.getInstance().restart()
 }

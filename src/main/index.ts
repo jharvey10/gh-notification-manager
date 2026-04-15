@@ -75,7 +75,7 @@ async function main() {
     app.quit()
   })
 
-  NotificationPoller.getInstance().start({ shouldNotify: false })
+  NotificationPoller.getInstance().start({ shouldNotify: false, reEnrichAll: true })
 }
 
 // Needs to be un-awaited to allow electron to initialize properly in ESM mode
