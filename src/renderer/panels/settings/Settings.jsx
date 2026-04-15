@@ -8,6 +8,7 @@ import { AutoDoneSection } from './settings-sections/AutoDoneSection.jsx'
 import { AuthTokenSection } from './settings-sections/AuthTokenSection.jsx'
 import { OlderSectionSettings } from './settings-sections/OlderSectionSettings.jsx'
 import { OsNotificationsSection } from './settings-sections/OsNotificationsSection.jsx'
+import { PrSizeSection } from './settings-sections/PrSizeSection.jsx'
 import { ResetDataSection } from './settings-sections/ResetDataSection.jsx'
 import { VersionSection } from './settings-sections/version-section/VersionSection.jsx'
 
@@ -17,18 +18,23 @@ export function Settings({ setPanelState }) {
   const [savingOsNotifications, setSavingOsNotifications] = useState(false)
   const [savingAutoMarkDone, setSavingAutoMarkDone] = useState(false)
   const [savingOlderWindow, setSavingOlderWindow] = useState(false)
+  const [savingPrSize, setSavingPrSize] = useState(false)
   const [resetting, setResetting] = useState(false)
   const [toast, setToast] = useState(null)
   const [osSettings, setOSSettings] = useState(() => pickOSSettings(settings))
   const [autoMarkDoneEnabled, setAutoMarkDoneEnabled] = useState(settings.autoMarkDoneEnabled)
   const [autoMarkDoneDays, setAutoMarkDoneDays] = useState(String(settings.autoMarkDoneDays))
   const [olderThanDays, setOlderThanDays] = useState(String(settings.olderThanDays))
+  const [prSizeSmallMax, setPrSizeSmallMax] = useState(String(settings.prSizeSmallMax))
+  const [prSizeLargeMin, setPrSizeLargeMin] = useState(String(settings.prSizeLargeMin))
 
   useEffect(() => {
     setOSSettings(pickOSSettings(settings))
     setAutoMarkDoneEnabled(settings.autoMarkDoneEnabled)
     setAutoMarkDoneDays(String(settings.autoMarkDoneDays))
     setOlderThanDays(String(settings.olderThanDays))
+    setPrSizeSmallMax(String(settings.prSizeSmallMax))
+    setPrSizeLargeMin(String(settings.prSizeLargeMin))
   }, [settings])
 
   useEffect(() => {
@@ -77,11 +83,26 @@ export function Settings({ setPanelState }) {
       autoDone:
         autoMarkDoneEnabled !== settings.autoMarkDoneEnabled ||
         autoMarkDoneDays !== String(settings.autoMarkDoneDays),
-      older: olderThanDays !== String(settings.olderThanDays)
+      older: olderThanDays !== String(settings.olderThanDays),
+      prSize:
+        prSizeSmallMax !== String(settings.prSizeSmallMax) ||
+        prSizeLargeMin !== String(settings.prSizeLargeMin)
     }
-  }, [osSettings, autoMarkDoneEnabled, autoMarkDoneDays, olderThanDays, settings])
+  }, [
+    osSettings,
+    autoMarkDoneEnabled,
+    autoMarkDoneDays,
+    olderThanDays,
+    prSizeSmallMax,
+    prSizeLargeMin,
+    settings
+  ])
 
-  const isDirty = sectionDirty.osNotifications || sectionDirty.autoDone || sectionDirty.older
+  const isDirty =
+    sectionDirty.osNotifications ||
+    sectionDirty.autoDone ||
+    sectionDirty.older ||
+    sectionDirty.prSize
 
   const handleBack = () => {
     if (isDirty && !globalThis.confirm('You have unsaved changes. Leave without saving?')) {
@@ -128,6 +149,16 @@ export function Settings({ setPanelState }) {
       showSavedToast('Older section settings saved')
     } finally {
       setSavingOlderWindow(false)
+    }
+  }
+
+  const handleSavePrSize = async () => {
+    setSavingPrSize(true)
+    try {
+      await updateSettings({ prSizeSmallMax, prSizeLargeMin })
+      showSavedToast('PR size settings saved')
+    } finally {
+      setSavingPrSize(false)
     }
   }
 
@@ -186,6 +217,16 @@ export function Settings({ setPanelState }) {
           dirty={sectionDirty.older}
           onOlderThanDaysChange={setOlderThanDays}
           onSave={handleSaveOlderWindow}
+        />
+
+        <PrSizeSection
+          prSizeSmallMax={prSizeSmallMax}
+          prSizeLargeMin={prSizeLargeMin}
+          saving={savingPrSize}
+          dirty={sectionDirty.prSize}
+          onSmallMaxChange={setPrSizeSmallMax}
+          onLargeMinChange={setPrSizeLargeMin}
+          onSave={handleSavePrSize}
         />
 
         <OsNotificationsSection

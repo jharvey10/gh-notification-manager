@@ -9,7 +9,7 @@ class AutoDoneProcessor implements BatchProcessor {
       return batch
     }
 
-    const cutoffTime = Date.now() - (context.settings.autoMarkDoneDays as number) * DAY_IN_MS
+    const cutoffTime = Date.now() - context.settings.autoMarkDoneDays * DAY_IN_MS
     const toArchive: string[] = []
 
     for (const notification of batch) {

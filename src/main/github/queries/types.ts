@@ -58,6 +58,9 @@ export type GitHubPullRequestSubject = {
   isDraft: boolean
   merged: boolean
   reviewDecision: string | null
+  additions: number
+  deletions: number
+  changedFiles: number
   author: GitHubActor | null
   labels: GitHubLabelConnection | null
   reviewRequests: GitHubReviewRequestConnection | null

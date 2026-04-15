@@ -41,12 +41,16 @@ const DEFAULT_SETTINGS = Object.freeze({
   ...Object.fromEntries(OS_NOTIFICATION_RULES.map((r) => [r.key, r.defaultValue])),
   autoMarkDoneEnabled: false,
   autoMarkDoneDays: 30,
-  olderThanDays: 7
+  olderThanDays: 7,
+  prSizeSmallMax: 20,
+  prSizeLargeMin: 500
 })
 
 const SETTINGS_LIMITS = Object.freeze({
   minDays: 1,
-  maxDays: 365
+  maxDays: 365,
+  minPrSize: 1,
+  maxPrSize: 100_000
 })
 
 function sanitizeDayCount(value, fallback) {
@@ -55,6 +59,14 @@ function sanitizeDayCount(value, fallback) {
     return fallback
   }
   return Math.min(SETTINGS_LIMITS.maxDays, Math.max(SETTINGS_LIMITS.minDays, parsed))
+}
+
+function sanitizePrSize(value, fallback) {
+  const parsed = Number.parseInt(value, 10)
+  if (!Number.isFinite(parsed)) {
+    return fallback
+  }
+  return Math.min(SETTINGS_LIMITS.maxPrSize, Math.max(SETTINGS_LIMITS.minPrSize, parsed))
 }
 
 function sanitizeBool(value, fallback) {
@@ -78,6 +90,14 @@ function sanitizeSettings(settings = {}, fallbackSettings = DEFAULT_SETTINGS) {
     fallbackSettings.autoMarkDoneDays
   )
   sanitized.olderThanDays = sanitizeDayCount(settings.olderThanDays, fallbackSettings.olderThanDays)
+  sanitized.prSizeSmallMax = sanitizePrSize(
+    settings.prSizeSmallMax,
+    fallbackSettings.prSizeSmallMax
+  )
+  sanitized.prSizeLargeMin = sanitizePrSize(
+    settings.prSizeLargeMin,
+    fallbackSettings.prSizeLargeMin
+  )
 
   return sanitized
 }

@@ -14,6 +14,9 @@ const PR_FRAGMENT = `fragment PRFields on PullRequest {
   isDraft
   merged
   reviewDecision
+  additions
+  deletions
+  changedFiles
   author { login }
   labels(first: 20) { nodes { name } }
   reviewRequests(first: 50) {

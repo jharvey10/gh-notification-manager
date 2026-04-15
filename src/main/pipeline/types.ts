@@ -6,6 +6,7 @@ import type {
   GitHubRepositoryList,
   LocalNotificationData
 } from '../github/queries/types.js'
+import type { Settings } from '../../shared/settings.js'
 
 export interface LatestEvent {
   type: string
@@ -48,7 +49,7 @@ export interface EnrichmentTarget {
 
 export interface PipelineContext {
   store: NotificationStore
-  settings: Record<string, any>
+  settings: Settings
   viewerLogin: string | null
   shouldNotify: boolean
   graphqlService: GitHubGraphQLService

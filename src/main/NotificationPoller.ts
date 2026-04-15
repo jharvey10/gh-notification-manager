@@ -6,9 +6,8 @@ import {
 import { GitHubGraphQLService } from './github/GitHubGraphQLService.js'
 import { broadcastError } from './broadcastError.js'
 import { ProgressTracker } from './ProgressTracker.js'
-import { createDefaultPipeline } from './pipeline/createDefaultPipeline.js'
 import { toNotificationPartial } from './toNotificationPartial.js'
-import type { Pipeline } from './pipeline/Pipeline.js'
+import { Pipeline } from './pipeline/Pipeline.js'
 import type { Notification } from './pipeline/types.js'
 import type { NotificationStore } from './NotificationStore.js'
 import type { PreferencesStore } from './PreferencesStore.js'
@@ -48,7 +47,7 @@ class NotificationPoller {
     this.#preferencesStore = preferencesStore
     this.#restService = new GitHubRESTService()
     this.#graphqlService = new GitHubGraphQLService()
-    this.#pipeline = createDefaultPipeline()
+    this.#pipeline = Pipeline.createDefault()
   }
 
   async #poll({ shouldNotify = false, reEnrichAll = false } = {}) {
@@ -221,7 +220,7 @@ class NotificationPoller {
     this.stop()
     this.#restService = new GitHubRESTService()
     this.#graphqlService = new GitHubGraphQLService()
-    this.#pipeline = createDefaultPipeline()
+    this.#pipeline = Pipeline.createDefault()
     this.#pollIntervalMs = DEFAULT_POLL_INTERVAL_MS
     this.start({ shouldNotify, reEnrichAll })
   }
