@@ -6,7 +6,7 @@ export function UpdateStatus({ status, onDownload, onInstall }) {
     case 'available':
       return (
         <div role="alert" className="alert alert-info alert-soft flex">
-          <div className="flex-1">A new version ({status.version}) is available.</div>
+          <div className="flex-1">🎉 New version ({status.version}) is available.</div>
           <Button className="btn-sm" variant="info" onClick={onDownload}>
             Update
           </Button>
