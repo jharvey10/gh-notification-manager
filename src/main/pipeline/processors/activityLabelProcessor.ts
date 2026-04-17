@@ -2,15 +2,15 @@ import type { BatchProcessor, LatestEvent, Notification, PipelineContext } from 
 
 const REVIEW_STATE_LABELS: Record<string, string> = {
   APPROVED: 'approved',
-  CHANGES_REQUESTED: 'changes_requested',
-  COMMENTED: 'review_comment',
-  DISMISSED: 'review_dismissed',
-  PENDING: 'review_pending'
+  CHANGES_REQUESTED: 'requested changed',
+  COMMENTED: 'added review comment',
+  DISMISSED: 'dismissed review',
+  PENDING: 'has pending review'
 }
 
 const CLOSED_DETAIL_LABELS: Record<string, string> = {
-  COMPLETED: 'completed',
-  NOT_PLANNED: 'not_planned'
+  COMPLETED: 'closed: completed',
+  NOT_PLANNED: 'closed: not planned'
 }
 
 function labelForEvent(event: LatestEvent | null, context: PipelineContext): string {
@@ -19,17 +19,17 @@ function labelForEvent(event: LatestEvent | null, context: PipelineContext): str
   }
   switch (event.type) {
     case 'comment':
-      return 'new_comment'
+      return 'commented'
     case 'review':
-      return REVIEW_STATE_LABELS[event.detail ?? ''] ?? 'review_updated'
+      return REVIEW_STATE_LABELS[event.detail ?? ''] ?? 'updated review'
     case 'mention':
       return context.viewerLogin && event.actor === context.viewerLogin
-        ? 'mentioned'
-        : 'new_comment'
+        ? 'mentioned you'
+        : `mentioned ${event.actor}`
     case 'assign':
       return 'assigned'
     case 'review_requested':
-      return 'review_requested'
+      return 'requested review'
     case 'closed':
       return CLOSED_DETAIL_LABELS[event.detail ?? ''] ?? 'closed'
     case 'reopened':
@@ -37,9 +37,9 @@ function labelForEvent(event: LatestEvent | null, context: PipelineContext): str
     case 'merged':
       return 'merged'
     case 'ready_for_review':
-      return 'ready_for_review'
+      return 'ready for review'
     case 'review_dismissed':
-      return 'review_dismissed'
+      return 'dismissed review'
     default:
       return 'unknown'
   }
