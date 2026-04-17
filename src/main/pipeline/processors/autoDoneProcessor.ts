@@ -30,7 +30,7 @@ class AutoDoneProcessor implements BatchProcessor {
     try {
       console.log(`Auto-archiving ${toArchive.length} notifications`)
       await context.restService.deleteThreads(toArchive)
-      context.store.markDeleted(toArchive)
+      context.store.upsert(toArchive.map((id) => [id, null]))
     } catch (err: unknown) {
       broadcastError('autoDone', (err as Error).message)
       return batch

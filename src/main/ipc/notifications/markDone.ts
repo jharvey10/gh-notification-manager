@@ -10,7 +10,7 @@ export async function markDone({ store }: IpcContext, ids: string[]) {
   const progress = new ProgressTracker(ids.length, 'Marking done')
   try {
     await archiveThreads(ids, (batch) => {
-      store.markDeleted(batch)
+      store.upsert(batch.map((id) => [id, null]))
       progress.report(batch.length)
     })
   } catch (err) {

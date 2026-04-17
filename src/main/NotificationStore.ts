@@ -6,7 +6,7 @@ import { LocalNotificationData, LocalNotificationDataPatch } from './github/quer
 import type { Notification } from './pipeline/types.js'
 
 const SAVE_DEBOUNCE_MS = 1000
-const STORE_VERSION = 2
+const STORE_VERSION = 3
 
 export type UpsertData = Omit<Partial<Notification>, '_localData'> & {
   _localData?: LocalNotificationDataPatch
@@ -17,9 +17,8 @@ class NotificationStore {
     return { isUnread: true, isSaved: false }
   }
 
-  #notifications: Map<string, Notification> | null = null
-  #deletedIds: Set<string> = new Set()
-  #initialIndexComplete = false
+  #notifications: Record<string, Notification> | null = null
+  #deleted: Record<string, string> = {}
   readonly #onChange: (store: NotificationStore) => void
   readonly #filePath: string
   #saveTimer: ReturnType<typeof setTimeout> | null = null
@@ -32,26 +31,58 @@ class NotificationStore {
   }
 
   #loadFromDisk() {
+    let data: any
+    let wasConverted = false
+
     try {
       const raw = fs.readFileSync(this.#filePath, 'utf8')
-      const data = JSON.parse(raw)
-      if (data.version !== STORE_VERSION) {
-        return
-      }
-
-      if (data.notifications && typeof data.notifications === 'object') {
-        this.#notifications = new Map(Object.entries(data.notifications))
-      }
-      if (Array.isArray(data.deletedIds)) {
-        this.#deletedIds = new Set(data.deletedIds)
-      }
-      if (typeof data.initialIndexComplete === 'boolean') {
-        this.#initialIndexComplete = data.initialIndexComplete
-      }
+      data = JSON.parse(raw)
     } catch (err) {
       if (err.code !== 'ENOENT') {
         broadcastError('store', `Failed to load notification store: ${err.message}`)
       }
+      return
+    }
+
+    if (data === null) {
+      broadcastError('store', `Failed to load notification store: data was of type ${typeof data}`)
+      return
+    }
+
+    if (data.version > STORE_VERSION) {
+      broadcastError(
+        'store',
+        `Failed to load notification store: data was of version ${data.version} but expected ${STORE_VERSION}`
+      )
+      return
+    }
+
+    if (data.version === 1 /* to 2 */) {
+      // Do not populate the store with data from version 1.
+      return
+    }
+
+    if (data.version === 2 /* to 3 */) {
+      data.version = 3
+      wasConverted = true
+      const now = new Date().toISOString()
+
+      // deletedIds was a flat set persisted as a list. Convert it to a json object
+      data.deleted = data.deletedIds.reduce((acc: Record<string, string>, id: string) => {
+        acc[id] = now
+        return acc
+      }, {})
+    }
+
+    data.notifications ??= {}
+    data.deleted ??= {}
+
+    // After all model upgrades, set vars
+    this.#notifications = data.notifications
+    this.#deleted = data.deleted
+
+    if (wasConverted) {
+      this.#saveToDisk()
     }
   }
 
@@ -67,12 +98,10 @@ class NotificationStore {
 
   #saveToDisk() {
     try {
-      const notifications = this.#notifications ? Object.fromEntries(this.#notifications) : {}
       const payload = {
         version: STORE_VERSION,
-        notifications,
-        deletedIds: [...this.#deletedIds],
-        initialIndexComplete: this.#initialIndexComplete
+        notifications: this.#notifications ?? {},
+        deleted: this.#deleted ?? {}
       }
       fs.mkdirSync(path.dirname(this.#filePath), { recursive: true })
       fs.writeFileSync(this.#filePath, JSON.stringify(payload))
@@ -83,7 +112,7 @@ class NotificationStore {
 
   /**
    * Upsert notification entries. Each entry is [id, data | null].
-   * - null deletes the notification (and tracks it in deletedIds).
+   * - null deletes the notification (and tracks it in deleted).
    * - A full notification is merged with existing data (preserving fields
    *   like _localData that the poller doesn't provide).
    * - A partial patch (e.g. { _localData: { isUnread: false } }) merges
@@ -100,20 +129,20 @@ class NotificationStore {
       return []
     }
 
-    if (!this.#notifications) {
-      this.#notifications = new Map()
-    }
+    this.#notifications ??= {}
 
     const merged: Notification[] = []
 
+    const now = new Date().toISOString()
+
     for (const [id, data] of entries) {
       if (data === null) {
-        this.#notifications.delete(id)
-        this.#deletedIds.add(id)
+        delete this.#notifications[id]
+        this.#deleted[id] = now
         continue
       }
 
-      const existing = this.#notifications.get(id)
+      const existing = this.#notifications[id]
 
       const result = {
         ...existing,
@@ -125,7 +154,7 @@ class NotificationStore {
         }
       }
 
-      this.#notifications.set(id, result)
+      this.#notifications[id] = result
       merged.push(result)
     }
 
@@ -134,44 +163,33 @@ class NotificationStore {
     return merged
   }
 
-  /**
-   * Mark notification IDs as deleted. Removes from the notifications map
-   * and adds to the deletedIds set so they are filtered on future polls.
-   */
-  markDeleted(ids: string[]) {
-    if (!this.#notifications) {
-      this.#notifications = new Map()
-    }
-    for (const id of ids) {
-      this.#notifications.delete(id)
-      this.#deletedIds.add(id)
-    }
-    this.#scheduleSave()
-    this.#onChange(this)
-  }
-
   isDeleted(id: string): boolean {
-    return this.#deletedIds.has(id)
+    return id in this.#deleted
   }
 
-  isInitialIndexComplete(): boolean {
-    return this.#initialIndexComplete
+  getDeletedAt(id: string): string | undefined {
+    return this.#deleted[id]
   }
 
-  setInitialIndexComplete() {
-    this.#initialIndexComplete = true
+  /**
+   * Remove IDs from the deleted set, allowing them to reappear
+   * when they have new activity after being dismissed.
+   */
+  undelete(ids: string[]) {
+    for (const id of ids) {
+      delete this.#deleted[id]
+    }
     this.#scheduleSave()
   }
 
   /**
-   * Hard reset: clears all data including deletedIds and initialIndexComplete.
+   * Hard reset: clears all data including deleted.
    * Used by the "Reset All Data" action in Settings.
    */
   hardReset() {
     console.log('hard-resetting notification store')
     this.#notifications = null
-    this.#deletedIds = new Set()
-    this.#initialIndexComplete = false
+    this.#deleted = {}
 
     try {
       if (fs.existsSync(this.#filePath)) {
@@ -193,15 +211,15 @@ class NotificationStore {
     if (!this.#notifications) {
       return null
     }
-    return Array.from(this.#notifications.values())
+    return Object.values(this.#notifications)
   }
 
   get(id: string): Notification | null {
-    return this.#notifications?.get(id) ?? null
+    return this.#notifications?.[id] ?? null
   }
 
   has(id: string): boolean {
-    return this.#notifications?.has(id) ?? false
+    return this.#notifications?.[id] != null
   }
 
   /**
@@ -209,7 +227,7 @@ class NotificationStore {
    * Used by SyncEngine for early-stop pagination.
    */
   getUpdatedAt(id: string): string | undefined {
-    return this.#notifications?.get(id)?.lastUpdatedAt
+    return this.#notifications?.[id]?.lastUpdatedAt
   }
 }
 

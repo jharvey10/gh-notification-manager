@@ -26,7 +26,7 @@ export async function unsubscribe({ store }: IpcContext, ids: string[]) {
     }
 
     const onBatchDone = (batch: string[]) => {
-      store.markDeleted(batch)
+      store.upsert(batch.map((id) => [id, null]))
       progress.report(batch.length)
     }
 

@@ -68,6 +68,8 @@ class NotificationPoller {
     const relevant = this.#filterIrrelevant(restData.threads)
     console.log('Relevant notifications', relevant.length)
 
+    this.#resurrectDeleted(relevant)
+
     const unprocessedNotifications = this.#upsertPartials(relevant)
 
     if (reEnrichAll) {
@@ -123,19 +125,32 @@ class NotificationPoller {
   }
 
   /**
-   * Drop threads that are deleted or unchanged since the last enrichment.
-   * GitHub's `since` param is inclusive, so unchanged threads reappear
-   * on every poll — especially after a reset where the `since` value
-   * jumps and invalidates the 304 cache.
+   * Drop threads that are unchanged since the last enrichment, or that
+   * were dismissed and have NOT received new activity since.
    */
   #filterIrrelevant(threads: RestNotificationThread[]) {
     return threads.filter((t) => {
-      if (this.#store.isDeleted(t.threadId)) {
+      const deletedAt = this.#store.getDeletedAt(t.threadId)
+      if (deletedAt && t.updatedAt <= deletedAt) {
         return false
       }
       const storedUpdatedAt = this.#store.getUpdatedAt(t.threadId)
       return !storedUpdatedAt || t.updatedAt > storedUpdatedAt
     })
+  }
+
+  /**
+   * Remove any thread IDs in the incoming list from the deleted set
+   * so they aren't suppressed on future polls.
+   */
+  #resurrectDeleted(threads: RestNotificationThread[]) {
+    const ids = threads.filter((t) => this.#store.isDeleted(t.threadId)).map((t) => t.threadId)
+    if (ids.length > 0) {
+      this.#store.undelete(ids)
+      console.log(
+        `Resurrected ${ids.length} previously-dismissed notification(s) with new activity`
+      )
+    }
   }
 
   #upsertPartials(threads: RestNotificationThread[]): Notification[] {
