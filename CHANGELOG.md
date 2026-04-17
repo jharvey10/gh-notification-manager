@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.3](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.2...v3.1.3) (2026-04-17)
+
+
+### Bug Fixes
+
+* phrasing changes in activity labels ([ecc83a0](https://github.com/jharvey10/gh-notification-manager/commit/ecc83a084718f136dae491bdd60bcaec60e1fb56))
+
 ## [3.1.2](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.1...v3.1.2) (2026-04-17)
 
 
