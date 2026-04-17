@@ -2,7 +2,7 @@ import type { BatchProcessor, LatestEvent, Notification, PipelineContext } from 
 
 const REVIEW_STATE_LABELS: Record<string, string> = {
   APPROVED: 'approved',
-  CHANGES_REQUESTED: 'requested changed',
+  CHANGES_REQUESTED: 'requested changes',
   COMMENTED: 'added review comment',
   DISMISSED: 'dismissed review',
   PENDING: 'has pending review'
@@ -29,7 +29,7 @@ function labelForEvent(event: LatestEvent | null, context: PipelineContext): str
     case 'assign':
       return 'assigned'
     case 'review_requested':
-      return 'requested review'
+      return 'requested as reviewer'
     case 'closed':
       return CLOSED_DETAIL_LABELS[event.detail ?? ''] ?? 'closed'
     case 'reopened':
@@ -49,7 +49,7 @@ function getMostRecentEvent(events: LatestEvent[]): LatestEvent | null {
   if (events.length === 0) {
     return null
   }
-  return events.reduce((a, b) => (a.timestamp >= b.timestamp ? a : b))
+  return events.reduce((a, b) => (a.timestamp >= b.timestamp ? a : b), events[0])
 }
 
 // TODO: CheckSuite and Release subjects have no timeline events — they'll
