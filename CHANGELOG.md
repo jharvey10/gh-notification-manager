@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.1](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.0...v3.1.1) (2026-04-17)
+
+
+### Bug Fixes
+
+* Allow deleted notifications to reappear on new activity ([b6fbdde](https://github.com/jharvey10/gh-notification-manager/commit/b6fbdde6afaa7e3939514a3d34226d5abcf9be1c))
+* re-add super necessary emoji ([18fb749](https://github.com/jharvey10/gh-notification-manager/commit/18fb7497948d87cf3df792685a591a4f3e0e55cd))
+
 ## [3.1.0](https://github.com/jharvey10/gh-notification-manager/compare/v3.0.1...v3.1.0) (2026-04-15)
 
 

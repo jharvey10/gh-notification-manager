@@ -1,7 +1,7 @@
 {
   "name": "gh-notification-manager",
   "productName": "gh-notification-manager",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "A better GitHub notification experience",
   "main": "bootstrap.js",
   "private": true,
