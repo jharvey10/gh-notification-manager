@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.2](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.1...v3.1.2) (2026-04-17)
+
+
+### Bug Fixes
+
+* Adjust activity labels ([cc76093](https://github.com/jharvey10/gh-notification-manager/commit/cc76093e47f8402f65932bd0446b5fa60c2c834c))
+
 ## [3.1.1](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.0...v3.1.1) (2026-04-17)
 
 
