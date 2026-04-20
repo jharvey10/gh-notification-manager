@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, powerMonitor } from 'electron'
 import path from 'node:path'
 import { registerIpcHandlers } from './ipc.js'
 import { NotificationStore } from './NotificationStore.js'
@@ -73,6 +73,10 @@ async function main() {
 
   app.on('window-all-closed', () => {
     app.quit()
+  })
+
+  powerMonitor.on('resume', () => {
+    NotificationPoller.getInstance().restart({ shouldNotify: true })
   })
 
   NotificationPoller.getInstance().start({ shouldNotify: false, reEnrichAll: true })

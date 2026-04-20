@@ -6,7 +6,7 @@ function broadcastNotificationsUpdated(mainWindow: BrowserWindow, store: Notific
     return
   }
 
-  console.log('broadcasting notifications updated', store.getAll()?.length)
+  console.log('broadcasting notifications updated. store size:', store.getAll()?.length)
 
   mainWindow.webContents.send('notifications:updated', store.getAll())
 }

@@ -53,59 +53,57 @@ class NotificationPoller {
   async #poll({ shouldNotify = false, reEnrichAll = false } = {}) {
     console.log('polling notifications')
 
-    let viewerLogin: string
-    let restData: { threads: RestNotificationThread[]; pollInterval: number }
+    let succeeded = false
 
     try {
-      viewerLogin = await this.#graphqlService.resolveViewerLogin()
-      restData = await this.#fetchThreads()
+      const viewerLogin = await this.#graphqlService.resolveViewerLogin()
+      const restData = await this.#fetchThreads()
       this.#pollIntervalMs = restData.pollInterval
-    } catch (err) {
-      broadcastError('poller', (err as Error).message)
-      return
-    }
 
-    const relevant = this.#filterIrrelevant(restData.threads)
-    console.log('Relevant notifications', relevant.length)
+      const relevant = this.#filterIrrelevant(restData.threads)
+      console.log('Relevant notifications', relevant.length)
 
-    this.#resurrectDeleted(relevant)
+      this.#resurrectDeleted(relevant)
 
-    const unprocessedNotifications = this.#upsertPartials(relevant)
+      const unprocessedNotifications = this.#upsertPartials(relevant)
 
-    if (reEnrichAll) {
-      const freshIds = new Set(unprocessedNotifications.map((n) => n.id))
-      unprocessedNotifications.push(
-        ...(this.#store.getAll() ?? []).filter((n) => !freshIds.has(n.id))
-      )
-    }
-
-    const progress = new ProgressTracker(
-      unprocessedNotifications.length,
-      'Fetching notification data'
-    )
-
-    try {
-      for (const chunk of this.#chunk(unprocessedNotifications, PER_PAGE)) {
-        const results = await this.#runPipeline(chunk, { viewerLogin, shouldNotify })
-        this.#upsertResults(results)
-
-        progress.report(chunk.length)
+      if (reEnrichAll) {
+        const freshIds = new Set(unprocessedNotifications.map((n) => n.id))
+        unprocessedNotifications.push(
+          ...(this.#store.getAll() ?? []).filter((n) => !freshIds.has(n.id))
+        )
       }
+
+      const progress = new ProgressTracker(
+        unprocessedNotifications.length,
+        'Fetching notification data'
+      )
+
+      try {
+        for (const chunk of this.#chunk(unprocessedNotifications, PER_PAGE)) {
+          const results = await this.#runPipeline(chunk, { viewerLogin, shouldNotify })
+          this.#upsertResults(results)
+
+          progress.report(chunk.length)
+        }
+      } finally {
+        progress.done()
+      }
+
+      succeeded = true
     } catch (err) {
       broadcastError('poller', (err as Error).message)
     } finally {
-      progress.done()
-    }
+      if (this.#stopped) {
+        return
+      }
 
-    if (this.#stopped) {
-      return
+      // Schedule the next poll
+      this.#timeoutId = setTimeout(() => {
+        this.#poll(succeeded ? { shouldNotify: true } : { shouldNotify, reEnrichAll })
+      }, this.#pollIntervalMs)
     }
-
-    this.#timeoutId = setTimeout(() => {
-      this.#poll({ shouldNotify: true })
-    }, this.#pollIntervalMs)
   }
-
   #chunk<T>(items: T[], size: number): T[][] {
     const chunks: T[][] = []
     for (let i = 0; i < items.length; i += size) {
