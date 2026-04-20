@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.4](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.3...v3.1.4) (2026-04-20)
+
+
+### Bug Fixes
+
+* improve poll loop stability ([451e947](https://github.com/jharvey10/gh-notification-manager/commit/451e9477d22dee07a20c261df4577d05bac6f854))
+
 ## [3.1.3](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.2...v3.1.3) (2026-04-17)
 
 
