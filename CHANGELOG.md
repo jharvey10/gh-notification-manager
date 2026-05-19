@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.6](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.5...v3.1.6) (2026-05-19)
+
+
+### Bug Fixes
+
+* hide "or" on token prompt when no token is set ([74baf9e](https://github.com/jharvey10/gh-notification-manager/commit/74baf9e2a446416a2c6c922601d6a7db90b3bef4))
+
 ## [3.1.5](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.4...v3.1.5) (2026-05-19)
 
 
