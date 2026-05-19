@@ -3,9 +3,8 @@ import { resetClients } from '../../github/client.js'
 import { NotificationPoller } from '../../NotificationPoller.js'
 import type { IpcContext } from '../types.js'
 
-export async function setToken({ store }: IpcContext, token: string) {
+export async function setToken(_ctx: IpcContext, token: string) {
   auth.saveToken(token)
   resetClients()
-  store.hardReset()
   NotificationPoller.getInstance().restart()
 }

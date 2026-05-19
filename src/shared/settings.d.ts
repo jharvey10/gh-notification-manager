@@ -26,5 +26,8 @@ export const OS_NOTIFICATION_RULES: ReadonlyArray<{
   defaultValue: boolean
 }>
 export const OS_NOTIFICATION_KEYS: readonly string[]
-export function sanitizeSettings(settings?: Partial<Settings>, fallbackSettings?: Settings): Settings
+export function sanitizeSettings(
+  settings?: Partial<Settings>,
+  fallbackSettings?: Settings
+): Settings
 export function pickOSSettings(source: Settings): Partial<Settings>

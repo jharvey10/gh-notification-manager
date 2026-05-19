@@ -33,7 +33,13 @@ export function App() {
       panel = <TokenPrompt setPanelState={setPanelState} />
       break
     case PanelState.DASHBOARD:
-      panel = <Dashboard setPanelState={setPanelState} notifications={notifications} batchProgress={batchProgress} />
+      panel = (
+        <Dashboard
+          setPanelState={setPanelState}
+          notifications={notifications}
+          batchProgress={batchProgress}
+        />
+      )
       break
     case PanelState.SETTINGS:
       panel = <Settings setPanelState={setPanelState} />
