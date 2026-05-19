@@ -2,8 +2,8 @@ import PropTypes from 'prop-types'
 import { Button } from '../../../components/Button.jsx'
 import { NotificationList } from './NotificationList.jsx'
 
-function splitByAge(notifications, olderThanDays) {
-  const cutoff = new Date()
+function splitByAge(notifications, olderThanDays, now) {
+  const cutoff = new Date(now)
   cutoff.setDate(cutoff.getDate() - olderThanDays)
 
   const current = []
@@ -26,7 +26,8 @@ export function NotificationListContainer({
   olderThanDays,
   selected,
   onToggle,
-  onSelectGroup
+  onSelectGroup,
+  now
 }) {
   if (notifications.length === 0) {
     return <p className="p-4">No notifications.</p>
@@ -35,7 +36,7 @@ export function NotificationListContainer({
   const sorted = [...notifications].sort(
     (a, b) => new Date(b.lastUpdatedAt).getTime() - new Date(a.lastUpdatedAt).getTime()
   )
-  const { current, older } = splitByAge(sorted, olderThanDays)
+  const { current, older } = splitByAge(sorted, olderThanDays, now)
 
   return (
     <div className="m-1 mb-4 flex flex-col gap-4">
@@ -50,7 +51,7 @@ export function NotificationListContainer({
             Select all
           </Button>
         </div>
-        <NotificationList items={current} selected={selected} onToggle={onToggle} />
+        <NotificationList items={current} selected={selected} onToggle={onToggle} now={now} />
       </section>
 
       {older.length > 0 && (
@@ -68,7 +69,7 @@ export function NotificationListContainer({
             </Button>
           </summary>
           <div className="collapse-content">
-            <NotificationList items={older} selected={selected} onToggle={onToggle} />
+            <NotificationList items={older} selected={selected} onToggle={onToggle} now={now} />
           </div>
         </details>
       )}
@@ -83,5 +84,6 @@ NotificationListContainer.propTypes = {
     has: PropTypes.func.isRequired
   }).isRequired,
   onToggle: PropTypes.func.isRequired,
-  onSelectGroup: PropTypes.func.isRequired
+  onSelectGroup: PropTypes.func.isRequired,
+  now: PropTypes.instanceOf(Date).isRequired
 }

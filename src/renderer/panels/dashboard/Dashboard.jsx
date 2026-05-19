@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useFilterState } from '../../hooks/useFilterState.js'
 import { applyFilters } from '../../filters/pipeline.js'
@@ -12,6 +12,15 @@ import { NotificationListContainer } from './notification-list/NotificationListC
 export function Dashboard({ setPanelState, notifications, batchProgress }) {
   const { settings } = useSettings()
   const notificationList = useMemo(() => notifications ?? [], [notifications])
+  const [now, setNow] = useState(new Date())
+
+  useEffect(() => {
+    const interval = globalThis.setInterval(() => {
+      setNow(new Date())
+    }, 10_000)
+
+    return () => globalThis.clearInterval(interval)
+  }, [])
 
   const {
     filters,
@@ -102,6 +111,7 @@ export function Dashboard({ setPanelState, notifications, batchProgress }) {
         selected={selected}
         onToggle={toggle}
         onSelectGroup={addToSelection}
+        now={now}
       />
     </div>
   )

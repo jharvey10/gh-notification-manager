@@ -24,12 +24,12 @@ function buildMenuId(id) {
   return id.replaceAll(/[^a-zA-Z0-9_-]/g, '-')
 }
 
-export function NotificationItem({ notification, isSelected, onToggle }) {
+export function NotificationItem({ notification, isSelected, onToggle, now }) {
   const { id, title, url, tags, activityLabel, lastUpdatedAt, _localData, optionalList } =
     notification
   const { isUnread, isSaved } = _localData ?? {}
   const repo = optionalList?.nameWithOwner ?? 'unknown'
-  const { label: timeLabel, tooltip: timeTooltip } = formatTimeAgo(lastUpdatedAt)
+  const { label: timeLabel, tooltip: timeTooltip } = formatTimeAgo(lastUpdatedAt, now)
   const menuId = buildMenuId(id)
   const detailsDialogRef = React.useRef(null)
   const eventActor = getEventActor(notification)
@@ -183,5 +183,6 @@ NotificationItem.propTypes = {
     })
   }).isRequired,
   isSelected: PropTypes.bool.isRequired,
-  onToggle: PropTypes.func.isRequired
+  onToggle: PropTypes.func.isRequired,
+  now: PropTypes.instanceOf(Date).isRequired
 }

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import { NotificationItem } from './NotificationItem.jsx'
 
-export function NotificationList({ items, selected, onToggle }) {
+export function NotificationList({ items, selected, onToggle, now }) {
   return (
     <div className="flex flex-col gap-2">
       {items.map((n) => (
@@ -10,6 +10,7 @@ export function NotificationList({ items, selected, onToggle }) {
           notification={n}
           isSelected={selected.has(n.id)}
           onToggle={() => onToggle(n.id)}
+          now={now}
         />
       ))}
     </div>
@@ -21,5 +22,6 @@ NotificationList.propTypes = {
   selected: PropTypes.shape({
     has: PropTypes.func.isRequired
   }).isRequired,
-  onToggle: PropTypes.func.isRequired
+  onToggle: PropTypes.func.isRequired,
+  now: PropTypes.instanceOf(Date).isRequired
 }
