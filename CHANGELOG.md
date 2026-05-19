@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.5](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.4...v3.1.5) (2026-05-19)
+
+
+### Bug Fixes
+
+* don't reset store when changing tokens ([85e63f0](https://github.com/jharvey10/gh-notification-manager/commit/85e63f0ebb48332ad0e07a2a775b7ce6baadad1b))
+
 ## [3.1.4](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.3...v3.1.4) (2026-04-20)
 
 
