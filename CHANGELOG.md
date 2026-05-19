@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.8](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.7...v3.1.8) (2026-05-19)
+
+
+### Bug Fixes
+
+* rename subscribed tag to repo_subscribed ([dc0ba79](https://github.com/jharvey10/gh-notification-manager/commit/dc0ba7937c5ce0cceef665a428e81ef6865f86af))
+
 ## [3.1.7](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.6...v3.1.7) (2026-05-19)
 
 
