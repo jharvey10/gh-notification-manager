@@ -60,11 +60,13 @@ export function TokenPrompt({ setPanelState }) {
           {saving ? 'Saving...' : 'Save token'}
         </button>
       </form>
-      <div className="flex flex-col gap-2">or</div>
       {hasExistingToken && (
-        <Button variant="primary" onClick={handleRetry}>
-          Retry current token
-        </Button>
+        <>
+          <div className="flex flex-col gap-2">or</div>
+          <Button variant="primary" onClick={handleRetry}>
+            Retry current token
+          </Button>
+        </>
       )}
       {error && <p className="text-error">{error}</p>}
     </div>
