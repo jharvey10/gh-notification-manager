@@ -3,6 +3,10 @@ import PropTypes from 'prop-types'
 import { SettingsSection } from '../../SettingsSection.jsx'
 import { UpdateStatus } from './UpdateStatus.jsx'
 
+function shouldCheckForUpdates(status) {
+  return status.state !== 'downloading' && status.state !== 'ready'
+}
+
 export function VersionSection({ appVersion }) {
   const [status, setStatus] = useState({ state: 'idle' })
 
@@ -11,7 +15,7 @@ export function VersionSection({ appVersion }) {
 
     globalThis.api.getUpdaterStatus().then((currentStatus) => {
       setStatus(currentStatus)
-      if (currentStatus.state === 'idle') {
+      if (shouldCheckForUpdates(currentStatus)) {
         globalThis.api.checkForUpdates()
       }
     })
