@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.7](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.6...v3.1.7) (2026-05-19)
+
+
+### Bug Fixes
+
+* improve update checking logic ([a58af8e](https://github.com/jharvey10/gh-notification-manager/commit/a58af8e35c89308fbb990842b64e62cdca1e05c2))
+* keep notification item "time ago"s up to date ([be35676](https://github.com/jharvey10/gh-notification-manager/commit/be3567615ae6930d3213d17b79bad4923432d76a))
+
 ## [3.1.6](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.5...v3.1.6) (2026-05-19)
 
 
