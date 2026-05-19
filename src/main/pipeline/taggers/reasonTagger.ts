@@ -9,7 +9,7 @@ const REASON_TAGS: Readonly<Record<string, string>> = Object.freeze({
   comment: 'comment',
   state_change: 'state_change',
   security_alert: 'security_alert',
-  subscribed: 'subscribed',
+  subscribed: 'repo_subscribed',
   manual: 'manual',
   invitation: 'invitation'
 })
