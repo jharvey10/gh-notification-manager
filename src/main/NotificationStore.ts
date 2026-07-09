@@ -12,6 +12,21 @@ export type UpsertData = Omit<Partial<Notification>, '_localData'> & {
   _localData?: LocalNotificationDataPatch
 }
 
+function hasNewerActivity(existing: Notification | undefined, data: UpsertData): boolean {
+  if (!existing?.lastUpdatedAt || !data.lastUpdatedAt) {
+    return false
+  }
+
+  const existingUpdatedAt = Date.parse(existing.lastUpdatedAt)
+  const incomingUpdatedAt = Date.parse(data.lastUpdatedAt)
+
+  return (
+    Number.isFinite(existingUpdatedAt) &&
+    Number.isFinite(incomingUpdatedAt) &&
+    incomingUpdatedAt > existingUpdatedAt
+  )
+}
+
 class NotificationStore {
   static createLocalData(): LocalNotificationData {
     return { isUnread: true, isSaved: false }
@@ -117,6 +132,8 @@ class NotificationStore {
    *   like _localData that the poller doesn't provide).
    * - A partial patch (e.g. { _localData: { isUnread: false } }) merges
    *   into the existing notification, with _localData deep-merged.
+   * - Existing notifications with a newer lastUpdatedAt are marked unread,
+   *   unless the update explicitly sets local read state.
    * - For brand-new notifications, _localData defaults to
    *   { isUnread: true, isSaved: false }.
    */
@@ -143,6 +160,8 @@ class NotificationStore {
       }
 
       const existing = this.#notifications[id]
+      const shouldMarkUnreadForNewActivity =
+        data._localData?.isUnread === undefined && hasNewerActivity(existing, data)
 
       const result = {
         ...existing,
@@ -150,6 +169,7 @@ class NotificationStore {
         _localData: {
           ...NotificationStore.createLocalData(),
           ...existing?._localData,
+          ...(shouldMarkUnreadForNewActivity ? { isUnread: true } : null),
           ...data._localData
         }
       }
