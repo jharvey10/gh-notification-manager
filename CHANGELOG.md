@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.9](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.8...v3.1.9) (2026-07-09)
+
+
+### Bug Fixes
+
+* correctly re-mark notifications as unread ([52bc65b](https://github.com/jharvey10/gh-notification-manager/commit/52bc65b4afabd4545284717058d68d70b3b7f58f))
+* update minor dep versions ([71ab4ba](https://github.com/jharvey10/gh-notification-manager/commit/71ab4ba33c45274dd3720f992d4bb469c89e6d5c))
+
 ## [3.1.8](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.7...v3.1.8) (2026-05-19)
 
 
