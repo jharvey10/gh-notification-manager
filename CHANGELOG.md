@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.10](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.9...v3.1.10) (2026-09-10)
+
+
+### Bug Fixes
+
+* improve enrichment retry logic ([f6d3a99](https://github.com/jharvey10/gh-notification-manager/commit/f6d3a990dcad09d26892cecbf4092ca9e0fb97f4))
+* update minor dep versions ([0d8f394](https://github.com/jharvey10/gh-notification-manager/commit/0d8f394dfa1bd7ff15ffa0e9c9047c876e40b3e4))
+
 ## [3.1.9](https://github.com/jharvey10/gh-notification-manager/compare/v3.1.8...v3.1.9) (2026-07-09)
 
 
