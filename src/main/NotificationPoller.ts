@@ -14,6 +14,7 @@ import type { PreferencesStore } from './PreferencesStore.js'
 
 const DEFAULT_POLL_INTERVAL_MS = 60_000
 const FALLBACK_SINCE = '2025-01-01T00:00:00Z'
+const FAILED_ENRICHMENT_RETRY_WINDOW_MS = 24 * 60 * 60 * 1000
 
 class NotificationPoller {
   private static instance?: NotificationPoller
@@ -66,13 +67,9 @@ class NotificationPoller {
       this.#resurrectDeleted(relevant)
 
       const unprocessedNotifications = this.#upsertPartials(relevant)
-
-      if (reEnrichAll) {
-        const freshIds = new Set(unprocessedNotifications.map((n) => n.id))
-        unprocessedNotifications.push(
-          ...(this.#store.getAll() ?? []).filter((n) => !freshIds.has(n.id))
-        )
-      }
+      unprocessedNotifications.push(
+        ...this.#getStoredNotificationsToProcess(unprocessedNotifications, { reEnrichAll })
+      )
 
       const progress = new ProgressTracker(
         unprocessedNotifications.length,
@@ -104,12 +101,55 @@ class NotificationPoller {
       }, this.#pollIntervalMs)
     }
   }
+
   #chunk<T>(items: T[], size: number): T[][] {
     const chunks: T[][] = []
     for (let i = 0; i < items.length; i += size) {
       chunks.push(items.slice(i, i + size))
     }
     return chunks
+  }
+
+  #getStoredNotificationsToProcess(
+    queuedNotifications: Notification[],
+    { reEnrichAll }: { reEnrichAll: boolean }
+  ): Notification[] {
+    const queuedIds = new Set(queuedNotifications.map((n) => n.id))
+    return (this.#store.getAll() ?? []).filter((notification) => {
+      // Already queued from this poll's fresh REST results.
+      if (queuedIds.has(notification.id)) {
+        return false
+      }
+
+      // Full re-enrichment intentionally reprocesses every stored notification once.
+      if (reEnrichAll) {
+        return true
+      }
+
+      return this.#shouldRetryFailedEnrichment(notification)
+    })
+  }
+
+  #shouldRetryFailedEnrichment(notification: Notification): boolean {
+    const enrichmentStatus = notification._enrichmentStatus
+
+    // Unknown enrichment status is only revisited by full re-enrichment.
+    if (!enrichmentStatus) {
+      return false
+    }
+
+    // Successfully enriched notifications do not need normal retry processing.
+    if (enrichmentStatus.state === 'ok') {
+      return false
+    }
+
+    // Keep retrying recent failures so transient GitHub/API issues can recover.
+    return this.#isRecentEnrichmentFailure(enrichmentStatus.firstFailedAt)
+  }
+
+  #isRecentEnrichmentFailure(firstFailedAt: string): boolean {
+    const failedRetryCutoff = new Date(Date.now() - FAILED_ENRICHMENT_RETRY_WINDOW_MS).toISOString()
+    return firstFailedAt > failedRetryCutoff
   }
 
   async #fetchThreads() {

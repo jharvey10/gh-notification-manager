@@ -15,6 +15,19 @@ export interface LatestEvent {
   detail: string | null
 }
 
+export type EnrichmentStatus =
+  | {
+      state: 'ok'
+      updatedAt: string
+    }
+  | {
+      state: 'failed'
+      stage: 'subject_enrichment'
+      message: string
+      firstFailedAt: string
+      updatedAt: string
+    }
+
 export interface Notification {
   id: string
   title: string
@@ -27,6 +40,7 @@ export interface Notification {
   _localData: LocalNotificationData
   _nodeId?: string
   _latestEvents?: LatestEvent[]
+  _enrichmentStatus?: EnrichmentStatus
   tags: string[]
   activityLabel?: string | null
 

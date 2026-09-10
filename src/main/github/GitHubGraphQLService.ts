@@ -11,6 +11,11 @@ import {
 } from './queries/enrichSubjects.js'
 import type { EnrichmentTarget } from '../pipeline/types.js'
 
+interface EnrichSubjectsOptions {
+  onBatchDone?: (results: Map<string, any>, batchSize: number) => void | Promise<void>
+  onBatchFailed?: (threadIds: string[], message: string) => void | Promise<void>
+}
+
 class GitHubGraphQLService {
   #viewerLogin: string | null = null
 
@@ -41,7 +46,8 @@ class GitHubGraphQLService {
       (t) => t.subjectType !== 'Release' && t.subjectType !== 'CheckSuite'
     )
     const restTargets = needsDiscovery.filter(
-      (t) => (t.subjectType === 'Release' || t.subjectType === 'CheckSuite') && t.subjectUrl
+      (t): t is EnrichmentTarget & { subjectUrl: string } =>
+        (t.subjectType === 'Release' || t.subjectType === 'CheckSuite') && Boolean(t.subjectUrl)
     )
 
     const discoveryBatches = buildNodeIdDiscoveryQueries(gqlTargets)
@@ -66,7 +72,7 @@ class GitHubGraphQLService {
       const t0 = performance.now()
       const fetches = restTargets.map(async (target) => {
         try {
-          const resp = await octokit.request(`GET ${new URL(target.subjectUrl!).pathname}`)
+          const resp = await octokit.request(`GET ${new URL(target.subjectUrl).pathname}`)
           if (resp.data?.node_id) {
             allNodeIds.set(target.threadId, resp.data.node_id)
           }
@@ -92,9 +98,7 @@ class GitHubGraphQLService {
    */
   async enrichSubjects(
     targets: EnrichmentTarget[],
-    options?: {
-      onBatchDone?: (results: Map<string, any>, batchSize: number) => void | Promise<void>
-    }
+    options?: EnrichSubjectsOptions
   ): Promise<Map<string, any>> {
     if (targets.length === 0) {
       return new Map()
@@ -103,13 +107,17 @@ class GitHubGraphQLService {
     const gql = getGraphql()
     const allResults = new Map<string, any>()
 
-    const nodeIdTargets = targets
-      .filter((t) => t.nodeId)
-      .map((t) => ({
-        nodeId: t.nodeId!,
-        subjectType: t.subjectType,
-        threadId: t.threadId
-      }))
+    const nodeIdTargets = targets.flatMap((t) =>
+      t.nodeId
+        ? [
+            {
+              nodeId: t.nodeId,
+              subjectType: t.subjectType,
+              threadId: t.threadId
+            }
+          ]
+        : []
+    )
     const fallbackTargets = targets.filter((t) => !t.nodeId)
 
     for (let i = 0; i < nodeIdTargets.length; i += ENRICH_BATCH_SIZE) {
@@ -127,21 +135,19 @@ class GitHubGraphQLService {
         }
         await options?.onBatchDone?.(results, batch.length)
       } catch (err: unknown) {
-        console.error('Node enrichment batch failed:', (err as Error).message)
-        for (const item of batch) {
-          allResults.set(item.threadId, null)
+        const message = (err as Error).message
+        console.error('Node enrichment batch failed:', message)
+        const threadIds = batch.map((item) => item.threadId)
+        for (const threadId of threadIds) {
+          allResults.set(threadId, null)
         }
-        await options?.onBatchDone?.(new Map(), batch.length)
+        await options?.onBatchFailed?.(threadIds, message)
       }
     }
 
     if (fallbackTargets.length > 0) {
       const fallbackBatches = buildFallbackEnrichmentQueries(fallbackTargets)
-      for (const entry of fallbackBatches) {
-        if (!entry) {
-          continue
-        }
-        const { query, mapping } = entry
+      for (const { query, mapping } of fallbackBatches) {
         try {
           const t0 = performance.now()
           const data = await gql<any>(query)
@@ -154,11 +160,13 @@ class GitHubGraphQLService {
           }
           await options?.onBatchDone?.(results, mapping.size)
         } catch (err: unknown) {
-          console.error('Fallback enrichment batch failed:', (err as Error).message)
-          for (const threadId of mapping.values()) {
+          const message = (err as Error).message
+          console.error('Fallback enrichment batch failed:', message)
+          const threadIds = [...mapping.values()]
+          for (const threadId of threadIds) {
             allResults.set(threadId, null)
           }
-          await options?.onBatchDone?.(new Map(), mapping.size)
+          await options?.onBatchFailed?.(threadIds, message)
         }
       }
     }
