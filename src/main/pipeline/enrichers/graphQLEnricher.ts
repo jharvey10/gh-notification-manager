@@ -15,10 +15,12 @@ function markEnrichmentFailed(
   message: string,
   updatedAt = new Date().toISOString()
 ) {
+  const previousStatus = notification._enrichmentStatus
   notification._enrichmentStatus = {
     state: 'failed',
     stage: 'subject_enrichment',
     message,
+    firstFailedAt: previousStatus?.state === 'failed' ? previousStatus.firstFailedAt : updatedAt,
     updatedAt
   }
 }

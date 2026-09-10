@@ -63,34 +63,34 @@
     }
   },
   "dependencies": {
-    "@octokit/graphql": "^9.0.3",
+    "@octokit/graphql": "^9.0.5",
     "@octokit/rest": "^22.0.1",
     "adm-zip": "^0.5.18",
     "clsx": "^2.1.1",
     "prop-types": "^15.8.1",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
-    "@tailwindcss/vite": "^4.3.2",
-    "@types/node": "^25.9.5",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^25.9.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.2.0",
-    "concurrently": "^9.2.3",
-    "daisyui": "^5.6.16",
+    "concurrently": "^9.2.4",
+    "daisyui": "^5.7.34",
     "electron": "40.8.5",
     "electron-builder": "^26.15.3",
     "esbuild": "^0.27.7",
-    "eslint": "^9.39.4",
+    "eslint": "^9.39.5",
     "eslint-plugin-react": "^7.37.5",
-    "globals": "^17.7.0",
-    "prettier": "^3.9.4",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.6",
     "tailwindcss": "^4.2.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.6",
     "vite-plugin-svgr": "^4.5.0",
-    "wait-on": "^9.0.10"
+    "wait-on": "^9.1.0"
   }
 }
